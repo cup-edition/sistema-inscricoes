@@ -87,9 +87,6 @@
         .status-confirmado {color: #27ae60; font-weight: bold;}
         .acoes-tabela button {padding: 4px 8px; font-size: 12px;}
         .area-limpar-tudo {text-align: right; margin-top: 10px;}
-        .status-sistema {padding: 8px 12px; border-radius: 4px; font-weight: bold; font-size: 14px; display: inline-block; margin-bottom: 15px;}
-        .aberto {background-color: #d4edda; color: #155724;}
-        .fechado {background-color: #f8d7da; color: #721c24;}
         .carregando {color: #3498db; font-style: italic;}
         #conteudoPrincipal {display: none;}
     </style>
@@ -113,8 +110,6 @@
         <div class="aviso-link">
             <p>Envie a página <strong>inscrever.html</strong> para as pessoas se cadastrarem/confirmarem.</p>
         </div>
-
-        <!-- ✅ SEÇÃO "CONTROLE DO SISTEMA" REMOVIDA AQUI -->
 
         <div class="secao">
             <h2>📝 Cadastrar Nova Pessoa</h2>
@@ -317,7 +312,8 @@
 
                 if (inscricoes.length === 0 || !inscricoes[0]) {
                     tabela.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #888;">Nenhuma inscrição cadastrada ainda.</td></tr>';
-                    document.getElementById('contadorConfirmados').innerText = `✅ 0 de 0 confirmados`;
+                    // ✅ Formato novo: confirmados + restantes
+                    document.getElementById('contadorConfirmados').innerText = `✅ 0 confirmados | Restam 16 vagas (Limite: 16)`;
                     verificarLimiteConfirmados(0);
                     return;
                 }
@@ -329,7 +325,10 @@
                 });
 
                 var qtdConfirmados = listaOrdenada.filter(i => i.status === 'confirmado').length;
-                document.getElementById('contadorConfirmados').innerText = `✅ ${qtdConfirmados} de ${listaOrdenada.length} confirmados (Limite: ${LIMITE_MAXIMO})`;
+                var vagasRestantes = LIMITE_MAXIMO - qtdConfirmados;
+
+                // ✅ Formato novo aplicado aqui
+                document.getElementById('contadorConfirmados').innerText = `✅ ${qtdConfirmados} confirmados | Restam ${vagasRestantes} vagas (Limite: 16)`;
                 
                 verificarLimiteConfirmados(qtdConfirmados);
 
