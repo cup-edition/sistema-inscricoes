@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Administrativo - Sistema de Inscrições</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+        body {
+            background-color: #f0f4f8;
+            padding: 20px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        .aviso-link {
+            text-align: center;
+            background: #e3f2fd;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            color: #0d47a1;
+        }
+        .secao {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 25px;
+        }
+        h2 {
+            color: #34495e;
+            margin-bottom: 15px;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .contador-confirmados {
+            color: #27ae60;
+            font-weight: bold;
+            font-size: 14px;
+            background: #e8f8f0;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+        .grupo-campo {
+            margin-bottom: 12px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #555;
+        }
+        input {
+            padding: 8px 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        input[type="number"] {
+            width: 80px;
+        }
+        button {
+            background-color: #27ae60;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-top: 8px;
+            margin-right: 8px;
+            transition: background 0.2s;
+        }
+        button:hover {
+            background-color: #219653;
+        }
+        .btn-vermelho {
+            background-color: #e74c3c;
+        }
+        .btn-vermelho:hover {
+            background-color: #c0392b;
+        }
+        .btn-amarelo {
+            background-color: #f39c12;
+        }
+        .btn-amarelo:hover {
+            background-color: #e67e22;
+        }
+        .btn-roxo {
+            background-color: #9b59b6;
+        }
+        .btn-roxo:hover {
+            background-color: #8e44ad;
+        }
+        .btn-copiar, .btn-ocultar-coluna {
+            background-color: #9b59b6;
+            padding: 5px 10px;
+            font-size: 12px;
+            border-radius: 4px;
+        }
+        .btn-copiar:hover, .btn-ocultar-coluna:hover {
+            background-color: #8e44ad;
+        }
+        .mensagem-copia {
+            font-size: 12px;
+            color: #27ae60;
+            font-weight: normal;
+            margin-left: 10px;
+            display: none;
+        }
+        .resultado {
+            margin-top: 12px;
+            padding: 10px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .sucesso {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .erro {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            font-size: 14px;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        th {
+            background-color: #f8f9fa;
+            color: #333;
+        }
+        .status-pendente {
+            color: #f39c12;
+            font-weight: bold;
+        }
+        .status-confirmado {
+            color: #27ae60;
+            font-weight: bold;
+        }
+        .acoes-tabela button {
+            padding: 4px 8px;
+            font-size: 12px;
+        }
+        .area-limpar-tudo {
+            text-align: right;
+            margin-top: 10px;
+        }
+        .status-sistema {
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 14px;
+            display: inline-block;
+            margin-bottom: 15px;
+        }
+        .aberto {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .fechado {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>🔐 Painel Administrativo</h1>
+    <div class="aviso-link">
+        <p>Envie a página <strong>inscrever.html</strong> para as pessoas se cadastrarem/confirmarem.</p>
+    </div>
+
+    <div class="secao">
+        <h2>⚙️ Controle do Sistema</h2>
+        <div id="statusAtual" class="status-sistema"></div>
+        <button id="botaoBloquear" class="btn-roxo" onclick="alternarStatusInscricoes()"></button>
+    </div>
+
+    <div class="secao">
+        <h2>📝 Cadastrar Nova Pessoa</h2>
+        <div class="grupo-campo">
+            <label>Nome Completo:</label>
+            <input type="text" id="cad_nome" placeholder="Digite o nome">
+        </div>
+        <div class="grupo-campo">
+            <label>Dia de Nascimento:</label>
+            <input type="number" id="cad_dia" min="1" max="31" placeholder="Dia">
+            
+            <label style="margin-left: 10px;">Mês de Nascimento:</label>
+            <input type="number" id="cad_mes" min="1" max="12" placeholder="Mês">
+        </div>
+        <button onclick="cadastrarPessoa()">Cadastrar</button>
+        <div id="msg_cadastro" class="resultado" style="display: none;"></div>
+    </div>
+
+    <div class="secao">
+        <h2>
+            📊 Lista de Inscrições 
+            <small>(Confirmados primeiro, depois pendentes - ambos em ordem alfabética)</small>
+            <span id="contadorConfirmados" class="contador-confirmados"></span>
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <button class="btn-ocultar-coluna" onclick="alternarVisibilidadeData()">🙈 Ocultar Data Nasc.</button>
+                <button class="btn-copiar" onclick="copiarNomesConfirmados()">📋 Copiar Nomes Confirmados</button>
+                <span class="mensagem-copia" id="msgCopia">Copiado!</span>
+            </div>
+        </h2>
+        
+        <div style="margin-bottom: 15px;">
+            <button class="btn-amarelo" onclick="voltarTodosParaPendente()">🔄 Voltar Todos para Pendentes</button>
+        </div>
+
+        <table id="tabelaInscritos">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nome</th>
+                    <th id="colunaDataCabecalho">Data Nasc.</th>
+                    <th>Status</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody id="lista_inscricoes">
+                <tr>
+                    <td colspan="5" style="text-align: center; color: #888;">Nenhuma inscrição cadastrada ainda.</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="area-limpar-tudo">
+            <button class="btn-vermelho" onclick="limparTodasInscricoes()">🗑️ Limpar Todas as Inscrições</button>
+        </div>
+    </div>
+
+    <script>
+        let inscricoes = JSON.parse(localStorage.getItem('dados_inscricoes')) || [];
+        let inscricoesAbertas = JSON.parse(localStorage.getItem('inscricoes_abertas')) ?? true;
+        let dataVisivel = true;
+
+        window.onload = function() {
+            atualizarLista();
+            atualizarInterfaceStatus();
+            atualizarContador();
+        };
+
+        function alternarStatusInscricoes() {
+            inscricoesAbertas = !inscricoesAbertas;
+            localStorage.setItem('inscricoes_abertas', JSON.stringify(inscricoesAbertas));
+            atualizarInterfaceStatus();
+            
+            if(inscricoesAbertas) {
+                alert('✅ Inscrições LIBERADAS! Agora as pessoas podem se inscrever/confirmar.');
+            } else {
+                alert('❌ Inscrições BLOQUEADAS! Ninguém conseguirá mais confirmar inscrições.');
+            }
+        }
+
+        function atualizarInterfaceStatus() {
+            const statusDiv = document.getElementById('statusAtual');
+            const botao = document.getElementById('botaoBloquear');
+
+            if (inscricoesAbertas) {
+                statusDiv.className = 'status-sistema aberto';
+                statusDiv.innerText = '🟢 Inscrições ABERTAS';
+                botao.innerText = '🔒 Bloquear Inscrições';
+            } else {
+                statusDiv.className = ' ';
+                statusDiv.innerText = '🔴 Inscrições BLOQUEADAS';
+                botao.innerText = '🔓 Desbloquear Inscrições';
+            }
+        }
+
+        function cadastrarPessoa() {
+            const nome = document.getElementById('cad_nome').value.trim();
+            const dia = parseInt(document.getElementById('cad_dia').value);
+            const mes = parseInt(document.getElementById('cad_mes').value);
+            const msg = document.getElementById('msg_cadastro');
+
+            if (!nome || !dia || !mes || dia < 1 || dia > 31 || mes < 1 || mes > 12) {
+                msg.className = 'resultado erro';
+                msg.innerText = '❌ Preencha todos os dados corretamente! (Dia 1-31 | Mês 1-12)';
+                msg.style.display = 'block';
+                return;
+            }
+
+            const novaInscricao = {
+                id: inscricoes.length > 0 ? Math.max(...inscricoes.map(i => i.id)) + 1 : 1,
+                nome: nome,
+                dia: dia,
+                mes: mes,
+                status: 'pendente'
+            };
+            inscricoes.push(novaInscricao);
+            salvarDados();
+
+            document.getElementById('cad_nome').value = '';
+            document.getElementById('cad_dia').value = '';
+            document.getElementById('cad_mes').value = '';
+            msg.className = 'resultado sucesso';
+            msg.innerText = '✅ Cadastro realizado com sucesso!';
+            msg.style.display = 'block';
+            
+            atualizarLista();
+            atualizarContador();
+            setTimeout(() => msg.style.display = 'none', 4000);
+        }
+
+        function apagarInscricao(id) {
+            if (confirm('Tem certeza que deseja excluir este cadastro? Essa ação não pode ser desfeita!')) {
+                inscricoes = inscricoes.filter(insc => insc.id !== id);
+                salvarDados();
+                atualizarLista();
+                atualizarContador();
+            }
+        }
+
+        function limparTodasInscricoes() {
+            if (confirm('⚠️ ATENÇÃO: Isso apagARÁ TODOS os cadastros (pendentes e confirmados). Tem certeza absoluta?')) {
+                inscricoes = [];
+                localStorage.removeItem('dados_inscricoes');
+                atualizarLista();
+                atualizarContador();
+                alert('Todos os dados foram apagados com sucesso!');
+            }
+        }
+
+        function voltarTodosParaPendente() {
+            if (confirm('⚠️ ATENÇÃO: Isso irá mudAR TODOS os cadastros para "Pendente", inclusive os que já foram confirmados. Deseja continuar?')) {
+                inscricoes = inscricoes.map(insc => {
+                    insc.status = 'pendente';
+                    return insc;
+                });
+                salvarDados();
+                atualizarLista();
+                atualizarContador();
+                alert('✅ Todos os cadastros foram alterados para Pendentes!');
+            }
+        }
+
+        function copiarNomesConfirmados() {
+            const nomes = inscricoes
+                .filter(insc => insc.status === 'confirmado')
+                .map(insc => insc.nome);
+
+            if (nomes.length === 0) {
+                alert('⚠️ Ainda não há ninguém confirmado para copiar.');
+                return;
+            }
+
+            const textoLista = nomes.join('\n');
+            navigator.clipboard.writeText(textoLista)
+                .then(() => {
+                    const msg = document.getElementById('msgCopia');
+                    msg.style.display = 'inline';
+                    setTimeout(() => { msg.style.display = 'none'; }, 2000);
+                })
+                .catch(err => {
+                    alert('Erro ao copiar: ' + err);
+                });
+        }
+
+        function alternarVisibilidadeData() {
+            dataVisivel = !dataVisivel;
+            const botao = document.querySelector('.btn-ocultar-coluna');
+            const cabecalho = document.getElementById('colunaDataCabecalho');
+            const tabela = document.getElementById('tabelaInscritos');
+
+            if (dataVisivel) {
+                botao.innerText = '🙈 Ocultar Data Nasc.';
+                cabecalho.style.display = '';
+            } else {
+                botao.innerText = '👁️ Mostrar Data Nasc.';
+                cabecalho.style.display = 'none';
+            }
+
+            for (let i = 0; i < tabela.rows.length; i++) {
+                const celulaData = tabela.rows[i].cells[2];
+                if (celulaData) {
+                    celulaData.style.display = dataVisivel ? '' : 'none';
+                }
+            }
+        }
+
+        function atualizarLista() {
+            const tabela = document.getElementById('lista_inscricoes');
+            tabela.innerHTML = '';
+
+            if (inscricoes.length === 0) {
+                tabela.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #888;">Nenhuma inscrição cadastrada ainda.</td></tr>';
+                return;
+            }
+
+            // ✅ ORDENAÇÃO: Primeiro por status (confirmados antes), depois por ORDEM ALFABÉTICA
+            const listaOrdenada = [...inscricoes].sort((a, b) => {
+                // Critério 1: Status (confirmado vem antes de pendente)
+                if (a.status === 'confirmado' && b.status !== 'confirmado') return -1;
+                if (a.status !== 'confirmado' && b.status === 'confirmado') return 1;
+                // Critério 2: Ordem alfabética do nome
+                return a.nome.localeCompare(b.nome);
+            });
+
+            listaOrdenada.forEach(insc => {
+                const linha = document.createElement('tr');
+                linha.innerHTML = `
+                    <td>${insc.id}</td>
+                    <td>${insc.nome}</td>
+                    <td style="display: ${dataVisivel ? '' : 'none'};">${insc.dia}/${insc.mes}</td>
+                    <td class="status-${insc.status}">${insc.status === 'pendente' ? 'Pendente' : 'Confirmada'}</td>
+                    <td class="acoes-tabela">
+                        <button class="btn-vermelho" onclick="apagarInscricao(${insc.id})">Excluir</button>
+                    </td>
+                `;
+                tabela.appendChild(linha);
+            });
+        }
+
+        function atualizarContador() {
+            const qtdConfirmados = inscricoes.filter(insc => insc.status === 'confirmado').length;
+            const qtdTotal = inscricoes.length;
+            document.getElementById('contadorConfirmados').innerText = `✅ ${qtdConfirmados} de ${qtdTotal} confirmados`;
+        }
+
+        function salvarDados() {
+            localStorage.setItem('dados_inscricoes', JSON.stringify(inscricoes));
+        }
+    </script>
+
+</body>
+</html>
