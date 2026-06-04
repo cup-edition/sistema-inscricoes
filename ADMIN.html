@@ -93,6 +93,8 @@
         .btn-roxo:hover {background-color: #8e44ad;}
         .btn-copiar, .btn-ocultar-coluna {background-color: #9b59b6; padding: 5px 10px; font-size: 12px; border-radius: 4px;}
         .btn-copiar:hover, .btn-ocultar-coluna:hover {background-color: #8e44ad;}
+        .btn-editar {background-color: #3498db; padding: 4px 8px; font-size: 12px;}
+        .btn-editar:hover {background-color: #2980b9;}
         .mensagem-copia {font-size: 12px; color: #27ae60; font-weight: normal; margin-left: 10px; display: none;}
         .resultado {margin-top: 12px; padding: 10px; border-radius: 4px; font-weight: bold;}
         .sucesso {background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb;}
@@ -102,10 +104,43 @@
         th {background-color: #f8f9fa; color: #333;}
         .status-pendente {color: #f39c12; font-weight: bold;}
         .status-confirmado {color: #27ae60; font-weight: bold;}
-        .acoes-tabela button {padding: 4px 8px; font-size: 12px;}
+        .acoes-tabela button {padding: 4px 8px; font-size: 12px; margin: 0 2px;}
         .area-limpar-tudo {text-align: right; margin-top: 10px;}
         .carregando {color: #3498db; font-style: italic;}
         #conteudoPrincipal {display: none;}
+
+        /* ===== ESTILOS DO MODAL DE EDIÇÃO ===== */
+        #modalEditar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 99999;
+        }
+        .caixa-editar {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+        }
+        .caixa-editar h3 {
+            margin-bottom: 15px;
+            color: #2c3e50;
+            text-align: center;
+        }
+        .botoes-modal {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
@@ -117,6 +152,33 @@
             <input type="password" id="senhaLogin" placeholder="Senha" required>
             <button onclick="fazerLogin()">ENTRAR</button>
             <div class="errologin" id="mensagemErro">Usuário ou senha incorretos!</div>
+        </div>
+    </div>
+
+    <!-- ✅ MODAL DE EDIÇÃO (SÓ APARECE AO CLICAR NO BOTÃO) -->
+    <div id="modalEditar">
+        <div class="caixa-editar">
+            <h3>📝 Editar Cadastro <span id="editId"></span></h3>
+            
+            <div class="grupo-campo">
+                <label>Nome Completo:</label>
+                <input type="text" id="edit_nome" placeholder="Digite o nome">
+            </div>
+            <div class="grupo-campo">
+                <label>Dia de Nascimento:</label>
+                <input type="number" id="edit_dia" min="1" max="31" placeholder="Dia">
+                <label style="margin-left: 10px;">Mês de Nascimento:</label>
+                <input type="number" id="edit_mes" min="1" max="12" placeholder="Mês">
+            </div>
+            <div class="grupo-campo">
+                <label>📸 Trocar Foto (opcional):</label>
+                <input type="file" id="edit_foto" accept="image/*">
+            </div>
+
+            <div class="botoes-modal">
+                <button type="button" onclick="fecharEdicao()" class="btn-vermelho">Cancelar</button>
+                <button type="button" onclick="salvarEdicao()">Salvar Alterações</button>
+            </div>
         </div>
     </div>
 
@@ -178,7 +240,6 @@
                 <label style="margin-left: 10px;">Mês de Nascimento:</label>
                 <input type="number" id="cad_mes" min="1" max="12" placeholder="Mês">
             </div>
-            <!-- CAMPO DE FOTO - AGORA SALVA DIRETO NO BANCO -->
             <div class="grupo-campo">
                 <label>📸 Foto de Perfil (opcional):</label>
                 <input type="file" id="cad_foto" accept="image/*">
@@ -204,6 +265,7 @@
         var dataVisivel = true;
         const LIMITE_MAXIMO = 16;
         let quantidadeAnterior = 0;
+        let idEmEdicao = null; // Guarda qual cadastro está sendo editado
 
         // ===== LOGIN =====
         function fazerLogin() {
@@ -235,31 +297,27 @@
             }
         }
 
-        // ✅ FUNÇÃO PARA CONVERTER FOTO EM TEXTO (SEM PRECISAR DE STORAGE)
+        // ✅ CONVERTER FOTO PARA TEXTO
         function lerFotoComoTexto(arquivo, callback) {
-            if (!arquivo) {
-                callback(null);
-                return;
-            }
+            if (!arquivo) { callback(null); return; }
             var leitor = new FileReader();
             leitor.onload = function(e) {
-                // Reduz o tamanho da imagem para não ficar muito grande no banco
                 var img = new Image();
                 img.onload = function() {
                     var canvas = document.createElement('canvas');
-                    var tamanho = 100; // Tamanho pequeno, suficiente para perfil
+                    var tamanho = 100;
                     canvas.width = tamanho;
                     canvas.height = tamanho;
                     var ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, tamanho, tamanho);
-                    callback(canvas.toDataURL('image/jpeg', 0.7)); // Qualidade boa
+                    callback(canvas.toDataURL('image/jpeg', 0.7));
                 };
                 img.src = e.target.result;
             };
             leitor.readAsDataURL(arquivo);
         }
 
-        // ✅ CADASTRO ATUALIZADO - SALVA TUDO NO BANCO MESMO
+        // ✅ CADASTRAR NOVA PESSOA
         function cadastrarPessoa() {
             var nome = document.getElementById('cad_nome').value.trim();
             var dia = parseInt(document.getElementById('cad_dia').value);
@@ -278,7 +336,6 @@
             msg.innerText = '⏳ Processando...';
             msg.style.display = 'block';
 
-            // Converte foto e salva
             lerFotoComoTexto(arquivoFoto, function(textoDaFoto) {
                 db.ref('inscricoes').once('value').then(snap => {
                     var inscricoes = snap.val() || [];
@@ -290,20 +347,80 @@
                         dia: dia,
                         mes: mes,
                         status: 'pendente',
-                        foto: textoDaFoto || "" // Salva a foto como texto
+                        foto: textoDaFoto || ""
                     });
                     
                     db.ref('inscricoes').set(inscricoes).then(() => {
                         msg.className = 'resultado sucesso';
                         msg.innerText = '✅ Cadastro realizado com sucesso!';
                         msg.style.display = 'block';
-                        // Limpa campos
                         document.getElementById('cad_nome').value = '';
                         document.getElementById('cad_dia').value = '';
                         document.getElementById('cad_mes').value = '';
                         document.getElementById('cad_foto').value = '';
                         setTimeout(() => msg.style.display = 'none', 4000);
                     });
+                });
+            });
+        }
+
+        // ✅ ABRIR TELA DE EDIÇÃO
+        function abrirEdicao(id) {
+            idEmEdicao = id;
+            db.ref('inscricoes').once('value').then(snap => {
+                var lista = snap.val() || [];
+                var item = lista.find(i => i && i.id === id);
+                if(item){
+                    document.getElementById('editId').innerText = `#${item.id}`;
+                    document.getElementById('edit_nome').value = item.nome;
+                    document.getElementById('edit_dia').value = item.dia;
+                    document.getElementById('edit_mes').value = item.mes;
+                    document.getElementById('modalEditar').style.display = 'flex';
+                }
+            });
+        }
+
+        // ✅ FECHAR EDIÇÃO
+        function fecharEdicao() {
+            document.getElementById('modalEditar').style.display = 'none';
+            idEmEdicao = null;
+            document.getElementById('edit_foto').value = "";
+        }
+
+        // ✅ SALVAR ALTERAÇÕES DA EDIÇÃO
+        function salvarEdicao() {
+            var novoNome = document.getElementById('edit_nome').value.trim();
+            var novoDia = parseInt(document.getElementById('edit_dia').value);
+            var novoMes = parseInt(document.getElementById('edit_mes').value);
+            var novaFotoArquivo = document.getElementById('edit_foto').files[0];
+
+            if (!novoNome || !novoDia || !novoMes || novoDia < 1 || novoDia > 31 || novoMes < 1 || novoMes > 12) {
+                alert('❌ Preencha todos os dados corretamente!');
+                return;
+            }
+
+            // Se escolher nova foto, converte primeiro
+            lerFotoComoTexto(novaFotoArquivo, function(novaFotoTexto) {
+                db.ref('inscricoes').once('value').then(snap => {
+                    var lista = snap.val() || [];
+                    var alterado = false;
+
+                    lista = lista.map(item => {
+                        if(item && item.id === idEmEdicao){
+                            item.nome = novoNome;
+                            item.dia = novoDia;
+                            item.mes = novoMes;
+                            if(novaFotoTexto) item.foto = novaFotoTexto;
+                            alterado = true;
+                        }
+                        return item;
+                    });
+
+                    if(alterado){
+                        db.ref('inscricoes').set(lista).then(() => {
+                            fecharEdicao();
+                        });
+                    }
                 });
             });
         }
@@ -403,7 +520,8 @@
                     <td style="display: ${dataVisivel ? '' : 'none'};">${insc.dia}/${insc.mes}</td>
                     <td class="status-${insc.status}">${insc.status === 'pendente' ? 'PENDENTE' : 'CONFIRMADO'}</td>
                     <td class="acoes-tabela">
-                        <button class="btn-vermelho" onclick="apagarInscricao(${insc.id})">Excluir</button>
+                        <button class="btn-editar" onclick="abrirEdicao(${insc.id})">📝</button>
+                        <button class="btn-vermelho" onclick="apagarInscricao(${insc.id})">🗑️</button>
                     </td>
                 `;
                 tabela.appendChild(linha);
