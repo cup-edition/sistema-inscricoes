@@ -70,7 +70,7 @@
             font-weight: bold;
         }
 
-        /* ===== ESTILOS DO SISTEMA (JÁ EXISTENTES) ===== */
+        /* ===== ESTILOS DO SISTEMA ===== */
         h1 {color: #2c3e50; text-align: center; margin-bottom: 10px;}
         .aviso-link {text-align: center; background: #e3f2fd; padding: 10px; border-radius: 8px; margin-bottom: 30px; color: #0d47a1;}
         .secao {background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 25px;}
@@ -92,6 +92,8 @@
         .btn-roxo:hover {background-color: #8e44ad;}
         .btn-copiar, .btn-ocultar-coluna {background-color: #9b59b6; padding: 5px 10px; font-size: 12px; border-radius: 4px;}
         .btn-copiar:hover, .btn-ocultar-coluna:hover {background-color: #8e44ad;}
+        .btn-atualizar {background-color: #3498db; padding: 6px 12px; font-size: 13px; border-radius: 4px; font-weight: bold;}
+        .btn-atualizar:hover {background-color: #2980b9;}
         .mensagem-copia {font-size: 12px; color: #27ae60; font-weight: normal; margin-left: 10px; display: none;}
         .resultado {margin-top: 12px; padding: 10px; border-radius: 4px; font-weight: bold;}
         .sucesso {background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb;}
@@ -106,11 +108,10 @@
         .status-sistema {padding: 8px 12px; border-radius: 4px; font-weight: bold; font-size: 14px; display: inline-block; margin-bottom: 15px;}
         .aberto {background-color: #d4edda; color: #155724;}
         .fechado {background-color: #f8d7da; color: #721c24;}
+        .carregando {color: #3498db; font-style: italic;}
         
         /* Esconde todo o conteúdo principal até logar */
-        #conteudoPrincipal {
-            display: none;
-        }
+        #conteudoPrincipal {display: none;}
     </style>
 </head>
 <body>
@@ -126,7 +127,7 @@
         </div>
     </div>
 
-    <!-- ===== CONTEÚDO DO SISTEMA (SÓ APARECE SE LOGAR) ===== -->
+    <!-- ===== CONTEÚDO DO SISTEMA ===== -->
     <div id="conteudoPrincipal">
         <h1>🔐 Painel Administrativo</h1>
         <div class="aviso-link">
@@ -161,7 +162,9 @@
                 📊 Lista de Inscrições 
                 <small>(Confirmados primeiro, depois pendentes - ambos em ordem alfabética)</small>
                 <span id="contadorConfirmados" class="contador-confirmados"></span>
-                <div style="display: flex; align-items: center; gap: 8px;">
+                <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                    <!-- ✅ BOTÃO NOVO ADICIONADO AQUI -->
+                    <button class="btn-atualizar" onclick="atualizarLista()">🔄 Atualizar Lista</button>
                     <button class="btn-ocultar-coluna" onclick="alternarVisibilidadeData()">🙈 Ocultar Data Nasc.</button>
                     <button class="btn-copiar" onclick="copiarNomesConfirmados()">📋 Copiar Nomes Confirmados</button>
                     <span class="mensagem-copia" id="msgCopia">Copiado!</span>
@@ -210,7 +213,7 @@
         firebase.initializeApp(firebaseConfig);
         var db = firebase.database();
         var dataVisivel = true;
-        const LIMITE_MAXIMO = 16; // AQUI DEFINE O LIMITE, ESTÁ EM 16
+        const LIMITE_MAXIMO = 16;
 
         // ===== FUNÇÃO DE LOGIN =====
         function fazerLogin() {
@@ -218,32 +221,24 @@
             const senha = document.getElementById('senhaLogin').value.trim();
             const mensagemErro = document.getElementById('mensagemErro');
 
-            // AQUI ESTÃO OS DADOS QUE VOCÊ PEDIU
             if (usuario === "cupedition" && senha === "campimfc") {
-                // Login correto: esconde a tela de login e mostra o sistema
                 document.getElementById('telaLogin').style.display = 'none';
                 document.getElementById('conteudoPrincipal').style.display = 'block';
-                // Carrega os dados após logar
                 atualizarLista();
                 atualizarInterfaceStatus();
             } else {
-                // Login errado: mostra mensagem
                 mensagemErro.style.display = 'block';
-                // Limpa os campos
                 document.getElementById('senhaLogin').value = '';
             }
         }
 
-        // Permite pressionar ENTER para logar
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Enter') fazerLogin();
         });
 
-        // NOVA FUNÇÃO: VERIFICA SE ATINGIU O LIMITE DE 16
         function verificarLimiteConfirmados(qtd) {
             const aviso = document.getElementById('avisoLimite');
             if (qtd >= LIMITE_MAXIMO) {
-                // Se chegou no limite, força o encerramento das inscrições
                 db.ref('configuracao').set({inscricoes_abertas: false});
                 aviso.style.display = 'block';
             } else {
@@ -255,7 +250,6 @@
             db.ref('configuracao/inscricoes_abertas').once('value').then(snap => {
                 var statusAtual = snap.val() !== null ? snap.val() : true;
                 
-                // Impede de abrir se já estiver no limite
                 db.ref('inscricoes').once('value').then(snapIns => {
                     var lista = snapIns.val() || [];
                     var qtdConfirmados = lista.filter(i => i && i.status === 'confirmado').length;
@@ -371,9 +365,11 @@
             atualizarLista();
         }
 
+        // ✅ FUNÇÃO PRINCIPAL PARA ATUALIZAR A LISTA
         function atualizarLista() {
             var tabela = document.getElementById('lista_inscricoes');
-            tabela.innerHTML = '';
+            // Mensagem de carregamento ao clicar
+            tabela.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #3498db; font-style: italic;">🔄 Atualizando dados...</td></tr>';
 
             db.ref('inscricoes').once('value').then(snap => {
                 var inscricoes = snap.val() || [];
@@ -394,8 +390,9 @@
                 var qtdConfirmados = listaOrdenada.filter(i => i.status === 'confirmado').length;
                 document.getElementById('contadorConfirmados').innerText = `✅ ${qtdConfirmados} de ${listaOrdenada.length} confirmados (Limite: ${LIMITE_MAXIMO})`;
                 
-                // CHAMA A VERIFICAÇÃO AQUI
                 verificarLimiteConfirmados(qtdConfirmados);
+
+                tabela.innerHTML = ''; // Limpa a tabela
 
                 listaOrdenada.forEach(insc => {
                     var linha = document.createElement('tr');
