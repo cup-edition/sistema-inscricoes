@@ -3,64 +3,69 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Página de Inscrição</title>
+    <title>Inscreva-se - Sistema de Inscrições</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase.js"></script>
     <style>
         * {margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif;}
-        body {background-color: #343a40; padding: 20px; max-width: 500px; margin: 0 auto;}
-        .container {background: white; padding: 25px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);}
-        h1 {color: #2c3e50; text-align: center; margin-bottom: 20px; font-size: 22px;}
-        .grupo-campo {margin-bottom: 15px;}
+        /* ✅ FUNDO ALTERADO PARA CINZA ESCURO */
+        body {background-color: #343a40; display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px;}
+        .container {background: #ffffff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); width: 100%; max-width: 450px; text-align: center;}
+        h1 {color: #2c3e50; margin-bottom: 10px; font-size: 22px;}
+        p.descricao {color: #666; margin-bottom: 25px; font-size: 15px;}
+        .encerrado {background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; padding: 20px; border-radius: 8px; font-weight: bold; font-size: 18px;}
+        .aviso-limite-atingido {background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba; padding: 15px; border-radius: 8px; font-weight: bold; font-size: 16px; margin-bottom: 20px;}
+        .grupo-campo {margin-bottom: 15px; text-align: left;}
         label {display: block; margin-bottom: 6px; font-weight: 500; color: #555;}
-        input {width: 100%; padding: 10px 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 15px;}
-        input[type="number"] {width: 48%; display: inline-block; margin-right: 4%;}
-        input[type="number"]:last-child {margin-right: 0;}
-        input[type="file"] {padding: 8px; border: 1px dashed #27ae60; background: #f8f9fa;}
-        button {width: 100%; background-color: #27ae60; color: white; border: none; padding: 12px; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; transition: background 0.2s; margin-top: 10px;}
+        select, input {width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 16px; background-color: #fff;}
+        input[type="number"] {width: 48%; display: inline-block; margin-right: 2%;}
+        button {background-color: #27ae60; color: white; border: none; padding: 14px; border-radius: 6px; cursor: pointer; font-size: 16px; width: 100%; margin-top: 10px; font-weight: bold; transition: background 0.3s;}
         button:hover {background-color: #219653;}
-        .mensagem {margin-top: 15px; padding: 12px; border-radius: 6px; font-weight: bold; text-align: center; display: none;}
+        button:disabled {background-color: #95a5a6; cursor: not-allowed;}
+        .resultado {margin-top: 20px; padding: 15px; border-radius: 6px; font-weight: bold; font-size: 15px; display: none;}
         .sucesso {background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb;}
         .erro {background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb;}
-        .encerrado {background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba; padding: 20px; border-radius: 8px; text-align: center; font-weight: bold; font-size: 18px;}
-        .foto-preview {width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 2px solid #ddd; margin: 10px auto; display: none;}
     </style>
 </head>
 <body>
+
     <div class="container">
-        <h1>📋 Fazer Inscrição / Confirmação</h1>
-
-    <div id="avisoEncerrado" class="encerrado" style="display: none;">
-        ⚠️ INSCRIÇÕES ENCERRADAS<br>
-        Todas as vagas foram preenchidas! 🚫
-    </div>
-
-    <div id="formularioInscricao">
-        <div class="grupo-campo">
-            <label>Nome Completo:</label>
-            <input type="text" id="nome" placeholder="Digite seu nome completo" required>
+        <div id="telaEncerrado" style="display: none;" class="encerrado">
+            🚫 INSCRIÇÕES ENCERRADAS<br><br>
+            Todas as vagas foram preenchidas ou o período de inscrições finalizou.<br>
+            <span style="font-size:14px; margin-top:10px; display:block;">Limite máximo: 16 confirmados</span>
         </div>
-        <div class="grupo-campo">
-            <label>Data de Nascimento:</label>
-            <div style="display: flex; gap: 10px;">
-                <input type="number" id="dia" min="1" max="31" placeholder="Dia" required>
-                <input type="number" id="mes" min="1" max="12" placeholder="Mês" required>
+
+        <div id="telaNormal">
+            <div id="avisoLimite" class="aviso-limite-atingido" style="display: none;">
+                ⚠️ ATENÇÃO: Restam poucas vagas. Ao atingir 16 confirmados, o sistema será bloqueado automaticamente.
             </div>
+
+            <h1>✅ Confirmar Inscrição</h1>
+            <p class="descricao">Escolha seu nome e preencha a data de nascimento para confirmar sua participação.</p>
+
+            <div class="grupo-campo">
+                <label>Nome</label>
+                <select id="ver_nome">
+                    <option value="">-- Selecione seu nome --</option>
+                </select>
+            </div>
+
+            <div class="grupo-campo">
+                <label>Data de Nascimento</label>
+                <input type="number" id="ver_dia" min="1" max="31" placeholder="Dia" maxlength="2" oninput="limitarDigitos(this, 2)">
+                <input type="number" id="ver_mes" min="1" max="12" placeholder="Mês" maxlength="2" oninput="limitarDigitos(this, 2)">
+            </div>
+
+            <button id="botaoConfirmar" onclick="confirmarInscricao()">CONFIRMAR INSCRIÇÃO</button>
+
+            <div id="msg_verificacao" class="resultado"></div>
         </div>
-        <div class="grupo-campo">
-            <label>📸 Foto de Perfil (opcional):</label>
-            <input type="file" id="foto" accept="image/*" onchange="mostrarPreview(this)">
-            <img id="previewFoto" class="foto-preview" alt="Pré-visualização">
-        </div>
-
-        <button onclick="enviarInscricao()">Enviar Inscrição</button>
-    </div>
-
-    <div id="mensagem" class="mensagem"></div>
-
     </div>
 
     <script>
+        // 👇 COLE AQUI O MESMO CÓDIGO DO FIREBASE QUE USOU NO OUTRO 👇
         var firebaseConfig = {
+          // COLE SEU CÓDIGO AQUI MESMO
           apiKey: "AIzaSyAR--VWkuPUBzKtJlEHPXnwBwbapB8JY_w",
   authDomain: "sistema-inscricoes-e9241.firebaseapp.com",
   databaseURL: "https://sistema-inscricoes-e9241-default-rtdb.firebaseio.com",
@@ -69,107 +74,119 @@
   messagingSenderId: "232618438422",
   appId: "1:232618438422:web:1c62103b2169e64e862a37"
 };
+        // 👆 FIM DO CÓDIGO 👆
 
         firebase.initializeApp(firebaseConfig);
         var db = firebase.database();
+        const LIMITE_MAXIMO = 16;
 
-        // ✅ Verifica se está aberto ou fechado (regra: só fecha quando 0 vagas)
-        function verificarStatusInscricoes() {
-            db.ref('configuracao/inscricoes_abertas').on('value', status => {
-                if (status.val() === false) {
-                    document.getElementById('formularioInscricao').style.display = 'none';
-                    document.getElementById('avisoEncerrado').style.display = 'block';
-                } else {
-                    document.getElementById('formularioInscricao').style.display = 'block';
-                    document.getElementById('avisoEncerrado').style.display = 'none';
-                }
-            });
-        }
+        window.onload = function() {
+            verificarStatusSistema();
+            carregarListaNomes();
+            setInterval(verificarStatusSistema, 3000);
+        };
 
-        function mostrarPreview(input) {
-            if (input.files && input.files[0]) {
-                var leitor = new FileReader();
-                leitor.onload = function(e) {
-                    document.getElementById('previewFoto').src = e.target.result;
-                    document.getElementById('previewFoto').style.display = 'block';
-                }
-                leitor.readAsDataURL(input.files[0]);
+        // Função para limitar a quantidade de dígitos
+        function limitarDigitos(campo, maximo) {
+            if (campo.value.length > maximo) {
+                campo.value = campo.value.slice(0, maximo);
             }
         }
 
-        function lerFotoComoTexto(arquivo, callback) {
-            if (!arquivo) { callback(null); return; }
-            var leitor = new FileReader();
-            leitor.onload = function(e) {
-                var img = new Image();
-                img.onload = function() {
-                    var canvas = document.createElement('canvas');
-                    var tamanho = 100;
-                    canvas.width = tamanho;
-                    canvas.height = tamanho;
-                    var ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, tamanho, tamanho);
-                    callback(canvas.toDataURL('image/jpeg', 0.7));
-                };
-                img.src = e.target.result;
-            };
-            leitor.readAsDataURL(arquivo);
-        }
+        function carregarListaNomes() {
+            db.ref('inscricoes').once('value').then(snap => {
+                var inscricoes = snap.val() || [];
+                var selectNome = document.getElementById('ver_nome');
+                selectNome.innerHTML = '<option value="">-- Selecione seu nome --</option>';
 
-        function enviarInscricao() {
-            var nome = document.getElementById('nome').value.trim();
-            var dia = parseInt(document.getElementById('dia').value);
-            var mes = parseInt(document.getElementById('mes').value);
-            var arquivoFoto = document.getElementById('foto').files[0];
-            var msg = document.getElementById('mensagem');
+                var nomesPendentes = inscricoes.filter(insc => insc && insc.status === 'pendente').map(insc => insc.nome);
+                var nomesUnicos = [...new Set(nomesPendentes)].sort();
 
-            if (!nome || !dia || !mes || dia < 1 || dia > 31 || mes < 1 || mes > 12) {
-                msg.className = 'mensagem erro';
-                msg.innerText = '❌ Preencha todos os dados corretamente!';
-                msg.style.display = 'block';
-                return;
-            }
-
-            msg.className = 'mensagem sucesso';
-            msg.innerText = '⏳ Enviando...';
-            msg.style.display = 'block';
-
-            lerFotoComoTexto(arquivoFoto, function(textoDaFoto) {
-                db.ref('inscricoes').once('value').then(snap => {
-                    var inscricoes = snap.val() || [];
-                    var existe = inscricoes.some(i => i && i.nome.toLowerCase() === nome.toLowerCase() && i.dia === dia && i.mes === mes);
-
-                    if (existe) {
-                        msg.className = 'mensagem erro';
-                        msg.innerText = '⚠️ Você já está inscrito!';
-                        return;
-                    }
-
-                    var novoId = inscricoes.length > 0 ? Math.max(...inscricoes.map(i => i.id)) + 1 : 1;
-                    inscricoes.push({
-                        id: novoId,
-                        nome: nome,
-                        dia: dia,
-                        mes: mes,
-                        status: 'pendente',
-                        foto: textoDaFoto || ""
-                    });
-
-                    db.ref('inscricoes').set(inscricoes).then(() => {
-                        msg.className = 'mensagem sucesso';
-                        msg.innerText = '✅ Inscrição realizada com sucesso!';
-                        document.getElementById('nome').value = '';
-                        document.getElementById('dia').value = '';
-                        document.getElementById('mes').value = '';
-                        document.getElementById('foto').value = '';
-                        document.getElementById('previewFoto').style.display = 'none';
-                    });
+                nomesUnicos.forEach(nome => {
+                    var opcao = document.createElement('option');
+                    opcao.value = nome;
+                    opcao.textContent = nome;
+                    selectNome.appendChild(opcao);
                 });
             });
         }
 
-        // Inicia verificação automática
-        verificarStatusInscricoes();
+        function verificarStatusSistema() {
+            db.ref('configuracao/inscricoes_abertas').once('value').then(snap => {
+                var aberto = snap.val() !== null ? snap.val() : true;
+                
+                db.ref('inscricoes').once('value').then(snapIns => {
+                    var lista = snapIns.val() || [];
+                    var qtdConfirmados = lista.filter(i => i && i.status === 'confirmado').length;
+
+                    if (!aberto || qtdConfirmados >= LIMITE_MAXIMO) {
+                        document.getElementById('telaEncerrado').style.display = 'block';
+                        document.getElementById('telaNormal').style.display = 'none';
+                    } else {
+                        document.getElementById('telaEncerrado').style.display = 'none';
+                        document.getElementById('telaNormal').style.display = 'block';
+                        
+                        if (qtdConfirmados >= 12) {
+                            document.getElementById('avisoLimite').style.display = 'block';
+                        } else {
+                            document.getElementById('avisoLimite').style.display = 'none';
+                        }
+                    }
+                });
+            });
+        }
+
+        function confirmarInscricao() {
+            var nome = document.getElementById('ver_nome').value.trim();
+            var dia = parseInt(document.getElementById('ver_dia').value);
+            var mes = parseInt(document.getElementById('ver_mes').value);
+            var msg = document.getElementById('msg_verificacao');
+            msg.style.display = 'none';
+
+            if (!nome || !dia || !mes) {
+                msg.className = 'resultado erro';
+                msg.innerText = '❌ Selecione o nome e preencha dia e mês corretamente.';
+                msg.style.display = 'block';
+                return;
+            }
+
+            db.ref('inscricoes').once('value').then(snap => {
+                var inscricoes = snap.val() || [];
+                
+                var qtdAtual = inscricoes.filter(i => i && i.status === 'confirmado').length;
+                if (qtdAtual >= LIMITE_MAXIMO) {
+                    msg.className = 'resultado erro';
+                    msg.innerText = '❌ LIMITE DE 16 CONFIRMADOS ATINGIDO! Inscrições encerradas.';
+                    msg.style.display = 'block';
+                    verificarStatusSistema();
+                    return;
+                }
+
+                var encontrado = inscricoes.find(insc => insc && insc.nome === nome && insc.dia === dia && insc.mes === mes && insc.status === 'pendente');
+
+                if (encontrado) {
+                    inscricoes = inscricoes.map(insc => { if (insc && insc.id === encontrado.id) insc.status = 'confirmado'; return insc; });
+                    db.ref('inscricoes').set(inscricoes);
+                    
+                    msg.className = 'resultado sucesso';
+                    msg.innerText = '🎉 INSCRIÇÃO CONFIRMADA COM SUCESSO!';
+                    msg.style.display = 'block';
+                    
+                    document.getElementById('ver_nome').value = '';
+                    document.getElementById('ver_dia').value = '';
+                    document.getElementById('ver_mes').value = '';
+                    
+                    carregarListaNomes();
+                    verificarStatusSistema();
+                } else {
+                    // ✅ MENSAGEM ALTERADA CONFORME PEDIDO ANTERIORMENTE
+                    msg.className = 'resultado erro';
+                    msg.innerText = '❌ DADOS INCORRETOS COM A BASE DE DADOS';
+                    msg.style.display = 'block';
+                }
+            });
+        }
     </script>
+
 </body>
 </html>
