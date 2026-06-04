@@ -3,66 +3,181 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inscreva-se - Sistema de Inscrições</title>
+    <title>Inscrição - Cup Edition Campim FC</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase.js"></script>
     <style>
-        * {margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif;}
-        body {background-color: #f0f4f8; display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px;}
-        .container {background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); width: 100%; max-width: 450px; text-align: center;}
-        h1 {color: #2c3e50; margin-bottom: 10px; font-size: 22px;}
-        p.descricao {color: #666; margin-bottom: 25px; font-size: 15px;}
-        .encerrado {background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; padding: 20px; border-radius: 8px; font-weight: bold; font-size: 18px;}
-        .aviso-limite-atingido {background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba; padding: 15px; border-radius: 8px; font-weight: bold; font-size: 16px; margin-bottom: 20px;}
-        .grupo-campo {margin-bottom: 15px; text-align: left;}
-        label {display: block; margin-bottom: 6px; font-weight: 500; color: #555;}
-        select, input {width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 16px; background-color: #fff;}
-        input[type="number"] {width: 48%; display: inline-block; margin-right: 2%;}
-        button {background-color: #27ae60; color: white; border: none; padding: 14px; border-radius: 6px; cursor: pointer; font-size: 16px; width: 100%; margin-top: 10px; font-weight: bold; transition: background 0.3s;}
-        button:hover {background-color: #219653;}
-        button:disabled {background-color: #95a5a6; cursor: not-allowed;}
-        .resultado {margin-top: 20px; padding: 15px; border-radius: 6px; font-weight: bold; font-size: 15px; display: none;}
-        .sucesso {background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb;}
-        .erro {background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb;}
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+        body {
+            background-color: #f0f4f8;
+            padding: 20px;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        /* ✅ ESTILO DA LOGO */
+        .logo-container {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 10px;
+        }
+        .logo-container img {
+            max-width: 300px;
+            width: 100%;
+            height: auto;
+        }
+
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 22px;
+        }
+
+        .status-sistema {
+            padding: 12px;
+                       border-radius: 8px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+        .aberto {
+            background-color: #d4edda;
+            color: #155724;
+            border: 2px solid #27ae60;
+        }
+        .fechado {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 2px solid #e74c3c;
+        }
+
+        .formulario {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+
+        .grupo-campo {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #333;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 15px;
+        }
+
+        input[type="number"] {
+            width: 100%;
+        }
+
+        button {
+            width: 100%;
+            background-color: #27ae60;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background-color: #219653;
+        }
+
+        button:disabled {
+            background-color: #95a5a6;
+            cursor: not-allowed;
+        }
+
+        .mensagem {
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: 6px;
+            font-weight: bold;
+            text-align: center;
+            display: none;
+        }
+
+        .sucesso {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .erro {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .aviso-limite {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            text-align: center;
+            font-weight: bold;
+            display: none;
+        }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <div id="telaEncerrado" style="display: none;" class="encerrado">
-            🚫 INSCRIÇÕES ENCERRADAS<br><br>
-            Todas as vagas foram preenchidas ou o período de inscrições finalizou.<br>
-            <span style="font-size:14px; margin-top:10px; display:block;">Limite máximo: 16 confirmados</span>
+    <!-- ✅ LOGO ADICIONADA AQUI -->
+    <div class="logo-container">
+        <img src="https://i.ibb.co/7nYVjQH/logo-cup-edition.png" alt="Cup Edition Campim FC">
+    </div>
+
+    <h1>📋 Sistema de Inscrições</h1>
+
+    <div id="statusSistema" class="status-sistema"></div>
+    <div id="avisoLimite" class="aviso-limite">⚠️ LIMITE DE 16 CONFIRMADOS ATINGIDO! INSCRIÇÕES ENCERRADAS.</div>
+
+    <div class="formulario">
+        <div class="grupo-campo">
+            <label>Nome Completo:</label>
+            <input type="text" id="nome" placeholder="Digite seu nome completo" required>
         </div>
 
-        <div id="telaNormal">
-            <div id="avisoLimite" class="aviso-limite-atingido" style="display: none;">
-                ⚠️ ATENÇÃO: Restam poucas vagas. Ao atingir 16 confirmados, o sistema será bloqueado automaticamente.
+        <div class="grupo-campo">
+            <label>Data de Nascimento:</label>
+            <div style="display: flex; gap: 10px;">
+                <input type="number" id="dia" min="1" max="31" placeholder="Dia" required>
+                <input type="number" id="mes" min="1" max="12" placeholder="Mês" required>
             </div>
-
-            <h1>✅ Confirmar Inscrição</h1>
-            <p class="descricao">Escolha seu nome e preencha a data de nascimento para confirmar sua participação.</p>
-
-            <div class="grupo-campo">
-                <label>Nome</label>
-                <select id="ver_nome">
-                    <option value="">-- Selecione seu nome --</option>
-                </select>
-            </div>
-
-            <div class="grupo-campo">
-                <label>Data de Nascimento</label>
-                <input type="number" id="ver_dia" min="1" max="31" placeholder="Dia">
-                <input type="number" id="ver_mes" min="1" max="12" placeholder="Mês">
-            </div>
-
-            <button id="botaoConfirmar" onclick="confirmarInscricao()">CONFIRMAR INSCRIÇÃO</button>
-
-            <div id="msg_verificacao" class="resultado"></div>
         </div>
+
+        <button id="btnInscrever" onclick="fazerInscricao()">📝 Inscrever-se</button>
+        <button id="btnConfirmar" onclick="confirmarPresenca()" style="background-color: #f39c12; display: none;">✅ Confirmar Presença</button>
+
+        <div id="mensagem" class="mensagem"></div>
     </div>
 
     <script>
-        // 👇 COLE AQUI O MESMO CÓDIGO DO FIREBASE QUE USOU NO OUTRO 👇
+        // 👇 COLE AQUI SEU CÓDIGO DO FIREBASE 👇
         var firebaseConfig = {
           // COLE SEU CÓDIGO AQUI MESMO
           apiKey: "AIzaSyAR--VWkuPUBzKtJlEHPXnwBwbapB8JY_w",
@@ -78,102 +193,130 @@
         firebase.initializeApp(firebaseConfig);
         var db = firebase.database();
         const LIMITE_MAXIMO = 16;
+        let inscricaoEncontrada = null;
 
+        // Verifica status e limite ao carregar
         window.onload = function() {
             verificarStatusSistema();
-            carregarListaNomes();
-            setInterval(verificarStatusSistema, 3000);
+            verificarLimiteConfirmados();
         };
 
-        function carregarListaNomes() {
-            db.ref('inscricoes').once('value').then(snap => {
-                var inscricoes = snap.val() || [];
-                var selectNome = document.getElementById('ver_nome');
-                selectNome.innerHTML = '<option value="">-- Selecione seu nome --</option>';
-
-                var nomesPendentes = inscricoes.filter(insc => insc && insc.status === 'pendente').map(insc => insc.nome);
-                var nomesUnicos = [...new Set(nomesPendentes)].sort();
-
-                nomesUnicos.forEach(nome => {
-                    var opcao = document.createElement('option');
-                    opcao.value = nome;
-                    opcao.textContent = nome;
-                    selectNome.appendChild(opcao);
-                });
-            });
-        }
-
         function verificarStatusSistema() {
-            db.ref('configuracao/inscricoes_abertas').once('value').then(snap => {
-                var aberto = snap.val() !== null ? snap.val() : true;
-                
-                db.ref('inscricoes').once('value').then(snapIns => {
-                    var lista = snapIns.val() || [];
-                    var qtdConfirmados = lista.filter(i => i && i.status === 'confirmado').length;
+            db.ref('configuracao').on('value', snap => {
+                let abertas = snap.val()?.inscricoes_abertas ?? true;
+                const statusEl = document.getElementById('statusSistema');
+                const btnInscrever = document.getElementById('btnInscrever');
+                const btnConfirmar = document.getElementById('btnConfirmar');
 
-                    if (!aberto || qtdConfirmados >= LIMITE_MAXIMO) {
-                        document.getElementById('telaEncerrado').style.display = 'block';
-                        document.getElementById('telaNormal').style.display = 'none';
-                    } else {
-                        document.getElementById('telaEncerrado').style.display = 'none';
-                        document.getElementById('telaNormal').style.display = 'block';
-                        
-                        if (qtdConfirmados >= 12) {
-                            document.getElementById('avisoLimite').style.display = 'block';
-                        } else {
-                            document.getElementById('avisoLimite').style.display = 'none';
-                        }
+                if (abertas) {
+                    statusEl.className = 'status-sistema aberto';
+                    statusEl.innerText = '✅ INSCRIÇÕES ABERTAS';
+                    btnInscrever.disabled = false;
+                } else {
+                    statusEl.className = 'status-sistema fechado';
+                    statusEl.innerText = '❌ INSCRIÇÕES ENCERRADAS';
+                    btnInscrever.disabled = true;
+                    // Se já estiver inscrito, ainda pode confirmar
+                    if (inscricaoEncontrada) {
+                        btnInscrever.style.display = 'none';
+                        btnConfirmar.style.display = 'block';
                     }
+                }
+            });
+        }
+
+        function verificarLimiteConfirmados() {
+            db.ref('inscricoes').on('value', snap => {
+                const lista = snap.val() || [];
+                const qtdConfirmados = lista.filter(i => i?.status === 'confirmado').length;
+                const avisoEl = document.getElementById('avisoLimite');
+
+                if (qtdConfirmados >= LIMITE_MAXIMO) {
+                    avisoEl.style.display = 'block';
+                    // Fecha inscrições automaticamente
+                    db.ref('configuracao').set({inscricoes_abertas: false});
+                } else {
+                    avisoEl.style.display = 'none';
+                }
+            });
+        }
+
+        function mostrarMensagem(texto, tipo) {
+            const el = document.getElementById('mensagem');
+            el.innerText = texto;
+            el.className = `mensagem ${tipo}`;
+            el.style.display = 'block';
+            setTimeout(() => el.style.display = 'none', 5000);
+        }
+
+        function dadosPreenchidos() {
+            const nome = document.getElementById('nome').value.trim();
+            const dia = parseInt(document.getElementById('dia').value);
+            const mes = parseInt(document.getElementById('mes').value);
+
+            if (!nome || !dia || !mes || dia < 1 || dia > 31 || mes < 1 || mes > 12) {
+                mostrarMensagem('❌ Preencha todos os dados corretamente!', 'erro');
+                return null;
+            }
+            return { nome, dia, mes };
+        }
+
+        function fazerInscricao() {
+            const dados = dadosPreenchidos();
+            if (!dados) return;
+
+            db.ref('inscricoes').once('value').then(snap => {
+                let lista = snap.val() || [];
+
+                // Verifica se já existe
+                const existente = lista.find(i => 
+                    i && i.nome.toLowerCase() === dados.nome.toLowerCase() && i.dia === dados.dia && i.mes === dados.mes
+                );
+
+                if (existente) {
+                    inscricaoEncontrada = existente;
+                    document.getElementById('btnInscrever').style.display = 'none';
+                    document.getElementById('btnConfirmar').style.display = 'block';
+                    mostrarMensagem('📋 Você já está inscrito! Clique em CONFIRMAR PRESENÇA.', 'sucesso');
+                    return;
+                }
+
+                // Cria nova inscrição
+                const novoId = lista.length > 0 ? Math.max(...lista.map(i => i.id)) + 1 : 1;
+                lista.push({
+                    id: novoId,
+                    nome: dados.nome,
+                    dia: dados.dia,
+                    mes: dados.mes,
+                    status: 'pendente'
+                });
+
+                db.ref('inscricoes').set(lista).then(() => {
+                    inscricaoEncontrada = lista[lista.length - 1];
+                    document.getElementById('btnInscrever').style.display = 'none';
+                    document.getElementById('btnConfirmar').style.display = 'block';
+                    mostrarMensagem('✅ Inscrição realizada com sucesso! Agora confirme sua presença.', 'sucesso');
                 });
             });
         }
 
-        function confirmarInscricao() {
-            var nome = document.getElementById('ver_nome').value.trim();
-            var dia = parseInt(document.getElementById('ver_dia').value);
-            var mes = parseInt(document.getElementById('ver_mes').value);
-            var msg = document.getElementById('msg_verificacao');
-            msg.style.display = 'none';
-
-            if (!nome || !dia || !mes) {
-                msg.className = 'resultado erro';
-                msg.innerText = '❌ Selecione o nome e preencha dia e mês corretamente.';
-                msg.style.display = 'block';
+        function confirmarPresenca() {
+            if (!inscricaoEncontrada) {
+                mostrarMensagem('❌ Faça sua inscrição primeiro!', 'erro');
                 return;
             }
 
             db.ref('inscricoes').once('value').then(snap => {
-                var inscricoes = snap.val() || [];
-                
-                var qtdAtual = inscricoes.filter(i => i && i.status === 'confirmado').length;
-                if (qtdAtual >= LIMITE_MAXIMO) {
-                    msg.className = 'resultado erro';
-                    msg.innerText = '❌ LIMITE DE 16 CONFIRMADOS ATINGIDO! Inscrições encerradas.';
-                    msg.style.display = 'block';
-                    verificarStatusSistema();
-                    return;
-                }
+                let lista = snap.val() || [];
+                const index = lista.findIndex(i => i && i.id === inscricaoEncontrada.id);
 
-                var encontrado = inscricoes.find(insc => insc && insc.nome === nome && insc.dia === dia && insc.mes === mes && insc.status === 'pendente');
-
-                if (encontrado) {
-                    inscricoes = inscricoes.map(insc => { if (insc && insc.id === encontrado.id) insc.status = 'confirmado'; return insc; });
-                    db.ref('inscricoes').set(inscricoes);
-                    
-                    msg.className = 'resultado sucesso';
-                    msg.innerText = '🎉 INSCRIÇÃO CONFIRMADA COM SUCESSO!';
-                    msg.style.display = 'block';
-                    
-                    document.getElementById('ver_nome').value = '';
-                    document.getElementById('ver_dia').value = '';
-                    document.getElementById('ver_mes').value = '';
-                    
-                    carregarListaNomes();
-                    verificarStatusSistema();
-                } else {
-                    msg.className = 'resultado erro';
-                    msg.innerText = '❌ Dados não conferem ou já foi confirmada.';
-                    msg.style.display = 'block';
+                if (index !== -1) {
+                    lista[index].status = 'confirmado';
+                    db.ref('inscricoes').set(lista).then(() => {
+                        mostrarMensagem('🎉 Presença confirmada com sucesso! Obrigado.', 'sucesso');
+                        document.getElementById('btnConfirmar').disabled = true;
+                        document.getElementById('btnConfirmar').innerText = '✅ Confirmado';
+                    });
                 }
             });
         }
