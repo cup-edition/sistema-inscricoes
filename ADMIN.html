@@ -40,35 +40,17 @@
         }
         .caixa-login input {
             width: 100%;
-            padding: 12px;
-            margin: 8px 0;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            font-size: 15px;
+            padding: 12px; margin: 8px 0;
+            border: 1px solid #ddd; border-radius: 6px; font-size: 15px;
         }
         .caixa-login button {
-            width: 100%;
-            padding: 12px;
-            background-color: #27ae60;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            margin-top: 10px;
+            width: 100%; padding: 12px;
+            background-color: #27ae60; color: white; border: none; border-radius: 6px;
+            font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px;
             transition: background 0.2s;
         }
-        .caixa-login button:hover {
-            background-color: #219653;
-        }
-        .errologin {
-            color: #e74c3c;
-            font-size: 14px;
-            margin-top: 10px;
-            display: none;
-            font-weight: bold;
-        }
+        .caixa-login button:hover {background-color: #219653;}
+        .errologin {color: #e74c3c; font-size: 14px; margin-top: 10px; display: none; font-weight: bold;}
 
         /* ===== ESTILOS DO SISTEMA ===== */
         h1 {color: #2c3e50; text-align: center; margin-bottom: 10px;}
@@ -76,7 +58,7 @@
         .secao {background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 25px;}
         h2 {color: #34495e; margin-bottom: 15px; font-size: 18px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;}
         .contador-confirmados {color: #27ae60; font-weight: bold; font-size: 14px; background: #e8f8f0; padding: 4px 8px; border-radius: 4;}
-        .aviso-limite {color: #e74c3c; font-weight: bold; font-size: 14px; background: #ffebee; padding: 4px 8px; border-radius: 4px; animation: piscar 1s infinite;}
+        .aviso-limite {color: #e74c3c; font-weight: bold; font-size: 14px; background: #ffebee; padding: 4px 8px; border-radius: 4px; animation: piscar 1s infinite; display: none;}
         @keyframes piscar { 0%{opacity:1;} 50%{opacity:0.5;} 100%{opacity:1;} }
         .grupo-campo {margin-bottom: 12px;}
         label {display: block; margin-bottom: 5px; font-weight: 500; color: #555;}
@@ -109,8 +91,6 @@
         .aberto {background-color: #d4edda; color: #155724;}
         .fechado {background-color: #f8d7da; color: #721c24;}
         .carregando {color: #3498db; font-style: italic;}
-        
-        /* Esconde todo o conteúdo principal até logar */
         #conteudoPrincipal {display: none;}
     </style>
 </head>
@@ -134,12 +114,7 @@
             <p>Envie a página <strong>inscrever.html</strong> para as pessoas se cadastrarem/confirmarem.</p>
         </div>
 
-        <div class="secao">
-            <h2>⚙️ Controle do Sistema</h2>
-            <div id="statusAtual" class="status-sistema"></div>
-            <button id="botaoBloquear" class="btn-roxo" onclick="alternarStatusInscricoes()"></button>
-            <div id="avisoLimite" class="aviso-limite" style="display: none; margin-top: 10px;">⚠️ LIMITE DE 16 CONFIRMADOS ATINGIDO! INSCRIÇÕES ENCERRADAS AUTOMATICAMENTE.</div>
-        </div>
+        <!-- ✅ SEÇÃO "CONTROLE DO SISTEMA" REMOVIDA AQUI -->
 
         <div class="secao">
             <h2>📝 Cadastrar Nova Pessoa</h2>
@@ -162,8 +137,8 @@
                 📊 Lista de Inscrições 
                 <small>(Confirmados primeiro, depois pendentes - ambos em ordem alfabética)</small>
                 <span id="contadorConfirmados" class="contador-confirmados"></span>
+                <div id="avisoLimite" class="aviso-limite">⚠️ LIMITE DE 16 CONFIRMADOS ATINGIDO! INSCRIÇÕES ENCERRADAS AUTOMATICAMENTE.</div>
                 <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-                    <!-- ✅ BOTÃO NOVO ADICIONADO AQUI -->
                     <button class="btn-atualizar" onclick="atualizarLista()">🔄 Atualizar Lista</button>
                     <button class="btn-ocultar-coluna" onclick="alternarVisibilidadeData()">🙈 Ocultar Data Nasc.</button>
                     <button class="btn-copiar" onclick="copiarNomesConfirmados()">📋 Copiar Nomes Confirmados</button>
@@ -225,7 +200,6 @@
                 document.getElementById('telaLogin').style.display = 'none';
                 document.getElementById('conteudoPrincipal').style.display = 'block';
                 atualizarLista();
-                atualizarInterfaceStatus();
             } else {
                 mensagemErro.style.display = 'block';
                 document.getElementById('senhaLogin').value = '';
@@ -244,43 +218,6 @@
             } else {
                 aviso.style.display = 'none';
             }
-        }
-
-        function alternarStatusInscricoes() {
-            db.ref('configuracao/inscricoes_abertas').once('value').then(snap => {
-                var statusAtual = snap.val() !== null ? snap.val() : true;
-                
-                db.ref('inscricoes').once('value').then(snapIns => {
-                    var lista = snapIns.val() || [];
-                    var qtdConfirmados = lista.filter(i => i && i.status === 'confirmado').length;
-                    
-                    if (!statusAtual && qtdConfirmados >= LIMITE_MAXIMO) {
-                        alert(`⚠️ Você não pode reabrir! O limite de ${LIMITE_MAXIMO} confirmados já foi atingido.`);
-                        return;
-                    }
-
-                    db.ref('configuracao').set({inscricoes_abertas: !statusAtual});
-                    alert(!statusAtual ? '✅ Inscrições LIBERADAS!' : '❌ Inscrições BLOQUEADAS!');
-                    atualizarInterfaceStatus();
-                });
-            });
-        }
-
-        function atualizarInterfaceStatus() {
-            db.ref('configuracao/inscricoes_abertas').once('value').then(snap => {
-                var aberto = snap.val() !== null ? snap.val() : true;
-                var statusDiv = document.getElementById('statusAtual');
-                var botao = document.getElementById('botaoBloquear');
-                if (aberto) {
-                    statusDiv.className = 'status-sistema aberto';
-                    statusDiv.innerText = '🟢 Inscrições ABERTAS';
-                    botao.innerText = '🔒 Bloquear Inscrições';
-                } else {
-                    statusDiv.className = 'status-sistema fechado';
-                    statusDiv.innerText = '🔴 Inscrições BLOQUEADAS';
-                    botao.innerText = '🔓 Desbloquear Inscrições';
-                }
-            });
         }
 
         function cadastrarPessoa() {
@@ -334,13 +271,19 @@
             }
         }
 
+        // ✅ Função mantida: ao voltar todos para pendentes, reabre automaticamente
         function voltarTodosParaPendente() {
-            if (confirm('⚠️ Isso irá mudAR TODOS para Pendente. Deseja continuar?')) {
+            if (confirm('⚠️ Isso irá mudAR TODOS para Pendente e reabrir as inscrições. Deseja continuar?')) {
                 db.ref('inscricoes').once('value').then(snap => {
                     var lista = snap.val() || [];
                     lista = lista.map(insc => { if(insc) insc.status = 'pendente'; return insc; });
                     db.ref('inscricoes').set(lista);
+                    
+                    // 🔓 REABRE AS INSCRIÇÕES
+                    db.ref('configuracao').set({inscricoes_abertas: true});
+                    
                     atualizarLista();
+                    alert('✅ Todos voltaram para pendentes e inscrições foram REABERTAS!');
                 });
             }
         }
@@ -365,10 +308,8 @@
             atualizarLista();
         }
 
-        // ✅ FUNÇÃO PRINCIPAL PARA ATUALIZAR A LISTA
         function atualizarLista() {
             var tabela = document.getElementById('lista_inscricoes');
-            // Mensagem de carregamento ao clicar
             tabela.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #3498db; font-style: italic;">🔄 Atualizando dados...</td></tr>';
 
             db.ref('inscricoes').once('value').then(snap => {
@@ -392,8 +333,7 @@
                 
                 verificarLimiteConfirmados(qtdConfirmados);
 
-                tabela.innerHTML = ''; // Limpa a tabela
-
+                tabela.innerHTML = '';
                 listaOrdenada.forEach(insc => {
                     var linha = document.createElement('tr');
                     linha.innerHTML = `
