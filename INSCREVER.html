@@ -63,18 +63,16 @@
     </div>
 
     <script>
-        // 👇 COLE AQUI O MESMO CÓDIGO DO FIREBASE QUE USOU NO OUTRO 👇
+        // ✅ DADOS DO SEU PROJETO - NÃO ALTERE
         var firebaseConfig = {
-          // COLE SEU CÓDIGO AQUI MESMO
-          apiKey: "AIzaSyAR--VWkuPUBzKtJlEHPXnwBwbapB8JY_w",
-  authDomain: "sistema-inscricoes-e9241.firebaseapp.com",
-  databaseURL: "https://sistema-inscricoes-e9241-default-rtdb.firebaseio.com",
-  projectId: "sistema-inscricoes-e9241",
-  storageBucket: "sistema-inscricoes-e9241.firebasestorage.app",
-  messagingSenderId: "232618438422",
-  appId: "1:232618438422:web:1c62103b2169e64e862a37"
-};
-        // 👆 FIM DO CÓDIGO 👆
+            apiKey: "AIzaSyAR--VWkuPUBzKtJlEHPXnwBwbapB8JY_w",
+            authDomain: "sistema-inscricoes-e9241.firebaseapp.com",
+            databaseURL: "https://sistema-inscricoes-e9241-default-rtdb.firebaseio.com",
+            projectId: "sistema-inscricoes-e9241",
+            storageBucket: "sistema-inscricoes-e9241.firebasestorage.app",
+            messagingSenderId: "232618438422",
+            appId: "1:232618438422:web:1c62103b2169e64e862a37"
+        };
 
         firebase.initializeApp(firebaseConfig);
         var db = firebase.database();
@@ -145,7 +143,7 @@
 
             if (!nome || !dia || !mes) {
                 msg.className = 'resultado erro';
-                msg.innerText = '❌ Selecione o nome e preencha dia e mês corretamente.';
+                msg.innerText = '❌ Selecione o nome e preencha dia e mês corretamente!';
                 msg.style.display = 'block';
                 return;
             }
@@ -165,7 +163,16 @@
                 var encontrado = inscricoes.find(insc => insc && insc.nome === nome && insc.dia === dia && insc.mes === mes && insc.status === 'pendente');
 
                 if (encontrado) {
-                    inscricoes = inscricoes.map(insc => { if (insc && insc.id === encontrado.id) insc.status = 'confirmado'; return insc; });
+                    // ✅ GUARDA A DATA E HORA ATUAL NO MOMENTO DA CONFIRMAÇÃO
+                    const dataHoraAtual = new Date().getTime();
+
+                    inscricoes = inscricoes.map(insc => { 
+                        if (insc && insc.id === encontrado.id) {
+                            insc.status = 'confirmado'; 
+                            insc.data_confirmacao = dataHoraAtual; // ✅ SALVA AQUI
+                        }
+                        return insc; 
+                    });
                     db.ref('inscricoes').set(inscricoes);
                     
                     msg.className = 'resultado sucesso';
@@ -179,7 +186,6 @@
                     carregarListaNomes();
                     verificarStatusSistema();
                 } else {
-                    // ✅ MENSAGEM ALTERADA CONFORME PEDIDO ANTERIORMENTE
                     msg.className = 'resultado erro';
                     msg.innerText = '❌ DADOS INCORRETOS COM A BASE DE DADOS';
                     msg.style.display = 'block';
