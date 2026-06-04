@@ -76,6 +76,8 @@
         .secao {background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 25px;}
         h2 {color: #34495e; margin-bottom: 15px; font-size: 18px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;}
         .contador-confirmados {color: #27ae60; font-weight: bold; font-size: 14px; background: #e8f8f0; padding: 4px 8px; border-radius: 4;}
+        .aviso-limite {color: #e74c3c; font-weight: bold; font-size: 14px; background: #ffebee; padding: 4px 8px; border-radius: 4px; animation: piscar 1s infinite;}
+        @keyframes piscar { 0%{opacity:1;} 50%{opacity:0.5;} 100%{opacity:1;} }
         .grupo-campo {margin-bottom: 12px;}
         label {display: block; margin-bottom: 5px; font-weight: 500; color: #555;}
         input {padding: 8px 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;}
@@ -135,6 +137,7 @@
             <h2>⚙️ Controle do Sistema</h2>
             <div id="statusAtual" class="status-sistema"></div>
             <button id="botaoBloquear" class="btn-roxo" onclick="alternarStatusInscricoes()"></button>
+            <div id="avisoLimite" class="aviso-limite" style="display: none; margin-top: 10px;">⚠️ LIMITE DE 16 CONFIRMADOS ATINGIDO! INSCRIÇÕES ENCERRADAS AUTOMATICAMENTE.</div>
         </div>
 
         <div class="secao">
@@ -207,6 +210,7 @@
         firebase.initializeApp(firebaseConfig);
         var db = firebase.database();
         var dataVisivel = true;
+        const LIMITE_MAXIMO = 16; // AQUI DEFINE O LIMITE, ESTÁ EM 16
 
         // ===== FUNÇÃO DE LOGIN =====
         function fazerLogin() {
@@ -235,12 +239,36 @@
             if (e.key === 'Enter') fazerLogin();
         });
 
+        // NOVA FUNÇÃO: VERIFICA SE ATINGIU O LIMITE DE 16
+        function verificarLimiteConfirmados(qtd) {
+            const aviso = document.getElementById('avisoLimite');
+            if (qtd >= LIMITE_MAXIMO) {
+                // Se chegou no limite, força o encerramento das inscrições
+                db.ref('configuracao').set({inscricoes_abertas: false});
+                aviso.style.display = 'block';
+            } else {
+                aviso.style.display = 'none';
+            }
+        }
+
         function alternarStatusInscricoes() {
             db.ref('configuracao/inscricoes_abertas').once('value').then(snap => {
                 var statusAtual = snap.val() !== null ? snap.val() : true;
-                db.ref('configuracao').set({inscricoes_abertas: !statusAtual});
-                alert(!statusAtual ? '✅ Inscrições LIBERADAS!' : '❌ Inscrições BLOQUEADAS!');
-                atualizarInterfaceStatus();
+                
+                // Impede de abrir se já estiver no limite
+                db.ref('inscricoes').once('value').then(snapIns => {
+                    var lista = snapIns.val() || [];
+                    var qtdConfirmados = lista.filter(i => i && i.status === 'confirmado').length;
+                    
+                    if (!statusAtual && qtdConfirmados >= LIMITE_MAXIMO) {
+                        alert(`⚠️ Você não pode reabrir! O limite de ${LIMITE_MAXIMO} confirmados já foi atingido.`);
+                        return;
+                    }
+
+                    db.ref('configuracao').set({inscricoes_abertas: !statusAtual});
+                    alert(!statusAtual ? '✅ Inscrições LIBERADAS!' : '❌ Inscrições BLOQUEADAS!');
+                    atualizarInterfaceStatus();
+                });
             });
         }
 
@@ -353,6 +381,7 @@
                 if (inscricoes.length === 0 || !inscricoes[0]) {
                     tabela.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #888;">Nenhuma inscrição cadastrada ainda.</td></tr>';
                     document.getElementById('contadorConfirmados').innerText = `✅ 0 de 0 confirmados`;
+                    verificarLimiteConfirmados(0);
                     return;
                 }
 
@@ -363,7 +392,10 @@
                 });
 
                 var qtdConfirmados = listaOrdenada.filter(i => i.status === 'confirmado').length;
-                document.getElementById('contadorConfirmados').innerText = `✅ ${qtdConfirmados} de ${listaOrdenada.length} confirmados`;
+                document.getElementById('contadorConfirmados').innerText = `✅ ${qtdConfirmados} de ${listaOrdenada.length} confirmados (Limite: ${LIMITE_MAXIMO})`;
+                
+                // CHAMA A VERIFICAÇÃO AQUI
+                verificarLimiteConfirmados(qtdConfirmados);
 
                 listaOrdenada.forEach(insc => {
                     var linha = document.createElement('tr');
