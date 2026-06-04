@@ -214,7 +214,6 @@
                 </div>
             </h2>
             
-            <!-- ✅ BOTÃO DE VOLTAR TODOS CONTINUA AQUI, NÃO MEXI NELE -->
             <div style="margin-bottom: 15px;">
                 <button class="btn-amarelo" onclick="voltarTodosParaPendente()">🔄 Voltar Todos para Pendentes</button>
             </div>
@@ -299,12 +298,18 @@
             if (e.key === 'Enter') fazerLogin();
         });
 
+        // ✅ REGRA NOVA: BLOQUEIA SOMENTE QUANDO VAGAS = 0
         function verificarLimiteConfirmados(qtd) {
             const aviso = document.getElementById('avisoLimite');
-            if (qtd >= LIMITE_MAXIMO) {
+            const vagasRestantes = LIMITE_MAXIMO - qtd;
+            
+            // Só fecha inscrições quando SOBRAR 0 vagas
+            if (vagasRestantes === 0) {
                 db.ref('configuracao').set({inscricoes_abertas: false});
                 aviso.style.display = 'block';
             } else {
+                // Se tiver 1 ou mais vagas, deixa aberto
+                db.ref('configuracao').set({inscricoes_abertas: true});
                 aviso.style.display = 'none';
             }
         }
@@ -450,7 +455,7 @@
             }
         }
 
-        // ✅ FUNÇÃO NOVA: VOLTAR APENAS UM CADASTRO PARA PENDENTE
+        // ✅ FUNÇÃO: VOLTAR APENAS UM CADASTRO PARA PENDENTE
         function voltarUmParaPendente(id) {
             db.ref('inscricoes').once('value').then(snap => {
                 var lista = snap.val() || [];
@@ -471,7 +476,7 @@
             }
         }
 
-        // ✅ ESSA FUNÇÃO CONTINUA A MESMA, NÃO ALTEREI NADA
+        // ✅ FUNÇÃO ORIGINAL - NÃO ALTERADA
         function voltarTodosParaPendente() {
             if (confirm('⚠️ Isso irá mudAR TODOS para Pendente e reabrir as inscrições. Deseja continuar?')) {
                 db.ref('inscricoes').once('value').then(snap => {
@@ -550,7 +555,6 @@
                     <td style="display: ${dataVisivel ? '' : 'none'};">${insc.dia}/${insc.mes}</td>
                     <td class="status-${insc.status}">${insc.status === 'pendente' ? 'PENDENTE' : 'CONFIRMADO'}</td>
                     <td class="acoes-tabela">
-                        <!-- ✅ NOVO BOTÃO INDIVIDUAL AQUI -->
                         <button class="btn-pendente" onclick="voltarUmParaPendente(${insc.id})" title="Voltar para Pendente">🔄</button>
                         <button class="btn-editar" onclick="abrirEdicao(${insc.id})">📝 Editar</button>
                     </td>
