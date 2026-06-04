@@ -35,8 +35,9 @@
         </div>
 
         <div id="telaNormal">
+            <!-- ✅ TEXTO ALTERADO CONFORME SEU PEDIDO -->
             <div id="avisoLimite" class="aviso-limite-atingido" style="display: none;">
-                ⚠️ ATENÇÃO: Apenas vagas remanescentes. Ao atingir 16 confirmados, o sistema será bloqueado automaticamente.
+                ⚠️ ATENÇÃO: Restam poucas vagas. Ao atingir 16 confirmados, o sistema será bloqueado automaticamente.
             </div>
 
             <h1>✅ Confirmar Inscrição</h1>
@@ -77,12 +78,11 @@
 
         firebase.initializeApp(firebaseConfig);
         var db = firebase.database();
-        const LIMITE_MAXIMO = 16; // MESMO LIMITE AQUI
+        const LIMITE_MAXIMO = 16;
 
         window.onload = function() {
             verificarStatusSistema();
             carregarListaNomes();
-            // Atualiza a verificação a cada 3 segundos
             setInterval(verificarStatusSistema, 3000);
         };
 
@@ -108,7 +108,6 @@
             db.ref('configuracao/inscricoes_abertas').once('value').then(snap => {
                 var aberto = snap.val() !== null ? snap.val() : true;
                 
-                // Verifica também quantos já tem confirmados
                 db.ref('inscricoes').once('value').then(snapIns => {
                     var lista = snapIns.val() || [];
                     var qtdConfirmados = lista.filter(i => i && i.status === 'confirmado').length;
@@ -120,7 +119,6 @@
                         document.getElementById('telaEncerrado').style.display = 'none';
                         document.getElementById('telaNormal').style.display = 'block';
                         
-                        // Mostra aviso se estiver chegando perto
                         if (qtdConfirmados >= 12) {
                             document.getElementById('avisoLimite').style.display = 'block';
                         } else {
@@ -148,13 +146,12 @@
             db.ref('inscricoes').once('value').then(snap => {
                 var inscricoes = snap.val() || [];
                 
-                // Verifica novamente antes de confirmar
                 var qtdAtual = inscricoes.filter(i => i && i.status === 'confirmado').length;
                 if (qtdAtual >= LIMITE_MAXIMO) {
                     msg.className = 'resultado erro';
                     msg.innerText = '❌ LIMITE DE 16 CONFIRMADOS ATINGIDO! Inscrições encerradas.';
                     msg.style.display = 'block';
-                    verificarStatusSistema(); // Atualiza a tela
+                    verificarStatusSistema();
                     return;
                 }
 
@@ -173,7 +170,7 @@
                     document.getElementById('ver_mes').value = '';
                     
                     carregarListaNomes();
-                    verificarStatusSistema(); // Verifica se agora bateu o limite
+                    verificarStatusSistema();
                 } else {
                     msg.className = 'resultado erro';
                     msg.innerText = '❌ Dados não conferem ou já foi confirmada.';
