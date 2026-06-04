@@ -224,17 +224,16 @@
                 <thead>
                     <tr>
                         <th>Foto</th>
-                        <th>ID</th>
+                        <!-- ✅ COLUNA ID REMOVIDA AQUI -->
                         <th>Nome</th>
                         <th id="colunaDataCabecalho">Data Nasc.</th>
-                        <!-- ✅ NOVA COLUNA -->
                         <th>Confirmação</th>
                         <th>Status</th>
                         <th>Ações</th>
                     </tr>
                 </thead>
                 <tbody id="lista_inscricoes">
-                    <tr><td colspan="7" style="text-align: center; color: #888;">Carregando...</td></tr>
+                    <tr><td colspan="6" style="text-align: center; color: #888;">Carregando...</td></tr>
                 </tbody>
             </table>
 
@@ -368,7 +367,7 @@
                         mes: mes,
                         status: 'pendente',
                         foto: textoDaFoto || "",
-                        data_confirmacao: null // ✅ novo campo
+                        data_confirmacao: null
                     });
                     
                     db.ref('inscricoes').set(inscricoes).then(() => {
@@ -466,7 +465,7 @@
                 lista = lista.map(insc => {
                     if(insc && insc.id === id) {
                         insc.status = 'pendente';
-                        insc.data_confirmacao = null; // ✅ limpa data se voltar
+                        insc.data_confirmacao = null;
                     }
                     return insc;
                 });
@@ -517,7 +516,7 @@
             var cabecalho = document.getElementById('colunaDataCabecalho');
             cabecalho.style.display = dataVisivel ? '' : 'none';
             botao.innerText = dataVisivel ? '🙈 Ocultar Data Nasc.' : '👁️ Mostrar Data Nasc.';
-            var celulasData = document.querySelectorAll('td:nth-child(4)');
+            var celulasData = document.querySelectorAll('td:nth-child(3)');
             celulasData.forEach(celula => { celula.style.display = dataVisivel ? '' : 'none'; });
         }
 
@@ -530,7 +529,7 @@
             var tabela = document.getElementById('lista_inscricoes');
 
             if (inscricoes.length === 0 || !inscricoes[0]) {
-                tabela.innerHTML = '<tr><td colspan="7" style="text-align: center; color: #888;">Nenhuma inscrição cadastrada ainda.</td></tr>';
+                tabela.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #888;">Nenhuma inscrição cadastrada ainda.</td></tr>';
                 document.getElementById('contadorConfirmados').innerText = `✅ 0 confirmados | Restam 16 vagas (Limite: 16)`;
                 verificarLimiteConfirmados(0);
                 return;
@@ -581,7 +580,7 @@
                     <td>
                         ${insc.foto ? `<img src="${insc.foto}" class="foto-preview" alt="foto">` : '📄'}
                     </td>
-                    <td>${insc.id}</td>
+                    <!-- ✅ CÉLULA DO ID REMOVIDA DAQUI -->
                     <td>${insc.nome}</td>
                     <td style="display: ${dataVisivel ? '' : 'none'};">${insc.dia}/${insc.mes}</td>
                     <td class="data-hora">${dataHora || '-'}</td>
