@@ -7,7 +7,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase.js"></script>
     <style>
         * {margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif;}
-        /* ✅ FUNDO ALTERADO PARA CINZA ESCURO */
+        /* ✅ FUNDO CINZA ESCURO */
         body {background-color: #343a40; padding: 20px; max-width: 900px; margin: 0 auto;}
 
         /* ===== ESTILOS DA TELA DE LOGIN ===== */
@@ -83,6 +83,8 @@
         label {display: block; margin-bottom: 5px; font-weight: 500; color: #555;}
         input {padding: 8px 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;}
         input[type="number"] {width: 80px;}
+        input[type="file"] {padding: 6px; font-size: 13px; border: 1px dashed #27ae60; background: #f8f9fa;}
+        .foto-preview {width: 45px; height: 45px; border-radius: 50%; object-fit: cover; border: 2px solid #ddd;}
         button {background-color: #27ae60; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; font-size: 14px; margin-top: 8px; margin-right: 8px; transition: background 0.2s;}
         button:hover {background-color: #219653;}
         .btn-vermelho {background-color: #e74c3c;}
@@ -153,6 +155,7 @@
             <table id="tabelaInscritos">
                 <thead>
                     <tr>
+                        <th>Foto</th>
                         <th>ID</th>
                         <th>Nome</th>
                         <th id="colunaDataCabecalho">Data Nasc.</th>
@@ -161,7 +164,7 @@
                     </tr>
                 </thead>
                 <tbody id="lista_inscricoes">
-                    <tr><td colspan="5" style="text-align: center; color: #888;">Carregando...</td></tr>
+                    <tr><td colspan="6" style="text-align: center; color: #888;">Carregando...</td></tr>
                 </tbody>
             </table>
 
@@ -171,7 +174,7 @@
         </div>
 
 
-        <!-- ✅ CADASTRO EMBAIXO -->
+        <!-- ✅ CADASTRO COM CAMPO DE FOTO ADICIONADO -->
         <div class="secao">
             <h2>📝 Cadastrar Nova Pessoa</h2>
             <div class="grupo-campo">
@@ -183,6 +186,11 @@
                 <input type="number" id="cad_dia" min="1" max="31" placeholder="Dia">
                 <label style="margin-left: 10px;">Mês de Nascimento:</label>
                 <input type="number" id="cad_mes" min="1" max="12" placeholder="Mês">
+            </div>
+            <!-- ✅ NOVO CAMPO: ENVIAR FOTO DE PERFIL -->
+            <div class="grupo-campo">
+                <label>📸 Foto de Perfil (opcional):</label>
+                <input type="file" id="cad_foto" accept="image/*">
             </div>
             <button onclick="cadastrarPessoa()">Cadastrar</button>
             <div id="msg_cadastro" class="resultado" style="display: none;"></div>
@@ -207,9 +215,10 @@
 
         firebase.initializeApp(firebaseConfig);
         var db = firebase.database();
+        var storage = firebase.storage(); // ✅ INICIALIZA O ARMAZENAMENTO DE FOTOS
         var dataVisivel = true;
         const LIMITE_MAXIMO = 16;
-        let quantidadeAnterior = 0; // Para detectar quando há nova confirmação
+        let quantidadeAnterior = 0;
 
         // ===== FUNÇÃO DE LOGIN =====
         function fazerLogin() {
@@ -220,10 +229,7 @@
             if (usuario === "cupedition" && senha === "campimfc") {
                 document.getElementById('telaLogin').style.display = 'none';
                 document.getElementById('conteudoPrincipal').style.display = 'block';
-                
-                // ✅ INICIA A ATUALIZAÇÃO AUTOMÁTICA EM TEMPO REAL
                 iniciarAtualizacaoAutomatica();
-
             } else {
                 mensagemErro.style.display = 'block';
                 document.getElementById('senhaLogin').value = '';
@@ -244,10 +250,12 @@
             }
         }
 
+        // ✅ FUNÇÃO DE CADASTRO ATUALIZADA COM UPLOAD DE FOTO
         function cadastrarPessoa() {
             var nome = document.getElementById('cad_nome').value.trim();
             var dia = parseInt(document.getElementById('cad_dia').value);
             var mes = parseInt(document.getElementById('cad_mes').value);
+            var fotoArquivo = document.getElementById('cad_foto').files[0];
             var msg = document.getElementById('msg_cadastro');
 
             if (!nome || !dia || !mes || dia < 1 || dia > 31 || mes < 1 || mes > 12) {
@@ -261,15 +269,57 @@
                 var inscricoes = snap.val() || [];
                 var novoId = inscricoes.length > 0 ? Math.max(...inscricoes.map(i => i.id)) + 1 : 1;
                 
-                inscricoes.push({id: novoId, nome: nome, dia: dia, mes: mes, status: 'pendente'});
+                // ✅ SE TIVER FOTO, FAZ UPLOAD PRIMEIRO
+                if (fotoArquivo) {
+                    var nomeArquivo = 'perfil_' + novoId + '_' + Date.now();
+                    var referenciaFoto = storage.ref('fotos_perfil/' + nomeArquivo);
+                    
+                    msg.className = 'resultado sucesso';
+                    msg.innerText = '⏳ Enviando foto...';
+                    msg.style.display = 'block';
+
+                    referenciaFoto.put(fotoArquivo).then(snapshot => {
+                        return snapshot.ref.getDownloadURL();
+                    }).then(urlFoto => {
+                        salvarCadastro(novoId, nome, dia, mes, urlFoto);
+                    }).catch(erro => {
+                        msg.className = 'resultado erro';
+                        msg.innerText = '❌ Erro ao enviar foto: ' + erro.message;
+                        msg.style.display = 'block';
+                    });
+
+                } else {
+                    // ✅ SEM FOTO: SALVA DIRETO
+                    salvarCadastro(novoId, nome, dia, mes, null);
+                }
+            });
+        }
+
+        // ✅ FUNÇÃO AUXILIAR PARA SALVAR OS DADOS NO BANCO
+        function salvarCadastro(id, nome, dia, mes, urlFoto) {
+            var msg = document.getElementById('msg_cadastro');
+
+            db.ref('inscricoes').once('value').then(snap => {
+                var inscricoes = snap.val() || [];
+                
+                inscricoes.push({
+                    id: id,
+                    nome: nome,
+                    dia: dia,
+                    mes: mes,
+                    status: 'pendente',
+                    foto: urlFoto || '' // Salva link da foto ou vazio
+                });
                 
                 db.ref('inscricoes').set(inscricoes).then(() => {
                     msg.className = 'resultado sucesso';
                     msg.innerText = '✅ Cadastro realizado com sucesso!';
                     msg.style.display = 'block';
+                    // LIMPA CAMPOS
                     document.getElementById('cad_nome').value = '';
                     document.getElementById('cad_dia').value = '';
                     document.getElementById('cad_mes').value = '';
+                    document.getElementById('cad_foto').value = '';
                     setTimeout(() => msg.style.display = 'none', 4000);
                 });
             });
@@ -279,6 +329,12 @@
             if (confirm('Tem certeza que deseja excluir?')) {
                 db.ref('inscricoes').once('value').then(snap => {
                     var lista = snap.val() || [];
+                    var item = lista.find(i => i && i.id === id);
+                    // ✅ SE TIVER FOTO, APAGA TAMBÉM DO STORAGE
+                    if (item && item.foto) {
+                        var refFoto = storage.refFromURL(item.foto);
+                        refFoto.delete().catch(()=>{}); // ignora erro se já não existir
+                    }
                     var novaLista = lista.filter(insc => insc && insc.id !== id);
                     db.ref('inscricoes').set(novaLista);
                 });
@@ -286,9 +342,18 @@
         }
 
         function limparTodasInscricoes() {
-            if (confirm('⚠️ ATENÇÃO: Isso apagARÁ TODOS os cadastros! Tem certeza?')) {
-                db.ref('inscricoes').remove();
-                alert('Todos os dados foram apagados!');
+            if (confirm('⚠️ ATENÇÃO: Isso apagARÁ TODOS os cadastros e fotos! Tem certeza?')) {
+                db.ref('inscricoes').once('value').then(snap => {
+                    var lista = snap.val() || [];
+                    // ✅ APAGA TODAS AS FOTOS ANTES
+                    lista.forEach(item => {
+                        if (item && item.foto) {
+                            storage.refFromURL(item.foto).delete().catch(()=>{});
+                        }
+                    });
+                    db.ref('inscricoes').remove();
+                    alert('Todos os dados e fotos foram apagados!');
+                });
             }
         }
 
@@ -298,10 +363,7 @@
                     var lista = snap.val() || [];
                     lista = lista.map(insc => { if(insc) insc.status = 'pendente'; return insc; });
                     db.ref('inscricoes').set(lista);
-                    
-                    // 🔓 REABRE AS INSCRIÇÕES
                     db.ref('configuracao').set({inscricoes_abertas: true});
-                    
                     alert('✅ Todos voltaram para pendentes e inscrições foram REABERTAS!');
                 });
             }
@@ -318,22 +380,16 @@
             });
         }
 
-        // ✅ FUNÇÃO CORRIGIDA: Oculta apenas a coluna de data
         function alternarVisibilidadeData() {
             dataVisivel = !dataVisivel;
             var botao = document.querySelector('.btn-ocultar-coluna');
             var cabecalho = document.getElementById('colunaDataCabecalho');
-            
             cabecalho.style.display = dataVisivel ? '' : 'none';
             botao.innerText = dataVisivel ? '🙈 Ocultar Data Nasc.' : '👁️ Mostrar Data Nasc.';
-
-            var celulasData = document.querySelectorAll('td:nth-child(3)');
-            celulasData.forEach(celula => {
-                celula.style.display = dataVisivel ? '' : 'none';
-            });
+            var celulasData = document.querySelectorAll('td:nth-child(4)'); // ✅ AGORA DATA É COLUNA 4
+            celulasData.forEach(celula => { celula.style.display = dataVisivel ? '' : 'none'; });
         }
 
-        // ✅ FUNÇÃO PRINCIPAL: ATUALIZA A LISTA
         function atualizarLista(dados) {
             let inscricoes = dados ? dados.val() || [] : [];
             processarLista(inscricoes);
@@ -343,7 +399,7 @@
             var tabela = document.getElementById('lista_inscricoes');
 
             if (inscricoes.length === 0 || !inscricoes[0]) {
-                tabela.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #888;">Nenhuma inscrição cadastrada ainda.</td></tr>';
+                tabela.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #888;">Nenhuma inscrição cadastrada ainda.</td></tr>';
                 document.getElementById('contadorConfirmados').innerText = `✅ 0 confirmados | Restam 16 vagas (Limite: 16)`;
                 quantidadeAnterior = 0;
                 verificarLimiteConfirmados(0);
@@ -365,13 +421,15 @@
             quantidadeAnterior = qtdConfirmados;
 
             document.getElementById('contadorConfirmados').innerText = `✅ ${qtdConfirmados} confirmados | Restam ${vagasRestantes} vagas (Limite: 16)`;
-            
             verificarLimiteConfirmados(qtdConfirmados);
 
             tabela.innerHTML = '';
             listaOrdenada.forEach(insc => {
                 var linha = document.createElement('tr');
                 linha.innerHTML = `
+                    <td>
+                        ${insc.foto ? `<img src="${insc.foto}" class="foto-preview" alt="foto">` : '📄'}
+                    </td>
                     <td>${insc.id}</td>
                     <td>${insc.nome}</td>
                     <td style="display: ${dataVisivel ? '' : 'none'};">${insc.dia}/${insc.mes}</td>
@@ -387,15 +445,11 @@
         function mostrarAvisoNovaConfirmacao() {
             const aviso = document.getElementById('avisoNovaConfirmacao');
             aviso.style.display = 'block';
-            setTimeout(() => {
-                aviso.style.display = 'none';
-            }, 4000);
+            setTimeout(() => { aviso.style.display = 'none'; }, 4000);
         }
 
         function iniciarAtualizacaoAutomatica() {
-            db.ref('inscricoes').on('value', function(dados) {
-                atualizarLista(dados);
-            });
+            db.ref('inscricoes').on('value', function(dados) { atualizarLista(dados); });
         }
     </script>
 
