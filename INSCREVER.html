@@ -51,8 +51,9 @@
 
             <div class="grupo-campo">
                 <label>Data de Nascimento</label>
-                <input type="number" id="ver_dia" min="1" max="31" placeholder="Dia">
-                <input type="number" id="ver_mes" min="1" max="12" placeholder="Mês">
+                <!-- ✅ ADICIONADO: maxLength="2" e função para limitar dígitos -->
+                <input type="number" id="ver_dia" min="1" max="31" placeholder="Dia" maxlength="2" oninput="limitarDigitos(this, 2)">
+                <input type="number" id="ver_mes" min="1" max="12" placeholder="Mês" maxlength="2" oninput="limitarDigitos(this, 2)">
             </div>
 
             <button id="botaoConfirmar" onclick="confirmarInscricao()">CONFIRMAR INSCRIÇÃO</button>
@@ -84,6 +85,13 @@
             carregarListaNomes();
             setInterval(verificarStatusSistema, 3000);
         };
+
+        // ✅ NOVA FUNÇÃO: Limita a quantidade de dígitos no campo
+        function limitarDigitos(campo, maximo) {
+            if (campo.value.length > maximo) {
+                campo.value = campo.value.slice(0, maximo);
+            }
+        }
 
         function carregarListaNomes() {
             db.ref('inscricoes').once('value').then(snap => {
