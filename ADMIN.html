@@ -4,11 +4,73 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Painel Administrativo - Sistema de Inscrições</title>
-    <!-- VERSÃO CORRIGIDA DO FIREBASE -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase.js"></script>
     <style>
         * {margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif;}
         body {background-color: #f0f4f8; padding: 20px; max-width: 900px; margin: 0 auto;}
+
+        /* ===== ESTILOS DA TELA DE LOGIN ===== */
+        #telaLogin {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.85);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+        .caixa-login {
+            background: white;
+            padding: 40px 30px;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+            width: 100%;
+            max-width: 350px;
+            text-align: center;
+        }
+        .caixa-login h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 20px;
+            display: flex;
+            justify-content: center;
+        }
+        .caixa-login input {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 15px;
+        }
+        .caixa-login button {
+            width: 100%;
+            padding: 12px;
+            background-color: #27ae60;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: background 0.2s;
+        }
+        .caixa-login button:hover {
+            background-color: #219653;
+        }
+        .errologin {
+            color: #e74c3c;
+            font-size: 14px;
+            margin-top: 10px;
+            display: none;
+            font-weight: bold;
+        }
+
+        /* ===== ESTILOS DO SISTEMA (JÁ EXISTENTES) ===== */
         h1 {color: #2c3e50; text-align: center; margin-bottom: 10px;}
         .aviso-link {text-align: center; background: #e3f2fd; padding: 10px; border-radius: 8px; margin-bottom: 30px; color: #0d47a1;}
         .secao {background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 25px;}
@@ -42,77 +104,96 @@
         .status-sistema {padding: 8px 12px; border-radius: 4px; font-weight: bold; font-size: 14px; display: inline-block; margin-bottom: 15px;}
         .aberto {background-color: #d4edda; color: #155724;}
         .fechado {background-color: #f8d7da; color: #721c24;}
+        
+        /* Esconde todo o conteúdo principal até logar */
+        #conteudoPrincipal {
+            display: none;
+        }
     </style>
 </head>
 <body>
 
-    <h1>🔐 Painel Administrativo</h1>
-    <div class="aviso-link">
-        <p>Envie a página <strong>inscrever.html</strong> para as pessoas se cadastrarem/confirmarem.</p>
-    </div>
-
-    <div class="secao">
-        <h2>⚙️ Controle do Sistema</h2>
-        <div id="statusAtual" class="status-sistema"></div>
-        <button id="botaoBloquear" class="btn-roxo" onclick="alternarStatusInscricoes()"></button>
-    </div>
-
-    <div class="secao">
-        <h2>📝 Cadastrar Nova Pessoa</h2>
-        <div class="grupo-campo">
-            <label>Nome Completo:</label>
-            <input type="text" id="cad_nome" placeholder="Digite o nome">
+    <!-- ===== TELA DE LOGIN (BLOQUEIO) ===== -->
+    <div id="telaLogin">
+        <div class="caixa-login">
+            <h2>🔐 ACESSO RESTRITO</h2>
+            <input type="text" id="usuarioLogin" placeholder="Usuário" required>
+            <input type="password" id="senhaLogin" placeholder="Senha" required>
+            <button onclick="fazerLogin()">ENTRAR</button>
+            <div class="errologin" id="mensagemErro">Usuário ou senha incorretos!</div>
         </div>
-        <div class="grupo-campo">
-            <label>Dia de Nascimento:</label>
-            <input type="number" id="cad_dia" min="1" max="31" placeholder="Dia">
-            <label style="margin-left: 10px;">Mês de Nascimento:</label>
-            <input type="number" id="cad_mes" min="1" max="12" placeholder="Mês">
-        </div>
-        <button onclick="cadastrarPessoa()">Cadastrar</button>
-        <div id="msg_cadastro" class="resultado" style="display: none;"></div>
     </div>
 
-    <div class="secao">
-        <h2>
-            📊 Lista de Inscrições 
-            <small>(Confirmados primeiro, depois pendentes - ambos em ordem alfabética)</small>
-            <span id="contadorConfirmados" class="contador-confirmados"></span>
-            <div style="display: flex; align-items: center; gap: 8px;">
-                <button class="btn-ocultar-coluna" onclick="alternarVisibilidadeData()">🙈 Ocultar Data Nasc.</button>
-                <button class="btn-copiar" onclick="copiarNomesConfirmados()">📋 Copiar Nomes Confirmados</button>
-                <span class="mensagem-copia" id="msgCopia">Copiado!</span>
+    <!-- ===== CONTEÚDO DO SISTEMA (SÓ APARECE SE LOGAR) ===== -->
+    <div id="conteudoPrincipal">
+        <h1>🔐 Painel Administrativo</h1>
+        <div class="aviso-link">
+            <p>Envie a página <strong>inscrever.html</strong> para as pessoas se cadastrarem/confirmarem.</p>
+        </div>
+
+        <div class="secao">
+            <h2>⚙️ Controle do Sistema</h2>
+            <div id="statusAtual" class="status-sistema"></div>
+            <button id="botaoBloquear" class="btn-roxo" onclick="alternarStatusInscricoes()"></button>
+        </div>
+
+        <div class="secao">
+            <h2>📝 Cadastrar Nova Pessoa</h2>
+            <div class="grupo-campo">
+                <label>Nome Completo:</label>
+                <input type="text" id="cad_nome" placeholder="Digite o nome">
             </div>
-        </h2>
-        
-        <div style="margin-bottom: 15px;">
-            <button class="btn-amarelo" onclick="voltarTodosParaPendente()">🔄 Voltar Todos para Pendentes</button>
+            <div class="grupo-campo">
+                <label>Dia de Nascimento:</label>
+                <input type="number" id="cad_dia" min="1" max="31" placeholder="Dia">
+                <label style="margin-left: 10px;">Mês de Nascimento:</label>
+                <input type="number" id="cad_mes" min="1" max="12" placeholder="Mês">
+            </div>
+            <button onclick="cadastrarPessoa()">Cadastrar</button>
+            <div id="msg_cadastro" class="resultado" style="display: none;"></div>
         </div>
 
-        <table id="tabelaInscritos">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Nome</th>
-                    <th id="colunaDataCabecalho">Data Nasc.</th>
-                    <th>Status</th>
-                    <th>Ações</th>
-                </tr>
-            </thead>
-            <tbody id="lista_inscricoes">
-                <tr><td colspan="5" style="text-align: center; color: #888;">Carregando...</td></tr>
-            </tbody>
-        </table>
+        <div class="secao">
+            <h2>
+                📊 Lista de Inscrições 
+                <small>(Confirmados primeiro, depois pendentes - ambos em ordem alfabética)</small>
+                <span id="contadorConfirmados" class="contador-confirmados"></span>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <button class="btn-ocultar-coluna" onclick="alternarVisibilidadeData()">🙈 Ocultar Data Nasc.</button>
+                    <button class="btn-copiar" onclick="copiarNomesConfirmados()">📋 Copiar Nomes Confirmados</button>
+                    <span class="mensagem-copia" id="msgCopia">Copiado!</span>
+                </div>
+            </h2>
+            
+            <div style="margin-bottom: 15px;">
+                <button class="btn-amarelo" onclick="voltarTodosParaPendente()">🔄 Voltar Todos para Pendentes</button>
+            </div>
 
-        <div class="area-limpar-tudo">
-            <button class="btn-vermelho" onclick="limparTodasInscricoes()">🗑️ Limpar Todas as Inscrições</button>
+            <table id="tabelaInscritos">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nome</th>
+                        <th id="colunaDataCabecalho">Data Nasc.</th>
+                        <th>Status</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="lista_inscricoes">
+                    <tr><td colspan="5" style="text-align: center; color: #888;">Carregando...</td></tr>
+                </tbody>
+            </table>
+
+            <div class="area-limpar-tudo">
+                <button class="btn-vermelho" onclick="limparTodasInscricoes()">🗑️ Limpar Todas as Inscrições</button>
+            </div>
         </div>
     </div>
 
     <script>
         // 👇 COLE AQUI SEU CÓDIGO DO FIREBASE 👇
         var firebaseConfig = {
-          // COLE SEU CÓDIGO AQUI MESMO, SUBSTITUINDO ESTE EXEMPLO
+          // COLE SEU CÓDIGO AQUI MESMO
           apiKey: "AIzaSyAR--VWkuPUBzKtJlEHPXnwBwbapB8JY_w",
   authDomain: "sistema-inscricoes-e9241.firebaseapp.com",
   databaseURL: "https://sistema-inscricoes-e9241-default-rtdb.firebaseio.com",
@@ -123,15 +204,36 @@
 };
         // 👆 FIM DO CÓDIGO 👆
 
-        // INICIALIZAÇÃO CORRETA
         firebase.initializeApp(firebaseConfig);
         var db = firebase.database();
         var dataVisivel = true;
 
-        window.onload = function() {
-            atualizarLista();
-            atualizarInterfaceStatus();
-        };
+        // ===== FUNÇÃO DE LOGIN =====
+        function fazerLogin() {
+            const usuario = document.getElementById('usuarioLogin').value.trim();
+            const senha = document.getElementById('senhaLogin').value.trim();
+            const mensagemErro = document.getElementById('mensagemErro');
+
+            // AQUI ESTÃO OS DADOS QUE VOCÊ PEDIU
+            if (usuario === "cupedition" && senha === "campimfc") {
+                // Login correto: esconde a tela de login e mostra o sistema
+                document.getElementById('telaLogin').style.display = 'none';
+                document.getElementById('conteudoPrincipal').style.display = 'block';
+                // Carrega os dados após logar
+                atualizarLista();
+                atualizarInterfaceStatus();
+            } else {
+                // Login errado: mostra mensagem
+                mensagemErro.style.display = 'block';
+                // Limpa os campos
+                document.getElementById('senhaLogin').value = '';
+            }
+        }
+
+        // Permite pressionar ENTER para logar
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') fazerLogin();
+        });
 
         function alternarStatusInscricoes() {
             db.ref('configuracao/inscricoes_abertas').once('value').then(snap => {
@@ -254,7 +356,6 @@
                     return;
                 }
 
-                // ORDEM ALFABÉTICA + CONFIRMADOS PRIMEIRO
                 var listaOrdenada = inscricoes.filter(Boolean).sort((a, b) => {
                     if (a.status === 'confirmado' && b.status !== 'confirmado') return -1;
                     if (a.status !== 'confirmado' && b.status === 'confirmado') return 1;
