@@ -91,8 +91,8 @@
         .btn-amarelo:hover {background-color: #e67e22;}
         .btn-roxo {background-color: #9b59b6;}
         .btn-roxo:hover {background-color: #8e44ad;}
-        .btn-copiar, .btn-ocultar-coluna {background-color: #9b59b6; padding: 5px 10px; font-size: 12px; border-radius: 4px;}
-        .btn-copiar:hover, .btn-ocultar-coluna:hover {background-color: #8e44ad;}
+        .btn-copiar, .btn-ocultar-coluna, .btn-sorteio {background-color: #9b59b6; padding: 5px 10px; font-size: 12px; border-radius: 4px;}
+        .btn-copiar:hover, .btn-ocultar-coluna:hover, .btn-sorteio:hover {background-color: #8e44ad;}
         .btn-editar {background-color: #3498db; padding: 4px 8px; font-size: 12px;}
         .btn-editar:hover {background-color: #2980b9;}
         .btn-pendente {background-color: #f39c12; padding: 4px 8px; font-size: 12px;}
@@ -102,7 +102,7 @@
         .sucesso {background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb;}
         .erro {background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb;}
         table {width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 14px;}
-        th, td {padding: 10px; text-align: left; border-bottom: 1px solid #eee;}
+        th, td {padding: 10px 10px; text-align: left; border-bottom: 1px solid #eee;}
         th {background-color: #f8f9fa; color: #333;}
         .status-pendente {color: #f39c12; font-weight: bold;}
         .status-confirmado {color: #27ae60; font-weight: bold;}
@@ -162,7 +162,7 @@
         </div>
     </div>
 
-    <!-- ✅ MODAL DE EDIÇÃO -->
+    <!-- ✅ MODAL DE EDIÇÃO (EXCLUIR DENTRO DAQUI) -->
     <div id="modalEditar">
         <div class="caixa-editar">
             <h3>📝 Editar Cadastro <span id="editId"></span></h3>
@@ -210,10 +210,13 @@
                 <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
                     <button class="btn-ocultar-coluna" onclick="alternarVisibilidadeData()">🙈 Ocultar Data Nasc.</button>
                     <button class="btn-copiar" onclick="copiarNomesConfirmados()">📋 Copiar Nomes Confirmados</button>
+                    <!-- ✅ NOVO BOTÃO ADICIONADO AQUI -->
+                    <button class="btn-sorteio" onclick="window.open('https://endrilsilva.github.io/sorteio-nomes/SORTEIO.html', '_blank')">🎰 Site de Sorteio</button>
                     <span class="mensagem-copia" id="msgCopia">Copiado!</span>
                 </div>
             </h2>
             
+            <!-- ✅ BOTÃO DE VOLTAR TODOS CONTINUA AQUI -->
             <div style="margin-bottom: 15px;">
                 <button class="btn-amarelo" onclick="voltarTodosParaPendente()">🔄 Voltar Todos para Pendentes</button>
             </div>
@@ -261,15 +264,16 @@
     </div>
 
     <script>
+        // ✅ SEUS DADOS DO FIREBASE - IGUAL AO OUTRO
         var firebaseConfig = {
           apiKey: "AIzaSyAR--VWkuPUBzKtJlEHPXnwBwbapB8JY_w",
-  authDomain: "sistema-inscricoes-e9241.firebaseapp.com",
-  databaseURL: "https://sistema-inscricoes-e9241-default-rtdb.firebaseio.com",
-  projectId: "sistema-inscricoes-e9241",
-  storageBucket: "sistema-inscricoes-e9241.firebasestorage.app",
-  messagingSenderId: "232618438422",
-  appId: "1:232618438422:web:1c62103b2169e64e862a37"
-};
+          authDomain: "sistema-inscricoes-e9241.firebaseapp.com",
+          databaseURL: "https://sistema-inscricoes-e9241-default-rtdb.firebaseio.com",
+          projectId: "sistema-inscricoes-e9241",
+          storageBucket: "sistema-inscricoes-e9241.firebasestorage.app",
+          messagingSenderId: "232618438422",
+          appId: "1:232618438422:web:1c62103b2169e64e862a37"
+        };
 
         firebase.initializeApp(firebaseConfig);
         var db = firebase.database();
@@ -298,23 +302,21 @@
             if (e.key === 'Enter') fazerLogin();
         });
 
-        // ✅ REGRA NOVA: BLOQUEIA SOMENTE QUANDO VAGAS = 0
+        // ✅ REGRA: SÓ BLOQUEIA QUANDO 0 VAGAS
         function verificarLimiteConfirmados(qtd) {
             const aviso = document.getElementById('avisoLimite');
             const vagasRestantes = LIMITE_MAXIMO - qtd;
             
-            // Só fecha inscrições quando SOBRAR 0 vagas
             if (vagasRestantes === 0) {
                 db.ref('configuracao').set({inscricoes_abertas: false});
                 aviso.style.display = 'block';
             } else {
-                // Se tiver 1 ou mais vagas, deixa aberto
                 db.ref('configuracao').set({inscricoes_abertas: true});
                 aviso.style.display = 'none';
             }
         }
 
-        // ✅ CONVERTER FOTO PARA TEXTO
+        // ✅ CONVERTER FOTO PARA TEXTO (SEM PRECISAR DE STORAGE)
         function lerFotoComoTexto(arquivo, callback) {
             if (!arquivo) { callback(null); return; }
             var leitor = new FileReader();
@@ -442,7 +444,7 @@
             });
         }
 
-        // ✅ EXCLUIR CADASTRO
+        // ✅ EXCLUIR CADASTRO (DENTRO DA EDIÇÃO)
         function excluirCadastro() {
             if (confirm('⚠️ Tem certeza que deseja EXCLUIR este cadastro? Essa ação não pode ser desfeita!')) {
                 db.ref('inscricoes').once('value').then(snap => {
@@ -455,7 +457,7 @@
             }
         }
 
-        // ✅ FUNÇÃO: VOLTAR APENAS UM CADASTRO PARA PENDENTE
+        // ✅ BOTÃO INDIVIDUAL: VOLTAR APENAS UM PARA PENDENTE
         function voltarUmParaPendente(id) {
             db.ref('inscricoes').once('value').then(snap => {
                 var lista = snap.val() || [];
@@ -476,7 +478,7 @@
             }
         }
 
-        // ✅ FUNÇÃO ORIGINAL - NÃO ALTERADA
+        // ✅ BOTÃO GERAL: VOLTAR TODOS PARA PENDENTE (ORIGINAL)
         function voltarTodosParaPendente() {
             if (confirm('⚠️ Isso irá mudAR TODOS para Pendente e reabrir as inscrições. Deseja continuar?')) {
                 db.ref('inscricoes').once('value').then(snap => {
@@ -555,6 +557,7 @@
                     <td style="display: ${dataVisivel ? '' : 'none'};">${insc.dia}/${insc.mes}</td>
                     <td class="status-${insc.status}">${insc.status === 'pendente' ? 'PENDENTE' : 'CONFIRMADO'}</td>
                     <td class="acoes-tabela">
+                        <!-- ✅ BOTÃOZINHO DE VOLTAR INDIVIDUAL -->
                         <button class="btn-pendente" onclick="voltarUmParaPendente(${insc.id})" title="Voltar para Pendente">🔄</button>
                         <button class="btn-editar" onclick="abrirEdicao(${insc.id})">📝 Editar</button>
                     </td>
