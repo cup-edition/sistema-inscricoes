@@ -131,7 +131,7 @@
         <div id="avisoNovaConfirmacao">🎉 NOVA INSCRIÇÃO CONFIRMADA!</div>
 
 
-        <!-- ✅ AGORA ESSA SEÇÃO ESTÁ NO TOPO -->
+        <!-- ✅ LISTA NO TOPO -->
         <div class="secao">
             <h2>
                 📊 Lista de Inscrições 
@@ -170,7 +170,7 @@
         </div>
 
 
-        <!-- ✅ AGORA ESSA SEÇÃO ESTÁ EMBAIXO -->
+        <!-- ✅ CADASTRO EMBAIXO -->
         <div class="secao">
             <h2>📝 Cadastrar Nova Pessoa</h2>
             <div class="grupo-campo">
@@ -317,17 +317,15 @@
             });
         }
 
-        // ✅ FUNÇÃO CORRIGIDA: Agora só oculta/mostra a COLUNA da data, não os cadastros
+        // ✅ FUNÇÃO CORRIGIDA: Oculta apenas a coluna de data
         function alternarVisibilidadeData() {
             dataVisivel = !dataVisivel;
             var botao = document.querySelector('.btn-ocultar-coluna');
             var cabecalho = document.getElementById('colunaDataCabecalho');
             
-            // Altera visibilidade do cabeçalho
             cabecalho.style.display = dataVisivel ? '' : 'none';
             botao.innerText = dataVisivel ? '🙈 Ocultar Data Nasc.' : '👁️ Mostrar Data Nasc.';
 
-            // Altera visibilidade de TODAS as células de data na tabela
             var celulasData = document.querySelectorAll('td:nth-child(3)');
             celulasData.forEach(celula => {
                 celula.style.display = dataVisivel ? '' : 'none';
@@ -360,13 +358,11 @@
             var qtdConfirmados = listaOrdenada.filter(i => i.status === 'confirmado').length;
             var vagasRestantes = LIMITE_MAXIMO - qtdConfirmados;
 
-            // ✅ SE HOUVE NOVA CONFIRMAÇÃO, MOSTRA O AVISO
             if (qtdConfirmados > quantidadeAnterior) {
                 mostrarAvisoNovaConfirmacao();
             }
             quantidadeAnterior = qtdConfirmados;
 
-            // ✅ Contador atualizado automaticamente
             document.getElementById('contadorConfirmados').innerText = `✅ ${qtdConfirmados} confirmados | Restam ${vagasRestantes} vagas (Limite: 16)`;
             
             verificarLimiteConfirmados(qtdConfirmados);
@@ -378,7 +374,7 @@
                     <td>${insc.id}</td>
                     <td>${insc.nome}</td>
                     <td style="display: ${dataVisivel ? '' : 'none'};">${insc.dia}/${insc.mes}</td>
-                    <td class="status-${insc.status}">${insc.status === 'pendente' ? 'Pendente' : 'Confirmada'}</td>
+                    <td class="status-${insc.status}">${insc.status === 'pendente' ? 'PENDENTE' : 'CONFIRMADO'}</td>
                     <td class="acoes-tabela">
                         <button class="btn-vermelho" onclick="apagarInscricao(${insc.id})">Excluir</button>
                     </td>
@@ -387,19 +383,15 @@
             });
         }
 
-        // ✅ NOVA FUNÇÃO: EXIBE E OCULTA O AVISO
         function mostrarAvisoNovaConfirmacao() {
             const aviso = document.getElementById('avisoNovaConfirmacao');
             aviso.style.display = 'block';
-            // Esconde após 4 segundos
             setTimeout(() => {
                 aviso.style.display = 'none';
             }, 4000);
         }
 
-        // ✅ NOVA FUNÇÃO: FICA OLHANDO O BANCO DE DADOS SEM PARAR
         function iniciarAtualizacaoAutomatica() {
-            // Sempre que houver alteração, atualiza na hora
             db.ref('inscricoes').on('value', function(dados) {
                 atualizarLista(dados);
             });
