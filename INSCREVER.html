@@ -51,7 +51,6 @@
 
             <div class="grupo-campo">
                 <label>Data de Nascimento</label>
-                <!-- ✅ ADICIONADO: maxLength="2" e função para limitar dígitos -->
                 <input type="number" id="ver_dia" min="1" max="31" placeholder="Dia" maxlength="2" oninput="limitarDigitos(this, 2)">
                 <input type="number" id="ver_mes" min="1" max="12" placeholder="Mês" maxlength="2" oninput="limitarDigitos(this, 2)">
             </div>
@@ -86,7 +85,7 @@
             setInterval(verificarStatusSistema, 3000);
         };
 
-        // ✅ NOVA FUNÇÃO: Limita a quantidade de dígitos no campo
+        // Função para limitar a quantidade de dígitos
         function limitarDigitos(campo, maximo) {
             if (campo.value.length > maximo) {
                 campo.value = campo.value.slice(0, maximo);
@@ -179,8 +178,9 @@
                     carregarListaNomes();
                     verificarStatusSistema();
                 } else {
+                    // ✅ TEXTO ALTERADO AQUI CONFORME SEU PEDIDO
                     msg.className = 'resultado erro';
-                    msg.innerText = '❌ Dados não conferem ou já foi confirmada.';
+                    msg.innerText = '❌ DADOS INCORRETOS COM A BASE DE DADOS';
                     msg.style.display = 'block';
                 }
             });
