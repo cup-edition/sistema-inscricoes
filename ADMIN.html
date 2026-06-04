@@ -7,7 +7,6 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase.js"></script>
     <style>
         * {margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif;}
-        /* ✅ FUNDO CINZA ESCURO */
         body {background-color: #343a40; padding: 20px; max-width: 900px; margin: 0 auto;}
 
         /* ===== ESTILOS DA TELA DE LOGIN ===== */
@@ -55,7 +54,6 @@
         h1 {color: #f8f9fa; text-align: center; margin-bottom: 10px;}
         .aviso-link {background: #495057; padding: 10px; border-radius: 8px; margin-bottom: 30px; color: #ffffff;}
         
-        /* ✅ ESTILO DO AVISO DE NOVA CONFIRMAÇÃO */
         #avisoNovaConfirmacao {
             background-color: #d4edda;
             color: #155724;
@@ -112,7 +110,6 @@
 </head>
 <body>
 
-    <!-- ===== TELA DE LOGIN (BLOQUEIO) ===== -->
     <div id="telaLogin">
         <div class="caixa-login">
             <h2>🔐 ACESSO RESTRITO</h2>
@@ -123,18 +120,14 @@
         </div>
     </div>
 
-    <!-- ===== CONTEÚDO DO SISTEMA ===== -->
     <div id="conteudoPrincipal">
         <h1>🔐 Painel Administrativo</h1>
         <div class="aviso-link">
             <p>Envie a página <strong>inscrever.html</strong> para as pessoas se cadastrarem/confirmarem.</p>
         </div>
 
-        <!-- ✅ AVISO DE NOVA CONFIRMAÇÃO -->
         <div id="avisoNovaConfirmacao">🎉 NOVA INSCRIÇÃO CONFIRMADA!</div>
 
-
-        <!-- ✅ LISTA NO TOPO -->
         <div class="secao">
             <h2>
                 📊 Lista de Inscrições 
@@ -173,8 +166,6 @@
             </div>
         </div>
 
-
-        <!-- ✅ CADASTRO COM CAMPO DE FOTO ADICIONADO -->
         <div class="secao">
             <h2>📝 Cadastrar Nova Pessoa</h2>
             <div class="grupo-campo">
@@ -187,7 +178,7 @@
                 <label style="margin-left: 10px;">Mês de Nascimento:</label>
                 <input type="number" id="cad_mes" min="1" max="12" placeholder="Mês">
             </div>
-            <!-- ✅ NOVO CAMPO: ENVIAR FOTO DE PERFIL -->
+            <!-- CAMPO DE FOTO - AGORA SALVA DIRETO NO BANCO -->
             <div class="grupo-campo">
                 <label>📸 Foto de Perfil (opcional):</label>
                 <input type="file" id="cad_foto" accept="image/*">
@@ -195,14 +186,10 @@
             <button onclick="cadastrarPessoa()">Cadastrar</button>
             <div id="msg_cadastro" class="resultado" style="display: none;"></div>
         </div>
-
-
     </div>
 
     <script>
-        // 👇 COLE AQUI SEU CÓDIGO DO FIREBASE 👇
         var firebaseConfig = {
-          // COLE SEU CÓDIGO AQUI MESMO
           apiKey: "AIzaSyAR--VWkuPUBzKtJlEHPXnwBwbapB8JY_w",
   authDomain: "sistema-inscricoes-e9241.firebaseapp.com",
   databaseURL: "https://sistema-inscricoes-e9241-default-rtdb.firebaseio.com",
@@ -211,16 +198,14 @@
   messagingSenderId: "232618438422",
   appId: "1:232618438422:web:1c62103b2169e64e862a37"
 };
-        // 👆 FIM DO CÓDIGO 👆
 
         firebase.initializeApp(firebaseConfig);
         var db = firebase.database();
-        var storage = firebase.storage(); // ✅ INICIALIZA O ARMAZENAMENTO DE FOTOS
         var dataVisivel = true;
         const LIMITE_MAXIMO = 16;
         let quantidadeAnterior = 0;
 
-        // ===== FUNÇÃO DE LOGIN =====
+        // ===== LOGIN =====
         function fazerLogin() {
             const usuario = document.getElementById('usuarioLogin').value.trim();
             const senha = document.getElementById('senhaLogin').value.trim();
@@ -250,12 +235,36 @@
             }
         }
 
-        // ✅ FUNÇÃO DE CADASTRO ATUALIZADA COM UPLOAD DE FOTO
+        // ✅ FUNÇÃO PARA CONVERTER FOTO EM TEXTO (SEM PRECISAR DE STORAGE)
+        function lerFotoComoTexto(arquivo, callback) {
+            if (!arquivo) {
+                callback(null);
+                return;
+            }
+            var leitor = new FileReader();
+            leitor.onload = function(e) {
+                // Reduz o tamanho da imagem para não ficar muito grande no banco
+                var img = new Image();
+                img.onload = function() {
+                    var canvas = document.createElement('canvas');
+                    var tamanho = 100; // Tamanho pequeno, suficiente para perfil
+                    canvas.width = tamanho;
+                    canvas.height = tamanho;
+                    var ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, tamanho, tamanho);
+                    callback(canvas.toDataURL('image/jpeg', 0.7)); // Qualidade boa
+                };
+                img.src = e.target.result;
+            };
+            leitor.readAsDataURL(arquivo);
+        }
+
+        // ✅ CADASTRO ATUALIZADO - SALVA TUDO NO BANCO MESMO
         function cadastrarPessoa() {
             var nome = document.getElementById('cad_nome').value.trim();
             var dia = parseInt(document.getElementById('cad_dia').value);
             var mes = parseInt(document.getElementById('cad_mes').value);
-            var fotoArquivo = document.getElementById('cad_foto').files[0];
+            var arquivoFoto = document.getElementById('cad_foto').files[0];
             var msg = document.getElementById('msg_cadastro');
 
             if (!nome || !dia || !mes || dia < 1 || dia > 31 || mes < 1 || mes > 12) {
@@ -265,62 +274,36 @@
                 return;
             }
 
-            db.ref('inscricoes').once('value').then(snap => {
-                var inscricoes = snap.val() || [];
-                var novoId = inscricoes.length > 0 ? Math.max(...inscricoes.map(i => i.id)) + 1 : 1;
-                
-                // ✅ SE TIVER FOTO, FAZ UPLOAD PRIMEIRO
-                if (fotoArquivo) {
-                    var nomeArquivo = 'perfil_' + novoId + '_' + Date.now();
-                    var referenciaFoto = storage.ref('fotos_perfil/' + nomeArquivo);
+            msg.className = 'resultado sucesso';
+            msg.innerText = '⏳ Processando...';
+            msg.style.display = 'block';
+
+            // Converte foto e salva
+            lerFotoComoTexto(arquivoFoto, function(textoDaFoto) {
+                db.ref('inscricoes').once('value').then(snap => {
+                    var inscricoes = snap.val() || [];
+                    var novoId = inscricoes.length > 0 ? Math.max(...inscricoes.map(i => i.id)) + 1 : 1;
                     
-                    msg.className = 'resultado sucesso';
-                    msg.innerText = '⏳ Enviando foto...';
-                    msg.style.display = 'block';
-
-                    referenciaFoto.put(fotoArquivo).then(snapshot => {
-                        return snapshot.ref.getDownloadURL();
-                    }).then(urlFoto => {
-                        salvarCadastro(novoId, nome, dia, mes, urlFoto);
-                    }).catch(erro => {
-                        msg.className = 'resultado erro';
-                        msg.innerText = '❌ Erro ao enviar foto: ' + erro.message;
-                        msg.style.display = 'block';
+                    inscricoes.push({
+                        id: novoId,
+                        nome: nome,
+                        dia: dia,
+                        mes: mes,
+                        status: 'pendente',
+                        foto: textoDaFoto || "" // Salva a foto como texto
                     });
-
-                } else {
-                    // ✅ SEM FOTO: SALVA DIRETO
-                    salvarCadastro(novoId, nome, dia, mes, null);
-                }
-            });
-        }
-
-        // ✅ FUNÇÃO AUXILIAR PARA SALVAR OS DADOS NO BANCO
-        function salvarCadastro(id, nome, dia, mes, urlFoto) {
-            var msg = document.getElementById('msg_cadastro');
-
-            db.ref('inscricoes').once('value').then(snap => {
-                var inscricoes = snap.val() || [];
-                
-                inscricoes.push({
-                    id: id,
-                    nome: nome,
-                    dia: dia,
-                    mes: mes,
-                    status: 'pendente',
-                    foto: urlFoto || '' // Salva link da foto ou vazio
-                });
-                
-                db.ref('inscricoes').set(inscricoes).then(() => {
-                    msg.className = 'resultado sucesso';
-                    msg.innerText = '✅ Cadastro realizado com sucesso!';
-                    msg.style.display = 'block';
-                    // LIMPA CAMPOS
-                    document.getElementById('cad_nome').value = '';
-                    document.getElementById('cad_dia').value = '';
-                    document.getElementById('cad_mes').value = '';
-                    document.getElementById('cad_foto').value = '';
-                    setTimeout(() => msg.style.display = 'none', 4000);
+                    
+                    db.ref('inscricoes').set(inscricoes).then(() => {
+                        msg.className = 'resultado sucesso';
+                        msg.innerText = '✅ Cadastro realizado com sucesso!';
+                        msg.style.display = 'block';
+                        // Limpa campos
+                        document.getElementById('cad_nome').value = '';
+                        document.getElementById('cad_dia').value = '';
+                        document.getElementById('cad_mes').value = '';
+                        document.getElementById('cad_foto').value = '';
+                        setTimeout(() => msg.style.display = 'none', 4000);
+                    });
                 });
             });
         }
@@ -329,12 +312,6 @@
             if (confirm('Tem certeza que deseja excluir?')) {
                 db.ref('inscricoes').once('value').then(snap => {
                     var lista = snap.val() || [];
-                    var item = lista.find(i => i && i.id === id);
-                    // ✅ SE TIVER FOTO, APAGA TAMBÉM DO STORAGE
-                    if (item && item.foto) {
-                        var refFoto = storage.refFromURL(item.foto);
-                        refFoto.delete().catch(()=>{}); // ignora erro se já não existir
-                    }
                     var novaLista = lista.filter(insc => insc && insc.id !== id);
                     db.ref('inscricoes').set(novaLista);
                 });
@@ -342,18 +319,9 @@
         }
 
         function limparTodasInscricoes() {
-            if (confirm('⚠️ ATENÇÃO: Isso apagARÁ TODOS os cadastros e fotos! Tem certeza?')) {
-                db.ref('inscricoes').once('value').then(snap => {
-                    var lista = snap.val() || [];
-                    // ✅ APAGA TODAS AS FOTOS ANTES
-                    lista.forEach(item => {
-                        if (item && item.foto) {
-                            storage.refFromURL(item.foto).delete().catch(()=>{});
-                        }
-                    });
-                    db.ref('inscricoes').remove();
-                    alert('Todos os dados e fotos foram apagados!');
-                });
+            if (confirm('⚠️ ATENÇÃO: Isso apagARÁ TODOS os cadastros! Tem certeza?')) {
+                db.ref('inscricoes').remove();
+                alert('Todos os dados foram apagados!');
             }
         }
 
@@ -386,7 +354,7 @@
             var cabecalho = document.getElementById('colunaDataCabecalho');
             cabecalho.style.display = dataVisivel ? '' : 'none';
             botao.innerText = dataVisivel ? '🙈 Ocultar Data Nasc.' : '👁️ Mostrar Data Nasc.';
-            var celulasData = document.querySelectorAll('td:nth-child(4)'); // ✅ AGORA DATA É COLUNA 4
+            var celulasData = document.querySelectorAll('td:nth-child(4)');
             celulasData.forEach(celula => { celula.style.display = dataVisivel ? '' : 'none'; });
         }
 
