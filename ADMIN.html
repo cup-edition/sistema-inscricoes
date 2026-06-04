@@ -94,8 +94,6 @@
         .btn-roxo:hover {background-color: #8e44ad;}
         .btn-copiar, .btn-ocultar-coluna {background-color: #9b59b6; padding: 5px 10px; font-size: 12px; border-radius: 4px;}
         .btn-copiar:hover, .btn-ocultar-coluna:hover {background-color: #8e44ad;}
-        .btn-atualizar {background-color: #3498db; padding: 6px 12px; font-size: 13px; border-radius: 4px; font-weight: bold;}
-        .btn-atualizar:hover {background-color: #2980b9;}
         .mensagem-copia {font-size: 12px; color: #27ae60; font-weight: normal; margin-left: 10px; display: none;}
         .resultado {margin-top: 12px; padding: 10px; border-radius: 4px; font-weight: bold;}
         .sucesso {background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb;}
@@ -157,7 +155,7 @@
                 <span id="contadorConfirmados" class="contador-confirmados"></span>
                 <div id="avisoLimite" class="aviso-limite">⚠️ LIMITE DE 16 CONFIRMADOS ATINGIDO! INSCRIÇÕES ENCERRADAS AUTOMATICAMENTE.</div>
                 <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-                    <button class="btn-atualizar" onclick="atualizarLista()">🔄 Atualizar Lista</button>
+                    <!-- ❌ BOTÃO "ATUALIZAR LISTA" REMOVIDO AQUI -->
                     <button class="btn-ocultar-coluna" onclick="alternarVisibilidadeData()">🙈 Ocultar Data Nasc.</button>
                     <button class="btn-copiar" onclick="copiarNomesConfirmados()">📋 Copiar Nomes Confirmados</button>
                     <span class="mensagem-copia" id="msgCopia">Copiado!</span>
