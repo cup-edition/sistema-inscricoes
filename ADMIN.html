@@ -4,189 +4,44 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Painel Administrativo - Sistema de Inscrições</title>
-    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js"></script>
+    <!-- VERSÃO CORRIGIDA DO FIREBASE -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase.js"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: Arial, sans-serif;
-        }
-        body {
-            background-color: #f0f4f8;
-            padding: 20px;
-            max-width: 900px;
-            margin: 0 auto;
-        }
-        h1 {
-            color: #2c3e50;
-            text-align: center;
-            margin-bottom: 10px;
-        }
-        .aviso-link {
-            text-align: center;
-            background: #e3f2fd;
-            padding: 10px;
-            border-radius: 8px;
-            margin-bottom: 30px;
-            color: #0d47a1;
-        }
-        .secao {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            margin-bottom: 25px;
-        }
-        h2 {
-            color: #34495e;
-            margin-bottom: 15px;
-            font-size: 18px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 8px;
-        }
-        .contador-confirmados {
-            color: #27ae60;
-            font-weight: bold;
-            font-size: 14px;
-            background: #e8f8f0;
-            padding: 4px 8px;
-            border-radius: 4px;
-        }
-        .grupo-campo {
-            margin-bottom: 12px;
-        }
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: 500;
-            color: #555;
-        }
-        input {
-            padding: 8px 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 14px;
-        }
-        input[type="number"] {
-            width: 80px;
-        }
-        button {
-            background-color: #27ae60;
-            color: white;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 14px;
-            margin-top: 8px;
-            margin-right: 8px;
-            transition: background 0.2s;
-        }
-        button:hover {
-            background-color: #219653;
-        }
-        .btn-vermelho {
-            background-color: #e74c3c;
-        }
-        .btn-vermelho:hover {
-            background-color: #c0392b;
-        }
-        .btn-amarelo {
-            background-color: #f39c12;
-        }
-        .btn-amarelo:hover {
-            background-color: #e67e22;
-        }
-        .btn-roxo {
-            background-color: #9b59b6;
-        }
-        .btn-roxo:hover {
-            background-color: #8e44ad;
-        }
-        .btn-copiar, .btn-ocultar-coluna {
-            background-color: #9b59b6;
-            padding: 5px 10px;
-            font-size: 12px;
-            border-radius: 4px;
-        }
-        .btn-copiar:hover, .btn-ocultar-coluna:hover {
-            background-color: #8e44ad;
-        }
-        .mensagem-copia {
-            font-size: 12px;
-            color: #27ae60;
-            font-weight: normal;
-            margin-left: 10px;
-            display: none;
-        }
-        .resultado {
-            margin-top: 12px;
-            padding: 10px;
-            border-radius: 4px;
-            font-weight: bold;
-        }
-        .sucesso {
-            background-color: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-        .erro {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 15px;
-            font-size: 14px;
-        }
-        th, td {
-            padding: 10px;
-            text-align: left;
-            border-bottom: 1px solid #eee;
-        }
-        th {
-            background-color: #f8f9fa;
-            color: #333;
-        }
-        .status-pendente {
-            color: #f39c12;
-            font-weight: bold;
-        }
-        .status-confirmado {
-            color: #27ae60;
-            font-weight: bold;
-        }
-        .acoes-tabela button {
-            padding: 4px 8px;
-            font-size: 12px;
-        }
-        .area-limpar-tudo {
-            text-align: right;
-            margin-top: 10px;
-        }
-        .status-sistema {
-            padding: 8px 12px;
-            border-radius: 4px;
-            font-weight: bold;
-            font-size: 14px;
-            display: inline-block;
-            margin-bottom: 15px;
-        }
-        .aberto {
-            background-color: #d4edda;
-            color: #155724;
-        }
-        .fechado {
-            background-color: #f8d7da;
-            color: #721c24;
-        }
+        * {margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif;}
+        body {background-color: #f0f4f8; padding: 20px; max-width: 900px; margin: 0 auto;}
+        h1 {color: #2c3e50; text-align: center; margin-bottom: 10px;}
+        .aviso-link {text-align: center; background: #e3f2fd; padding: 10px; border-radius: 8px; margin-bottom: 30px; color: #0d47a1;}
+        .secao {background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 25px;}
+        h2 {color: #34495e; margin-bottom: 15px; font-size: 18px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;}
+        .contador-confirmados {color: #27ae60; font-weight: bold; font-size: 14px; background: #e8f8f0; padding: 4px 8px; border-radius: 4;}
+        .grupo-campo {margin-bottom: 12px;}
+        label {display: block; margin-bottom: 5px; font-weight: 500; color: #555;}
+        input {padding: 8px 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;}
+        input[type="number"] {width: 80px;}
+        button {background-color: #27ae60; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; font-size: 14px; margin-top: 8px; margin-right: 8px; transition: background 0.2s;}
+        button:hover {background-color: #219653;}
+        .btn-vermelho {background-color: #e74c3c;}
+        .btn-vermelho:hover {background-color: #c0392b;}
+        .btn-amarelo {background-color: #f39c12;}
+        .btn-amarelo:hover {background-color: #e67e22;}
+        .btn-roxo {background-color: #9b59b6;}
+        .btn-roxo:hover {background-color: #8e44ad;}
+        .btn-copiar, .btn-ocultar-coluna {background-color: #9b59b6; padding: 5px 10px; font-size: 12px; border-radius: 4px;}
+        .btn-copiar:hover, .btn-ocultar-coluna:hover {background-color: #8e44ad;}
+        .mensagem-copia {font-size: 12px; color: #27ae60; font-weight: normal; margin-left: 10px; display: none;}
+        .resultado {margin-top: 12px; padding: 10px; border-radius: 4px; font-weight: bold;}
+        .sucesso {background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb;}
+        .erro {background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb;}
+        table {width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 14px;}
+        th, td {padding: 10px; text-align: left; border-bottom: 1px solid #eee;}
+        th {background-color: #f8f9fa; color: #333;}
+        .status-pendente {color: #f39c12; font-weight: bold;}
+        .status-confirmado {color: #27ae60; font-weight: bold;}
+        .acoes-tabela button {padding: 4px 8px; font-size: 12px;}
+        .area-limpar-tudo {text-align: right; margin-top: 10px;}
+        .status-sistema {padding: 8px 12px; border-radius: 4px; font-weight: bold; font-size: 14px; display: inline-block; margin-bottom: 15px;}
+        .aberto {background-color: #d4edda; color: #155724;}
+        .fechado {background-color: #f8d7da; color: #721c24;}
     </style>
 </head>
 <body>
@@ -211,7 +66,6 @@
         <div class="grupo-campo">
             <label>Dia de Nascimento:</label>
             <input type="number" id="cad_dia" min="1" max="31" placeholder="Dia">
-            
             <label style="margin-left: 10px;">Mês de Nascimento:</label>
             <input type="number" id="cad_mes" min="1" max="12" placeholder="Mês">
         </div>
@@ -246,9 +100,7 @@
                 </tr>
             </thead>
             <tbody id="lista_inscricoes">
-                <tr>
-                    <td colspan="5" style="text-align: center; color: #888;">Nenhuma inscrição cadastrada ainda.</td>
-                </tr>
+                <tr><td colspan="5" style="text-align: center; color: #888;">Carregando...</td></tr>
             </tbody>
         </table>
 
@@ -258,9 +110,10 @@
     </div>
 
     <script>
-        // 👇 COLE AQUI O MESMO CÓDIGO DO FIREBASE QUE VOCÊ COPIOU 👇
-        const firebaseConfig = {
-  apiKey: "AIzaSyAR--VWkuPUBzKtJlEHPXnwBwbapB8JY_w",
+        // 👇 COLE AQUI SEU CÓDIGO DO FIREBASE 👇
+        var firebaseConfig = {
+          // COLE SEU CÓDIGO AQUI MESMO, SUBSTITUINDO ESTE EXEMPLO
+          apiKey: "AIzaSyAR--VWkuPUBzKtJlEHPXnwBwbapB8JY_w",
   authDomain: "sistema-inscricoes-e9241.firebaseapp.com",
   databaseURL: "https://sistema-inscricoes-e9241-default-rtdb.firebaseio.com",
   projectId: "sistema-inscricoes-e9241",
@@ -268,12 +121,12 @@
   messagingSenderId: "232618438422",
   appId: "1:232618438422:web:1c62103b2169e64e862a37"
 };
-        // 👆 FIM DO CÓDIGO DO FIREBASE 👆
+        // 👆 FIM DO CÓDIGO 👆
 
-        const app = firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
-        const dbRef = db.ref('/');
-        let dataVisivel = true;
+        // INICIALIZAÇÃO CORRETA
+        firebase.initializeApp(firebaseConfig);
+        var db = firebase.database();
+        var dataVisivel = true;
 
         window.onload = function() {
             atualizarLista();
@@ -281,27 +134,19 @@
         };
 
         function alternarStatusInscricoes() {
-            dbRef.once('value').then(snapshot => {
-                const dados = snapshot.val() || {};
-                const statusAtual = dados.configuracao?.inscricoes_abertas ?? true;
-                const novoStatus = !statusAtual;
-
-                dbRef.update({
-                    configuracao: { inscricoes_abertas: novoStatus }
-                }).then(() => {
-                    atualizarInterfaceStatus();
-                    alert(novoStatus ? '✅ Inscrições LIBERADAS!' : '❌ Inscrições BLOQUEADAS!');
-                });
+            db.ref('configuracao/inscricoes_abertas').once('value').then(snap => {
+                var statusAtual = snap.val() !== null ? snap.val() : true;
+                db.ref('configuracao').set({inscricoes_abertas: !statusAtual});
+                alert(!statusAtual ? '✅ Inscrições LIBERADAS!' : '❌ Inscrições BLOQUEADAS!');
+                atualizarInterfaceStatus();
             });
         }
 
         function atualizarInterfaceStatus() {
-            dbRef.once('value').then(snapshot => {
-                const dados = snapshot.val();
-                const aberto = dados?.configuracao?.inscricoes_abertas ?? true;
-                const statusDiv = document.getElementById('statusAtual');
-                const botao = document.getElementById('botaoBloquear');
-
+            db.ref('configuracao/inscricoes_abertas').once('value').then(snap => {
+                var aberto = snap.val() !== null ? snap.val() : true;
+                var statusDiv = document.getElementById('statusAtual');
+                var botao = document.getElementById('botaoBloquear');
                 if (aberto) {
                     statusDiv.className = 'status-sistema aberto';
                     statusDiv.innerText = '🟢 Inscrições ABERTAS';
@@ -315,10 +160,10 @@
         }
 
         function cadastrarPessoa() {
-            const nome = document.getElementById('cad_nome').value.trim();
-            const dia = parseInt(document.getElementById('cad_dia').value);
-            const mes = parseInt(document.getElementById('cad_mes').value);
-            const msg = document.getElementById('msg_cadastro');
+            var nome = document.getElementById('cad_nome').value.trim();
+            var dia = parseInt(document.getElementById('cad_dia').value);
+            var mes = parseInt(document.getElementById('cad_mes').value);
+            var msg = document.getElementById('msg_cadastro');
 
             if (!nome || !dia || !mes || dia < 1 || dia > 31 || mes < 1 || mes > 12) {
                 msg.className = 'resultado erro';
@@ -327,26 +172,19 @@
                 return;
             }
 
-            dbRef.once('value').then(snapshot => {
-                const dados = snapshot.val() || {};
-                let inscricoes = dados.inscricoes || [];
-                const novoId = inscricoes.length > 0 ? Math.max(...inscricoes.map(i => i.id)) + 1 : 1;
-
-                inscricoes.push({
-                    id: novoId,
-                    nome: nome,
-                    dia: dia,
-                    mes: mes,
-                    status: 'pendente'
-                });
-
-                dbRef.update({ inscricoes: inscricoes }).then(() => {
-                    document.getElementById('cad_nome').value = '';
-                    document.getElementById('cad_dia').value = '';
-                    document.getElementById('cad_mes').value = '';
+            db.ref('inscricoes').once('value').then(snap => {
+                var inscricoes = snap.val() || [];
+                var novoId = inscricoes.length > 0 ? Math.max(...inscricoes.map(i => i.id)) + 1 : 1;
+                
+                inscricoes.push({id: novoId, nome: nome, dia: dia, mes: mes, status: 'pendente'});
+                
+                db.ref('inscricoes').set(inscricoes).then(() => {
                     msg.className = 'resultado sucesso';
                     msg.innerText = '✅ Cadastro realizado com sucesso!';
                     msg.style.display = 'block';
+                    document.getElementById('cad_nome').value = '';
+                    document.getElementById('cad_dia').value = '';
+                    document.getElementById('cad_mes').value = '';
                     atualizarLista();
                     setTimeout(() => msg.style.display = 'none', 4000);
                 });
@@ -354,12 +192,11 @@
         }
 
         function apagarInscricao(id) {
-            if (confirm('Tem certeza que deseja excluir este cadastro?')) {
-                dbRef.once('value').then(snapshot => {
-                    const dados = snapshot.val();
-                    let inscricoes = dados?.inscricoes || [];
-                    inscricoes = inscricoes.filter(insc => insc && insc.id !== id);
-                    dbRef.update({ inscricoes: inscricoes });
+            if (confirm('Tem certeza que deseja excluir?')) {
+                db.ref('inscricoes').once('value').then(snap => {
+                    var lista = snap.val() || [];
+                    var novaLista = lista.filter(insc => insc && insc.id !== id);
+                    db.ref('inscricoes').set(novaLista);
                     atualizarLista();
                 });
             }
@@ -367,57 +204,49 @@
 
         function limparTodasInscricoes() {
             if (confirm('⚠️ ATENÇÃO: Isso apagARÁ TODOS os cadastros! Tem certeza?')) {
-                dbRef.update({ inscricoes: [] });
+                db.ref('inscricoes').remove();
                 atualizarLista();
                 alert('Todos os dados foram apagados!');
             }
         }
 
         function voltarTodosParaPendente() {
-            if (confirm('⚠️ Isso irá mudAR TODOS os cadastros para "Pendente". Deseja continuar?')) {
-                dbRef.once('value').then(snapshot => {
-                    const dados = snapshot.val();
-                    let inscricoes = dados?.inscricoes || [];
-                    inscricoes = inscricoes.map(insc => {
-                        if(insc) insc.status = 'pendente';
-                        return insc;
-                    });
-                    dbRef.update({ inscricoes: inscricoes });
+            if (confirm('⚠️ Isso irá mudAR TODOS para Pendente. Deseja continuar?')) {
+                db.ref('inscricoes').once('value').then(snap => {
+                    var lista = snap.val() || [];
+                    lista = lista.map(insc => { if(insc) insc.status = 'pendente'; return insc; });
+                    db.ref('inscricoes').set(lista);
                     atualizarLista();
                 });
             }
         }
 
         function copiarNomesConfirmados() {
-            dbRef.once('value').then(snapshot => {
-                const dados = snapshot.val();
-                const inscricoes = dados?.inscricoes || [];
-                const nomes = inscricoes.filter(insc => insc && insc.status === 'confirmado').map(insc => insc.nome);
-
-                if (nomes.length === 0) { alert('⚠️ Ainda não há ninguém confirmado.'); return; }
-
+            db.ref('inscricoes').once('value').then(snap => {
+                var lista = snap.val() || [];
+                var nomes = lista.filter(insc => insc && insc.status === 'confirmado').map(insc => insc.nome);
+                if (nomes.length === 0) { alert('⚠️ Nenhum confirmado.'); return; }
                 navigator.clipboard.writeText(nomes.join('\n')).then(() => {
-                    const msg = document.getElementById('msgCopia'); msg.style.display = 'inline'; setTimeout(() => msg.style.display = 'none', 2000);
+                    var msg = document.getElementById('msgCopia'); msg.style.display = 'inline'; setTimeout(() => msg.style.display = 'none', 2000);
                 });
             });
         }
 
         function alternarVisibilidadeData() {
             dataVisivel = !dataVisivel;
-            const botao = document.querySelector('.btn-ocultar-coluna');
-            const cabecalho = document.getElementById('colunaDataCabecalho');
+            var botao = document.querySelector('.btn-ocultar-coluna');
+            var cabecalho = document.getElementById('colunaDataCabecalho');
             cabecalho.style.display = dataVisivel ? '' : 'none';
             botao.innerText = dataVisivel ? '🙈 Ocultar Data Nasc.' : '👁️ Mostrar Data Nasc.';
             atualizarLista();
         }
 
         function atualizarLista() {
-            const tabela = document.getElementById('lista_inscricoes');
+            var tabela = document.getElementById('lista_inscricoes');
             tabela.innerHTML = '';
 
-            dbRef.once('value').then(snapshot => {
-                const dados = snapshot.val();
-                const inscricoes = dados?.inscricoes || [];
+            db.ref('inscricoes').once('value').then(snap => {
+                var inscricoes = snap.val() || [];
 
                 if (inscricoes.length === 0 || !inscricoes[0]) {
                     tabela.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #888;">Nenhuma inscrição cadastrada ainda.</td></tr>';
@@ -425,17 +254,18 @@
                     return;
                 }
 
-                const listaOrdenada = [...inscricoes].filter(Boolean).sort((a, b) => {
+                // ORDEM ALFABÉTICA + CONFIRMADOS PRIMEIRO
+                var listaOrdenada = inscricoes.filter(Boolean).sort((a, b) => {
                     if (a.status === 'confirmado' && b.status !== 'confirmado') return -1;
                     if (a.status !== 'confirmado' && b.status === 'confirmado') return 1;
                     return a.nome.localeCompare(b.nome);
                 });
 
-                const qtdConfirmados = listaOrdenada.filter(i => i.status === 'confirmado').length;
+                var qtdConfirmados = listaOrdenada.filter(i => i.status === 'confirmado').length;
                 document.getElementById('contadorConfirmados').innerText = `✅ ${qtdConfirmados} de ${listaOrdenada.length} confirmados`;
 
                 listaOrdenada.forEach(insc => {
-                    const linha = document.createElement('tr');
+                    var linha = document.createElement('tr');
                     linha.innerHTML = `
                         <td>${insc.id}</td>
                         <td>${insc.nome}</td>
