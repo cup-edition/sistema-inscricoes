@@ -31,121 +31,53 @@
         
         /* ✅ ESTILO PARA A FOTO - AGORA AINDA MAIOR */
         .foto-container {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 12px;
-            margin-bottom: 10px;
+            display: flex; align-items: center; justify-content: space-between;
+            gap: 12px; margin-bottom: 10px;
         }
         .foto-preview {
             width: 100px; /* ✅ Aumentado de 80px para 100px */
             height: 100px; /* ✅ Aumentado de 80px para 100px */
-            border-radius: 50%;
-            object-fit: cover;
-            border: 2px solid #ddd;
-            display: none; /* Começa escondida */
-            box-shadow: 0 2px 6px rgba(0,0,0,0.15); /* ✅ Adicionei uma sombra leve para destacar */
+            border-radius: 50%; object-fit: cover;
+            border: 2px solid #ddd; display: none;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
         }
 
         /* ✅ ESTILO PARA O BOTÃO PEQUENO - AGORA NO CANTO INFERIOR DIREITO */
         .botao-lista {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background-color: #6c757d;
-            color: white;
-            border: none;
-            padding: 8px 12px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 12px;
-            width: auto;
-            font-weight: normal;
-            z-index: 99;
+            position: fixed; bottom: 20px; right: 20px;
+            background-color: #6c757d; color: white; border: none;
+            padding: 8px 12px; border-radius: 4px;
+            cursor: pointer; font-size: 12px; width: auto;
+            font-weight: normal; z-index: 99;
             box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
-        .botao-lista:hover {
-            background-color: #495057;
-        }
+        .botao-lista:hover {background-color: #495057;}
 
         /* ✅ ESTILO PARA A JANELA FLUTUANTE */
         .janela-flutuante {
-            display: none;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: #ffffff;
-            width: 90%;
-            max-width: 400px;
-            max-height: 80vh;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-            z-index: 1000;
-            overflow: hidden;
+            display: none; position: fixed;
+            top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: #ffffff; width: 90%; max-width: 400px; max-height: 80vh;
+            border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            z-index: 1000; overflow: hidden;
         }
         .cabecalho-janela {
-            background-color: #2c3e50;
-            color: white;
-            padding: 12px;
-            font-weight: bold;
-            font-size: 16px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            background-color: #2c3e50; color: white; padding: 12px;
+            font-weight: bold; font-size: 16px;
+            display: flex; justify-content: space-between; align-items: center;
         }
         .fechar-janela {
-            background: none;
-            border: none;
-            color: white;
-            font-size: 20px;
-            cursor: pointer;
-            width: auto;
-            padding: 0;
-            margin: 0;
+            background: none; border: none; color: white;
+            font-size: 20px; cursor: pointer;
+            width: auto; padding: 0; margin: 0;
         }
-        .conteudo-janela {
-            padding: 15px;
-            overflow-y: auto;
-            max-height: 65vh;
-        }
-        .item-inscrito {
-            display: flex;
-            align-items: center; gap: 10px;
-            padding: 10px 0;
-            border-bottom: 1px solid #eee;
-        }
-        .foto-inscrito {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 1px solid #ddd;
-        }
-        .dados-inscrito {
-            flex: 1;
-            text-align: left;
-        }
-        .nome-inscrito {
-            font-weight: 600;
-            color: #333;
-            font-size: 15px;
-        }
-        .data-hora-inscrito {
-            font-size: 12px;
-            color: #666;
-            margin-top: 2px;
-        }
-        .fundo-escuro {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.6);
-            z-index: 999;
-        }
+        .conteudo-janela {padding: 15px; overflow-y: auto; max-height: 65vh;}
+        .item-inscrito {display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid #eee;}
+        .foto-inscrito {width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 1px solid #ddd;}
+        .dados-inscrito {flex: 1; text-align: left;}
+        .nome-inscrito {font-weight: 600; color: #333; font-size: 15px;}
+        .data-hora-inscrito {font-size: 12px; color: #666; margin-top: 2px;}
+        .fundo-escuro {display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 999;}
     </style>
 </head>
 <body>
@@ -482,6 +414,8 @@
                 msg.className = 'resultado erro';
                 msg.innerText = '❌ Selecione o nome e preencha dia e mês corretamente!';
                 msg.style.display = 'block';
+                // ✅ Mensagem de campo vazio some após 3 segundos
+                setTimeout(() => { msg.style.display = 'none'; }, 3000);
                 return;
             }
 
@@ -493,6 +427,7 @@
                     msg.className = 'resultado erro';
                     msg.innerText = '❌ LIMITE DE 16 CONFIRMADOS ATINGIDO! Inscrições encerradas.';
                     msg.style.display = 'block';
+                    // ❌ REMOVIDO O setTimeout AQUI → AGORA ESSA MENSAGEM FICA VISÍVEL ATÉ RECARREGAR
                     verificarStatusSistema();
                     return;
                 }
@@ -516,10 +451,8 @@
                     msg.innerText = '🎉 INSCRIÇÃO CONFIRMADA COM SUCESSO!';
                     msg.style.display = 'block';
                     
-                    // ✅ NOVO: A MENSAGEM SOME APÓS 3 SEGUNDOS
-                    setTimeout(() => {
-                        msg.style.display = 'none';
-                    }, 3000);
+                    // ✅ A MENSAGEM DE SUCESSO SOME APÓS 3 SEGUNDOS
+                    setTimeout(() => { msg.style.display = 'none'; }, 3000);
                     
                     // ✅ Limpa campos e esconde foto após confirmação
                     document.getElementById('ver_nome').value = '';
@@ -533,6 +466,9 @@
                     msg.className = 'resultado erro';
                     msg.innerText = '❌ DADOS INCORRETOS COM A BASE DE DADOS';
                     msg.style.display = 'block';
+                    
+                    // ✅ ESSA TAMBÉM SOME APÓS 3 SEGUNDOS
+                    setTimeout(() => { msg.style.display = 'none'; }, 3000);
                 }
             });
         }
