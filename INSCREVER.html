@@ -6,53 +6,136 @@
     <title>Sistema de Inscrições</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase.js"></script>
     <style>
-        * {margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif;}
-        body {background-color: #f0f2f5; padding: 15px;}
-        .container {max-width: 500px; margin: 0 auto; background: white; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); overflow: hidden;}
-        
-        .cabecalho {background-color: #27ae60; color: white; padding: 20px; text-align: center;}
-        .cabecalho h1 {font-size: 20px; margin-bottom: 5px;}
-        .cabecalho p {font-size: 14px; opacity: 0.9;}
-
-        .aviso-encerrado {background-color: #e74c3c; color: white; padding: 15px; text-align: center; font-weight: bold; display: none;}
-        .aviso-reiniciando {background-color: #f39c12; color: white; padding: 15px; text-align: center; font-weight: bold; display: none;}
-
-        .lista-pessoas {padding: 20px;}
-        .grupo-pessoa {border: 1px solid #ddd; border-radius: 8px; padding: 12px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;}
-        .info-pessoa {display: flex; align-items: center; gap: 10px; flex: 1; min-width: 200px;}
-        .foto-mini {width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 1px solid #ccc;}
-        .dados-pessoa h3 {font-size: 15px; color: #333; margin-bottom: 2px;}
-        .dados-pessoa p {font-size: 12px; color: #666;}
-
-        .btn-confirmar {background-color: #27ae60; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: bold; transition: 0.2s;}
-        .btn-confirmar:hover {background-color: #219653;}
-        .btn-confirmar:disabled {background-color: #bdc3c7; cursor: not-allowed;}
-        .confirmado {background-color: #d4edda; color: #155724; padding: 8px 12px; border-radius: 6px; font-size: 13px; font-weight: bold;}
-        .limite-atingido {color: #e74c3c; font-weight: bold; text-align: center; padding: 10px; display: none;}
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+        body {
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: #fff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .header {
+            background-color: #28a745;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        .header h2 {
+            margin-bottom: 5px;
+            font-size: 18px;
+        }
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        .alerta-encerrado {
+            background-color: #dc3545;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-weight: bold;
+            display: none;
+        }
+        .alerta-reiniciando {
+            background-color: #ffc107;
+            color: #212529;
+            padding: 15px;
+            text-align: center;
+            font-weight: bold;
+            display: none;
+        }
+        .lista {
+            padding: 20px;
+        }
+        .item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .foto {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 1px solid #ccc;
+        }
+        .dados h4 {
+            font-size: 15px;
+            color: #333;
+            margin-bottom: 2px;
+        }
+        .dados p {
+            font-size: 12px;
+            color: #666;
+        }
+        .btn-confirmar {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: bold;
+        }
+        .btn-confirmar:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+        .confirmado {
+            color: #28a745;
+            font-weight: bold;
+            padding: 8px 16px;
+        }
+        .limite {
+            color: #dc3545;
+            font-weight: bold;
+            text-align: center;
+            padding: 10px;
+            display: none;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="cabecalho">
-            <h1>📋 Lista de Confirmações</h1>
+        <div class="header">
+            <h2>📋 Lista de Confirmações</h2>
             <p>Confirme sua presença na lista abaixo</p>
         </div>
 
-        <!-- ✅ AVISO DE REINÍCIO AUTOMÁTICO -->
-        <div id="avisoReiniciando" class="aviso-reiniciando">
-            ⏰ REINICIANDO SISTEMA... AGUARDE UM MOMENTO!
+        <div class="alerta-reiniciando" id="avisoReiniciando">
+            ⏰ REINICIANDO SISTEMA... AGUARDE!
         </div>
 
-        <div id="avisoEncerrado" class="aviso-encerrado">
-            ⚠️ AS INSCRIÇÕES ESTÃO ENCERRADAS (LIMITE DE 16 CONFIRMADOS ATINGIDO)
+        <div class="alerta-encerrado" id="avisoEncerrado">
+            ⚠️ AS INSCRIÇÕES ESTÃO ENCERRADAS
         </div>
 
-        <div class="lista-pessoas" id="lista"></div>
-        <div id="avisoLimite" class="limite-atingido">⚠️ Você atingiu o limite máximo de confirmações</div>
+        <div class="lista" id="listaPessoas"></div>
+        <div class="limite" id="avisoLimite">⚠️ Limite de 16 confirmações atingido</div>
     </div>
 
     <script>
-        // ✅ SEUS DADOS DO FIREBASE
+        // ✅ Configuração do Firebase (SEU DADOS)
         var firebaseConfig = {
           apiKey: "AIzaSyAR--VWkuPUBzKtJlEHPXnwBwbapB8JY_w",
           authDomain: "sistema-inscricoes-e9241.firebaseapp.com",
@@ -65,90 +148,76 @@
 
         firebase.initializeApp(firebaseConfig);
         var db = firebase.database();
-        const LIMITE = 16;
+        const LIMITE_MAXIMO = 16;
 
-        // ✅ FUNÇÃO PRINCIPAL: VERIFICA SE É HORA DE REINICIAR (GRATUITO)
-        async function verificarAgendamentoEExecutar() {
+        // ✅ FUNÇÃO DE REINÍCIO AUTOMÁTICO (GRATUITA)
+        async function verificarEExecutarReinicio() {
             const snap = await db.ref('agendamento_reinicio').once('value');
-            const agendamento = snap.val();
+            const agendado = snap.val();
 
-            // Se não tem agendamento ou já foi executado, sai fora
-            if (!agendamento || agendamento.executado === true) return;
+            if (!agendado || agendado.executado === true) return;
 
             const agora = Date.now();
-            const horarioMarcado = agendamento.timestamp;
-
-            // ✅ SE JÁ PASSOU DO HORÁRIO MARCADO: EXECUTA O REINÍCIO
-            if (agora >= horarioMarcado) {
+            if (agora >= agendado.timestamp) {
                 document.getElementById('avisoReiniciando').style.display = 'block';
 
-                // 1. Pegar todas as inscrições
-                const inscSnap = await db.ref('inscricoes').once('value');
-                const lista = inscSnap.val() || [];
+                // Reinicia tudo
+                const dados = await db.ref('inscricoes').once('value');
+                const lista = dados.val() || [];
 
-                // 2. Mudar TODOS para PENDENTE
-                const novaLista = lista.map(insc => {
-                    if(insc) {
-                        insc.status = 'pendente';
-                        insc.data_confirmacao = null;
+                const novaLista = lista.map(p => {
+                    if (p) {
+                        p.status = 'pendente';
+                        p.data_confirmacao = null;
                     }
-                    return insc;
+                    return p;
                 });
 
-                // 3. Salvar tudo de novo
                 await db.ref('inscricoes').set(novaLista);
-                
-                // 4. Reabrir inscrições
                 await db.ref('configuracao').update({inscricoes_abertas: true});
-
-                // 5. Marcar agendamento como executado para não repetir
                 await db.ref('agendamento_reinicio').update({executado: true});
 
-                // Recarrega a página para atualizar tudo
                 location.reload();
             }
         }
+        verificarEExecutarReinicio();
 
-        // ✅ Chamar a verificação assim que a página carregar
-        verificarAgendamentoEExecutar();
-
-        // ===== SISTEMA DE CONFIRMAÇÃO =====
-        function confirmarPresenca(id) {
+        // ✅ Função de Confirmar Presença
+        function confirmar(id) {
             db.ref('configuracao').once('value').then(snapConf => {
                 const conf = snapConf.val();
                 if (!conf || conf.inscricoes_abertas === false) {
-                    alert('⚠️ As inscrições estão encerradas!');
+                    alert('Inscrições encerradas!');
                     return;
                 }
 
                 db.ref('inscricoes').once('value').then(snap => {
                     let lista = snap.val() || [];
-                    let qtdConfirmados = lista.filter(i => i && i.status === 'confirmado').length;
+                    let qtd = lista.filter(i => i && i.status === 'confirmado').length;
 
-                    if (qtdConfirmados >= LIMITE) {
-                        alert('⚠️ Limite de confirmações atingido!');
+                    if (qtd >= LIMITE_MAXIMO) {
+                        alert('Limite atingido!');
                         return;
                     }
 
-                    lista = lista.map(pessoa => {
-                        if (pessoa && pessoa.id === id) {
-                            if (pessoa.status === 'pendente') {
-                                pessoa.status = 'confirmado';
-                                pessoa.data_confirmacao = Date.now();
-                            }
+                    lista = lista.map(p => {
+                        if (p && p.id === id && p.status === 'pendente') {
+                            p.status = 'confirmado';
+                            p.data_confirmacao = Date.now();
                         }
-                        return pessoa;
+                        return p;
                     });
-                    
+
                     db.ref('inscricoes').set(lista);
                 });
             });
         }
 
-        function carregarLista() {
+        // ✅ Carregar e exibir lista (MODELO ORIGINAL)
+        function carregar() {
             db.ref('inscricoes').on('value', snap => {
                 const lista = snap.val() || [];
-                const htmlLista = document.getElementById('lista');
+                const container = document.getElementById('listaPessoas');
                 const avisoEncerrado = document.getElementById('avisoEncerrado');
                 const avisoLimite = document.getElementById('avisoLimite');
                 let qtdConfirmados = lista.filter(i => i && i.status === 'confirmado').length;
@@ -161,53 +230,51 @@
                         avisoLimite.style.display = 'none';
                     } else {
                         avisoEncerrado.style.display = 'none';
-                        avisoLimite.style.display = qtdConfirmados >= LIMITE ? 'block' : 'none';
+                        avisoLimite.style.display = qtdConfirmados >= LIMITE_MAXIMO ? 'block' : 'none';
                     }
 
-                    if (lista.length === 0 || !lista[0]) {
-                        htmlLista.innerHTML = '<p style="text-align:center; color:#888; padding:20px;">Nenhuma inscrição cadastrada ainda.</p>';
+                    if (lista.length === 0) {
+                        container.innerHTML = '<p style="padding:20px;text-align:center;color:#888;">Nenhuma pessoa cadastrada.</p>';
                         return;
                     }
 
-                    // ✅ ORDENAR: Pendentes primeiro, depois confirmados
-                    let listaOrdenada = lista.filter(Boolean).sort((a, b) => {
+                    // Ordenação original
+                    let ordenado = lista.filter(Boolean).sort((a, b) => {
                         if (a.status === 'pendente' && b.status === 'confirmado') return -1;
                         if (a.status === 'confirmado' && b.status === 'pendente') return 1;
                         return a.nome.localeCompare(b.nome);
                     });
 
-                    htmlLista.innerHTML = '';
-                    listaOrdenada.forEach(pessoa => {
-                        let botaoOuStatus = '';
+                    container.innerHTML = '';
+                    ordenado.forEach(pessoa => {
+                        let acao = '';
                         if (pessoa.status === 'pendente') {
-                            botaoOuStatus = `<button class="btn-confirmar" onclick="confirmarPresenca(${pessoa.id})">✓ Confirmar</button>`;
+                            acao = `<button class="btn-confirmar" onclick="confirmar(${pessoa.id})">Confirmar</button>`;
                         } else {
-                            botaoOuStatus = `<span class="confirmado">✅ Confirmado</span>`;
+                            acao = `<span class="confirmado">Confirmado ✅</span>`;
                         }
 
-                        let foto = pessoa.foto ? `<img src="${pessoa.foto}" class="foto-mini">` : '📷';
+                        let foto = pessoa.foto ? `<img src="${pessoa.foto}" class="foto">` : '<div class="foto" style="display:flex;align-items:center;justify-content:center;background:#eee;">📷</div>';
 
-                        const linha = document.createElement('div');
-                        linha.className = 'grupo-pessoa';
-                        linha.innerHTML = `
-                            <div class="info-pessoa">
+                        const item = document.createElement('div');
+                        item.className = 'item';
+                        item.innerHTML = `
+                            <div class="info">
                                 ${foto}
-                                <div class="dados-pessoa">
-                                    <h3>${pessoa.nome}</h3>
-                                    <p>Nasc: ${pessoa.dia}/${pessoa.mes}</p>
+                                <div class="dados">
+                                    <h4>${pessoa.nome}</h4>
+                                    <p>Nascimento: ${pessoa.dia}/${pessoa.mes}</p>
                                 </div>
                             </div>
-                            ${botaoOuStatus}
+                            ${acao}
                         `;
-                        htmlLista.appendChild(linha);
+                        container.appendChild(item);
                     });
                 });
             });
         }
 
-        // Carregar tudo quando abrir a página
-        carregarLista();
+        carregar();
     </script>
-
 </body>
 </html>
