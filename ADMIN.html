@@ -209,8 +209,12 @@
     <div id="telaLogin">
         <div class="caixa-login">
             <h2>🔐 ACESSO RESTRITO</h2>
-            <input type="text" id="usuarioLogin" placeholder="Usuário" required>
-            <input type="password" id="senhaLogin" placeholder="Senha" required>
+            <!-- ✅ ADICIONADO: Ao pressionar Enter, vai para o campo de senha -->
+            <input type="text" id="usuarioLogin" placeholder="Usuário" required onkeydown="if(event.key === 'Enter') document.getElementById('senhaLogin').focus()">
+            
+            <!-- ✅ ADICIONADO: Ao pressionar Enter, faz o login -->
+            <input type="password" id="senhaLogin" placeholder="Senha" required onkeydown="if(event.key === 'Enter') fazerLogin()">
+            
             <button onclick="fazerLogin()">ENTRAR</button>
             <div class="errologin" id="mensagemErro">Usuário ou senha incorretos!</div>
         </div>
@@ -382,9 +386,7 @@
             }
         }
 
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Enter') fazerLogin();
-        });
+        // ✅ REMOVIDO O EVENTO GERAL DE TECLA, AGORA ESTÁ DIRETO NOS INPUTS
 
         // ✅ REGRA: SÓ BLOQUEIA QUANDO 0 VAGAS
         function verificarLimiteConfirmados(qtd) {
