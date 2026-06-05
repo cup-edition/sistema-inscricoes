@@ -56,7 +56,7 @@
         input[type="number"] {width: 80px;}
         input[type="file"] {padding: 6px; font-size: 13px; border: 1px dashed #27ae60; background: #f8f9fa; text-transform: none; font-weight: normal;}
         .foto-preview {width: 45px; height: 45px; border-radius: 50%; object-fit: cover; border: 2px solid #ddd;}
-        button {background-color: #27ae60; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; font-size: 14px; margin-top: 8px; margin-right: 8px; transition: background 0.2s; font-weight: bold;}
+        button {background-color: #27ae60; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 13px; margin-top: 8px; margin-right: 8px; transition: background 0.2s; font-weight: bold;}
         button:hover {background-color: #219653;}
         .btn-vermelho {background-color: #e74c3c;}
         .btn-vermelho:hover {background-color: #c0392b;}
@@ -86,12 +86,13 @@
             justify-content: space-between;
             align-items: center;
             margin-top: 10px;
-            flex-wrap: wrap;
-            gap: 10px;
+            flex-wrap: nowrap;
+            gap: 8px;
+            width: 100%;
         }
         .grupo-botoes-direita {
             display: flex;
-            gap: 10px;
+            gap: 8px;
         }
 
         .carregando {color: #3498db; font-style: italic; font-weight: bold;}
@@ -138,13 +139,14 @@
             background-color: #27ae60;
             color: white;
             border: none;
-            padding: 10px 15px;
+            padding: 8px 12px;
             border-radius: 4px;
             cursor: pointer;
-            font-size: 14px;
+            font-size: 13px;
             font-weight: bold;
             transition: background 0.2s;
             margin: 0;
+            white-space: nowrap;
         }
         #btnMostrarCadastro:hover {
             background-color: #219653;
