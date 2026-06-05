@@ -81,7 +81,6 @@
         .status-confirmado {color: #27ae60; font-weight: bold;}
         .acoes-tabela button {padding: 4px 6px; font-size: 11px; margin: 0 1px;}
         
-        /* ✅ ALINHAMENTO DOS BOTÕES NO MESMO LOCAL */
         .area-botoes-finais {
             display: flex;
             justify-content: space-between;
@@ -99,7 +98,7 @@
         #conteudoPrincipal {display: none;}
         .data-hora {font-size: 11px; color: #666; white-space: nowrap;}
 
-        /* ===== ESTILOS DO MODAL DE EDIÇÃO ===== */
+        /* ===== MODAL DE EDIÇÃO ===== */
         #modalEditar {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background-color: rgba(0, 0, 0, 0.7);
@@ -115,7 +114,7 @@
         .botoes-modal {display: flex; gap: 10px; justify-content: space-between; align-items: center; margin-top: 20px;}
         .grupo-botoes-direita-modal {display: flex; gap: 10px;}
 
-        /* ===== ESTILOS DO NOVO MODAL DE AGENDAMENTO ===== */
+        /* ===== MODAL DE AGENDAMENTO ===== */
         #modalAgendar {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background-color: rgba(0, 0, 0, 0.7);
@@ -134,7 +133,7 @@
         .agendado {background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba;}
         .ativo {background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb;}
 
-        /* ✅ ESTILO DO BOTÃO DE CADASTRO IGUAL AOS OUTROS */
+        /* ✅ JANELINHA DE CADASTRO - IGUAL A FOTO */
         #btnMostrarCadastro {
             background-color: #27ae60;
             color: white;
@@ -150,14 +149,74 @@
         #btnMostrarCadastro:hover {
             background-color: #219653;
         }
-        #secaoCadastro {
+
+        /* ✅ ESTILO DA JANELA FLUTUANTE */
+        #janelaCadastro {
             display: none;
-            margin-top: 15px;
-            animation: aparecer 0.3s ease;
+            position: absolute;
+            background: #ffffff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+            padding: 20px;
+            width: 340px;
+            margin-top: 10px;
+            z-index: 999;
         }
-        @keyframes aparecer {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
+        #janelaCadastro h3 {
+            color: #2c3e50;
+            font-size: 16px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        #janelaCadastro label {
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+        #janelaCadastro input[type="text"],
+        #janelaCadastro input[type="number"] {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        #janelaCadastro input[type="file"] {
+            width: 100%;
+            padding: 6px;
+            border: 1px dashed #27ae60;
+            border-radius: 4px;
+            background: #f8f9fa;
+            margin-bottom: 15px;
+        }
+        #btnOcultarCadastro {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 13px;
+            cursor: pointer;
+            margin-bottom: 15px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        #btnCadastrarPessoa {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            width: 100%;
+        }
+        #msg_cadastro {
+            margin-top: 10px;
+            font-size: 13px;
         }
     </style>
 </head>
@@ -269,35 +328,39 @@
                 </tbody>
             </table>
 
-            <!-- ✅ ÁREA DOS BOTÕES: NOVO BOTÃO À ESQUERDA, MESMO TAMANHO -->
-            <div class="area-botoes-finais">
-                <button id="btnMostrarCadastro" onclick="alternarCadastro()">📝 Cadastrar Nova Pessoa</button>
+            <!-- ✅ ÁREA DOS BOTÕES + JANELINHA DE CADASTRO -->
+            <div class="area-botoes-finais" style="position: relative;">
+                <div>
+                    <button id="btnMostrarCadastro" onclick="mostrarCadastro()">📝 Cadastrar Nova Pessoa</button>
+                    
+                    <!-- ✅ JANELINHA IGUAL A FOTO -->
+                    <div id="janelaCadastro">
+                        <button id="btnOcultarCadastro" onclick="ocultarCadastro()">✅ Ocultar Cadastro</button>
+                        
+                        <h3>📋 Cadastrar Nova Pessoa</h3>
+                        
+                        <label>Nome Completo:</label>
+                        <input type="text" id="cad_nome" placeholder="Digite o nome">
+
+                        <label>Dia de Nascimento:</label>
+                        <input type="number" id="cad_dia" min="1" max="31" placeholder="Dia">
+
+                        <label>Mês de Nascimento:</label>
+                        <input type="number" id="cad_mes" min="1" max="12" placeholder="Mês">
+
+                        <label>📸 Foto de Perfil (opcional):</label>
+                        <input type="file" id="cad_foto" accept="image/*">
+
+                        <button id="btnCadastrarPessoa" onclick="cadastrarPessoa()">Cadastrar</button>
+                        
+                        <div id="msg_cadastro" class="resultado" style="display: none;"></div>
+                    </div>
+                </div>
                 
                 <div class="grupo-botoes-direita">
                     <button class="btn-amarelo" onclick="voltarTodosParaPendente()">🔄 Voltar Todos para Pendentes</button>
                     <button class="btn-vermelho" onclick="limparTodasInscricoes()">🗑️ Limpar Todas as Inscrições</button>
                 </div>
-            </div>
-
-            <!-- ✅ SEÇÃO DE CADASTRO ABAIXO DO BOTÃO -->
-            <div id="secaoCadastro" class="secao" style="margin-top:15px; background:#f8f9fa;">
-                <h2>📝 Cadastrar Nova Pessoa</h2>
-                <div class="grupo-campo">
-                    <label>Nome Completo:</label>
-                    <input type="text" id="cad_nome" placeholder="Digite o nome">
-                </div>
-                <div class="grupo-campo">
-                    <label>Dia de Nascimento:</label>
-                    <input type="number" id="cad_dia" min="1" max="31" placeholder="Dia">
-                    <label style="margin-left: 10px;">Mês de Nascimento:</label>
-                    <input type="number" id="cad_mes" min="1" max="12" placeholder="Mês">
-                </div>
-                <div class="grupo-campo">
-                    <label>📸 Foto de Perfil (opcional):</label>
-                    <input type="file" id="cad_foto" accept="image/*">
-                </div>
-                <button onclick="cadastrarPessoa()">Cadastrar</button>
-                <div id="msg_cadastro" class="resultado" style="display: none;"></div>
             </div>
 
         </div>
@@ -322,18 +385,12 @@
         let quantidadeAnterior = 0;
         let idEmEdicao = null;
 
-        // ✅ FUNÇÃO PARA MOSTRAR/OCULTAR CADASTRO
-        function alternarCadastro() {
-            const secao = document.getElementById('secaoCadastro');
-            const botao = document.getElementById('btnMostrarCadastro');
-            
-            if (secao.style.display === 'none' || secao.style.display === '') {
-                secao.style.display = 'block';
-                botao.innerText = '🔽 Ocultar Cadastro';
-            } else {
-                secao.style.display = 'none';
-                botao.innerText = '📝 Cadastrar Nova Pessoa';
-            }
+        // ✅ FUNÇÕES PARA MOSTRAR/OCULTAR JANELINHA
+        function mostrarCadastro() {
+            document.getElementById('janelaCadastro').style.display = 'block';
+        }
+        function ocultarCadastro() {
+            document.getElementById('janelaCadastro').style.display = 'none';
         }
 
         // ===== LOGIN =====
