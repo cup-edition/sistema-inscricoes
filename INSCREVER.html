@@ -7,272 +7,257 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase.js"></script>
     <style>
         * {margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif;}
-        body {background-color: #343a40; padding: 20px; min-height: 100vh; display: flex; align-items: center; justify-content: center;}
-
-        .container {
-            background: white;
-            padding: 30px 25px;
-            border-radius: 12px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
-            width: 100%;
-            max-width: 400px;
-            text-align: center;
-        }
-
-        h1 {color: #2c3e50; margin-bottom: 8px; font-size: 22px;}
-        .subtitulo {color: #666; margin-bottom: 20px; font-size: 14px;}
-
-        .aviso-fechado {
-            background: #fff3cd;
-            color: #856404;
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            font-weight: bold;
-            display: none;
-        }
-
+        /* ✅ FUNDO ALTERADO PARA CINZA ESCURO */
+        body {background-color: #343a40; display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px;}
+        .container {background: #ffffff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); width: 100%; max-width: 450px; text-align: center;}
+        h1 {color: #2c3e50; margin-bottom: 10px; font-size: 22px;}
+        p.descricao {color: #666; margin-bottom: 25px; font-size: 15px;}
+        .encerrado {background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; padding: 20px; border-radius: 8px; font-weight: bold; font-size: 18px;}
+        .aviso-limite-atingido {background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba; padding: 15px; border-radius: 8px; font-weight: bold; font-size: 16px; margin-bottom: 20px;}
+        .aviso-reiniciando {background-color: #f39c12; color: #fff; border: 1px solid #e67e22; padding: 12px; border-radius: 6px; font-weight: bold; font-size: 15px; margin-bottom: 15px; display: none;}
         .grupo-campo {margin-bottom: 15px; text-align: left;}
-        label {display: block; margin-bottom: 5px; font-weight: 500; color: #555;}
-        
-        input {
-            width: 100%;
-            padding: 12px 10px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            font-size: 16px;
-        }
-
-        .grupo-data {
-            display: flex;
-            gap: 10px;
-        }
-        .grupo-data div {flex: 1;}
-
-        /* ✅ Deixa as caixinhas de dia e mês menores e alinhadas */
-        .grupo-data input {
-            text-align: center;
-        }
-
-        input[type="file"] {
-            padding: 8px;
-            border: 1px dashed #27ae60;
-            background: #f8f9fa;
-        }
-
-        .foto-preview {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 2px solid #ddd;
-            margin: 10px auto;
-            display: none;
-        }
-
-        button {
-            width: 100%;
-            padding: 13px;
-            background-color: #27ae60;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: background 0.2s;
-            margin-top: 8px;
-        }
+        label {display: block; margin-bottom: 6px; font-weight: 500; color: #555;}
+        select, input {width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 16px; background-color: #fff;}
+        input[type="number"] {width: 48%; display: inline-block; margin-right: 2%;}
+        button {background-color: #27ae60; color: white; border: none; padding: 14px; border-radius: 6px; cursor: pointer; font-size: 16px; width: 100%; margin-top: 10px; font-weight: bold; transition: background 0.3s;}
         button:hover {background-color: #219653;}
-        button:disabled {background: #95a5a6; cursor: not-allowed;}
-
-        .mensagem {
-            margin-top: 15px;
-            padding: 12px;
-            border-radius: 6px;
-            font-weight: bold;
-            display: none;
-        }
+        button:disabled {background-color: #95a5a6; cursor: not-allowed;}
+        .resultado {margin-top: 20px; padding: 15px; border-radius: 6px; font-weight: bold; font-size: 15px; display: none;}
         .sucesso {background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb;}
         .erro {background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb;}
-
-        .carregando {color: #3498db; font-style: italic; display: none; margin-top: 10px;}
     </style>
 </head>
 <body>
 
     <div class="container">
-        <h1>📋 Faça sua Inscrição</h1>
-        <p class="subtitulo">Preencha os dados corretamente para participar</p>
+        <!-- ✅ NOVO AVISO DE REINÍCIO -->
+        <div id="avisoReiniciando" class="aviso-reiniciando">
+            ⏰ REINICIANDO O SISTEMA... AGUARDE!
+        </div>
 
-        <div id="avisoFechado" class="aviso-fechado">⚠️ As inscrições estão encerradas no momento.</div>
+        <div id="telaEncerrado" style="display: none;" class="encerrado">
+            🚫 INSCRIÇÕES ENCERRADAS<br><br>
+            Todas as vagas foram preenchidas ou o período de inscrições finalizou.<br>
+            <span style="font-size:14px; margin-top:10px; display:block;">Limite máximo: 16 confirmados</span>
+        </div>
 
-        <form id="formInscricao">
+        <div id="telaNormal">
+            <div id="avisoLimite" class="aviso-limite-atingido" style="display: none;">
+                ⚠️ ATENÇÃO: Restam poucas vagas. Ao atingir 16 confirmados, o sistema será bloqueado automaticamente.
+            </div>
+
+            <h1>✅ Confirmar Inscrição</h1>
+            <p class="descricao">Escolha seu nome e preencha a data de nascimento para confirmar sua participação.</p>
+
             <div class="grupo-campo">
-                <label>Nome Completo:</label>
-                <input type="text" id="nome" placeholder="Digite seu nome completo" required>
+                <label>Nome</label>
+                <select id="ver_nome" onkeydown="avancarCampo(event, 'ver_dia')">
+                    <option value="">-- Selecione seu nome --</option>
+                </select>
             </div>
 
             <div class="grupo-campo">
-                <label>Data de Nascimento:</label>
-                <div class="grupo-data">
-                    <div>
-                        <label style="font-size: 13px; text-align:center; display:block;">Dia</label>
-                        <!-- ✅ Adicionei o evento oninput para pular automaticamente -->
-                        <input type="number" id="dia" min="1" max="31" placeholder="DD" required maxlength="2" oninput="pularParaMes(this)">
-                    </div>
-                    <div>
-                        <label style="font-size: 13px; text-align:center; display:block;">Mês</label>
-                        <input type="number" id="mes" min="1" max="12" placeholder="MM" required maxlength="2">
-                    </div>
-                </div>
+                <label>Data de Nascimento</label>
+                <!-- ✅ ADICIONADO: oninput="pularParaMes(this)" → Pula automaticamente quando completar 2 dígitos -->
+                <input type="number" id="ver_dia" min="1" max="31" placeholder="Dia" maxlength="2" oninput="limitarDigitos(this, 2); pularParaMes(this)" onkeydown="avancarCampo(event, 'ver_mes')">
+                <input type="number" id="ver_mes" min="1" max="12" placeholder="Mês" maxlength="2" oninput="limitarDigitos(this, 2)" onkeydown="avancarCampo(event, 'botaoConfirmar')">
             </div>
 
-            <div class="grupo-campo">
-                <label>📸 Foto de Perfil (opcional):</label>
-                <input type="file" id="foto" accept="image/*" onchange="mostrarPreview(this)">
-                <img id="previewFoto" class="foto-preview" alt="Pré-visualização">
-            </div>
+            <button id="botaoConfirmar" onclick="confirmarInscricao()">CONFIRMAR INSCRIÇÃO</button>
 
-            <button type="submit" id="botaoEnviar">✅ Confirmar Inscrição</button>
-        </form>
-
-        <div id="carregando" class="carregando">Enviando dados...</div>
-        <div id="mensagem" class="mensagem"></div>
+            <div id="msg_verificacao" class="resultado"></div>
+        </div>
     </div>
 
     <script>
-        // ✅ SEUS DADOS DO FIREBASE
+        // ✅ DADOS DO SEU PROJETO - NÃO ALTERE
         var firebaseConfig = {
-          apiKey: "AIzaSyAR--VWkuPUBzKtJlEHPXnwBwbapB8JY_w",
-          authDomain: "sistema-inscricoes-e9241.firebaseapp.com",
-          databaseURL: "https://sistema-inscricoes-e9241-default-rtdb.firebaseio.com",
-          projectId: "sistema-inscricoes-e9241",
-          storageBucket: "sistema-inscricoes-e9241.firebasestorage.app",
-          messagingSenderId: "232618438422",
-          appId: "1:232618438422:web:1c62103b2169e64e862a37"
+            apiKey: "AIzaSyAR--VWkuPUBzKtJlEHPXnwBwbapB8JY_w",
+            authDomain: "sistema-inscricoes-e9241.firebaseapp.com",
+            databaseURL: "https://sistema-inscricoes-e9241-default-rtdb.firebaseio.com",
+            projectId: "sistema-inscricoes-e9241",
+            storageBucket: "sistema-inscricoes-e9241.firebasestorage.app",
+            messagingSenderId: "232618438422",
+            appId: "1:232618438422:web:1c62103b2169e64e862a37"
         };
 
         firebase.initializeApp(firebaseConfig);
         var db = firebase.database();
         const LIMITE_MAXIMO = 16;
 
-        // ✅ FUNÇÃO PULAR PARA O MÊS AO DIGITAR 2 NÚMEROS NO DIA
+        window.onload = function() {
+            verificarAgendamentoEExecutar(); // ✅ NOVA FUNÇÃO CHAMADA AQUI
+            verificarStatusSistema();
+            carregarListaNomes();
+            setInterval(verificarStatusSistema, 3000);
+        };
+
+        // ✅ NOVA FUNÇÃO: VERIFICA SE DEVE REINICIAR (GRATUITA)
+        async function verificarAgendamentoEExecutar() {
+            const snap = await db.ref('agendamento_reinicio').once('value');
+            const agendamento = snap.val();
+
+            // Se não tem agendamento ou já foi executado, não faz nada
+            if (!agendamento || agendamento.executado === true) return;
+
+            const agora = Date.now();
+            const horarioMarcado = agendamento.timestamp;
+
+            // ✅ SE JÁ PASSOU DO HORÁRIO MARCADO: EXECUTA O REINÍCIO
+            if (agora >= horarioMarcado) {
+                document.getElementById('avisoReiniciando').style.display = 'block';
+
+                // 1. Pegar todas as inscrições
+                const inscSnap = await db.ref('inscricoes').once('value');
+                const lista = inscSnap.val() || [];
+
+                // 2. Mudar TODOS para PENDENTE e limpar data
+                const novaLista = lista.map(insc => {
+                    if(insc) {
+                        insc.status = 'pendente';
+                        insc.data_confirmacao = null;
+                    }
+                    return insc;
+                });
+
+                // 3. Salvar alterações
+                await db.ref('inscricoes').set(novaLista);
+                
+                // 4. Reabrir inscrições
+                await db.ref('configuracao').update({inscricoes_abertas: true});
+
+                // 5. Marcar agendamento como executado para não repetir
+                await db.ref('agendamento_reinicio').update({executado: true});
+
+                // Recarrega a página para atualizar tudo
+                location.reload();
+            }
+        }
+
+        // ✅ NOVA FUNÇÃO: AVANÇAR PARA PRÓXIMO CAMPO AO CLICAR ENTER
+        function avancarCampo(event, proximoCampoId) {
+            if (event.key === 'Enter') {
+                event.preventDefault(); // Evita o comportamento padrão
+                document.getElementById(proximoCampoId).focus(); // Vai para o próximo campo
+            }
+        }
+
+        // ✅ NOVA FUNÇÃO: PULAR AUTOMATICAMENTE QUANDO COMPLETAR 2 DÍGITOS NO DIA
         function pularParaMes(campo) {
-            // Se já tiver 2 dígitos, pula para o campo do mês
-            if (campo.value.length >= 2) {
-                document.getElementById('mes').focus();
+            // Se o tamanho do valor for igual a 2, pula para o campo Mês
+            if (campo.value.length === 2) {
+                document.getElementById('ver_mes').focus();
             }
         }
 
-        function mostrarPreview(input) {
-            if (input.files && input.files[0]) {
-                var leitor = new FileReader();
-                leitor.onload = function(e) {
-                    var img = document.getElementById('previewFoto');
-                    img.src = e.target.result;
-                    img.style.display = 'block';
-                }
-                leitor.readAsDataURL(input.files[0]);
+        // Função para limitar a quantidade de dígitos
+        function limitarDigitos(campo, maximo) {
+            if (campo.value.length > maximo) {
+                campo.value = campo.value.slice(0, maximo);
             }
         }
 
-        function lerFotoComoTexto(arquivo, callback) {
-            if (!arquivo) { callback(null); return; }
-            var leitor = new FileReader();
-            leitor.onload = function(e) {
-                var img = new Image();
-                img.onload = function() {
-                    var canvas = document.createElement('canvas');
-                    var tamanho = 100;
-                    canvas.width = tamanho;
-                    canvas.height = tamanho;
-                    var ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, tamanho, tamanho);
-                    callback(canvas.toDataURL('image/jpeg', 0.7));
-                };
-                img.src = e.target.result;
-            };
-            leitor.readAsDataURL(arquivo);
-        }
+        function carregarListaNomes() {
+            db.ref('inscricoes').once('value').then(snap => {
+                var inscricoes = snap.val() || [];
+                var selectNome = document.getElementById('ver_nome');
+                selectNome.innerHTML = '<option value="">-- Selecione seu nome --</option>';
 
-        function verificarEstadoInscricoes() {
-            return new Promise((resolve) => {
-                db.ref('configuracao').once('value').then(snap => {
-                    const config = snap.val() || {};
-                    db.ref('inscricoes').once('value').then(snapInsc => {
-                        const lista = snapInsc.val() || [];
-                        const qtdConfirmados = lista.filter(i => i && i.status === 'confirmado').length;
-                        const abertas = config.inscricoes_abertas !== false && qtdConfirmados < LIMITE_MAXIMO;
-                        resolve(abertas);
-                    });
+                var nomesPendentes = inscricoes.filter(insc => insc && insc.status === 'pendente').map(insc => insc.nome);
+                var nomesUnicos = [...new Set(nomesPendentes)].sort();
+
+                nomesUnicos.forEach(nome => {
+                    var opcao = document.createElement('option');
+                    opcao.value = nome;
+                    opcao.textContent = nome;
+                    selectNome.appendChild(opcao);
                 });
             });
         }
 
-        document.getElementById('formInscricao').addEventListener('submit', function(e) {
-            e.preventDefault();
+        function verificarStatusSistema() {
+            db.ref('configuracao/inscricoes_abertas').once('value').then(snap => {
+                var aberto = snap.val() !== null ? snap.val() : true;
+                
+                db.ref('inscricoes').once('value').then(snapIns => {
+                    var lista = snapIns.val() || [];
+                    var qtdConfirmados = lista.filter(i => i && i.status === 'confirmado').length;
 
-            verificarEstadoInscricoes().then(abertas => {
-                if (!abertas) {
-                    document.getElementById('avisoFechado').style.display = 'block';
-                    return;
-                }
-
-                document.getElementById('carregando').style.display = 'block';
-                document.getElementById('mensagem').style.display = 'none';
-                document.getElementById('botaoEnviar').disabled = true;
-
-                var nome = document.getElementById('nome').value.trim();
-                var dia = parseInt(document.getElementById('dia').value);
-                var mes = parseInt(document.getElementById('mes').value);
-                var arquivoFoto = document.getElementById('foto').files[0];
-
-                if (!nome || !dia || !mes || dia < 1 || dia > 31 || mes < 1 || mes > 12) {
-                    mostrarMensagem('❌ Preencha todos os dados corretamente!', 'erro');
-                    return;
-                }
-
-                lerFotoComoTexto(arquivoFoto, function(textoDaFoto) {
-                    db.ref('inscricoes').once('value').then(snap => {
-                        var inscricoes = snap.val() || [];
-                        var novoId = inscricoes.length > 0 ? Math.max(...inscricoes.map(i => i.id)) + 1 : 1;
+                    if (!aberto || qtdConfirmados >= LIMITE_MAXIMO) {
+                        document.getElementById('telaEncerrado').style.display = 'block';
+                        document.getElementById('telaNormal').style.display = 'none';
+                    } else {
+                        document.getElementById('telaEncerrado').style.display = 'none';
+                        document.getElementById('telaNormal').style.display = 'block';
                         
-                        inscricoes.push({
-                            id: novoId,
-                            nome: nome,
-                            dia: dia,
-                            mes: mes,
-                            status: 'pendente',
-                            foto: textoDaFoto || "",
-                            data_confirmacao: null
-                        });
-                        
-                        return db.ref('inscricoes').set(inscricoes);
-                    }).then(() => {
-                        mostrarMensagem('✅ Inscrição realizada com sucesso! Aguarde confirmação.', 'sucesso');
-                        document.getElementById('formInscricao').reset();
-                        document.getElementById('previewFoto').style.display = 'none';
-                    }).catch(() => {
-                        mostrarMensagem('❌ Erro ao enviar dados. Tente novamente.', 'erro');
-                    });
+                        if (qtdConfirmados >= 12) {
+                            document.getElementById('avisoLimite').style.display = 'block';
+                        } else {
+                            document.getElementById('avisoLimite').style.display = 'none';
+                        }
+                    }
                 });
             });
-        });
-
-        function mostrarMensagem(texto, tipo) {
-            document.getElementById('carregando').style.display = 'none';
-            const msg = document.getElementById('mensagem');
-            msg.innerText = texto;
-            msg.className = `mensagem ${tipo}`;
-            msg.style.display = 'block';
-            document.getElementById('botaoEnviar').disabled = false;
         }
 
-        // Verifica se está fechado ao carregar
-        verificarEstadoInscricoes().then(abertas => {
-            if (!abertas) document.getElementById('avisoFechado').style.display = 'block';
-        });
+        function confirmarInscricao() {
+            var nome = document.getElementById('ver_nome').value.trim();
+            var dia = parseInt(document.getElementById('ver_dia').value);
+            var mes = parseInt(document.getElementById('ver_mes').value);
+            var msg = document.getElementById('msg_verificacao');
+            msg.style.display = 'none';
+
+            if (!nome || !dia || !mes) {
+                msg.className = 'resultado erro';
+                msg.innerText = '❌ Selecione o nome e preencha dia e mês corretamente!';
+                msg.style.display = 'block';
+                return;
+            }
+
+            db.ref('inscricoes').once('value').then(snap => {
+                var inscricoes = snap.val() || [];
+                
+                var qtdAtual = inscricoes.filter(i => i && i.status === 'confirmado').length;
+                if (qtdAtual >= LIMITE_MAXIMO) {
+                    msg.className = 'resultado erro';
+                    msg.innerText = '❌ LIMITE DE 16 CONFIRMADOS ATINGIDO! Inscrições encerradas.';
+                    msg.style.display = 'block';
+                    verificarStatusSistema();
+                    return;
+                }
+
+                var encontrado = inscricoes.find(insc => insc && insc.nome === nome && insc.dia === dia && insc.mes === mes && insc.status === 'pendente');
+
+                if (encontrado) {
+                    // ✅ GUARDA A DATA E HORA ATUAL NO MOMENTO DA CONFIRMAÇÃO
+                    const dataHoraAtual = new Date().getTime();
+
+                    inscricoes = inscricoes.map(insc => { 
+                        if (insc && insc.id === encontrado.id) {
+                            insc.status = 'confirmado'; 
+                            insc.data_confirmacao = dataHoraAtual; // ✅ SALVA AQUI
+                        }
+                        return insc; 
+                    });
+                    db.ref('inscricoes').set(inscricoes);
+                    
+                    msg.className = 'resultado sucesso';
+                    msg.innerText = '🎉 INSCRIÇÃO CONFIRMADA COM SUCESSO!';
+                    msg.style.display = 'block';
+                    
+                    document.getElementById('ver_nome').value = '';
+                    document.getElementById('ver_dia').value = '';
+                    document.getElementById('ver_mes').value = '';
+                    
+                    carregarListaNomes();
+                    verificarStatusSistema();
+                } else {
+                    msg.className = 'resultado erro';
+                    msg.innerText = '❌ DADOS INCORRETOS COM A BASE DE DADOS';
+                    msg.style.display = 'block';
+                }
+            });
+        }
     </script>
 
 </body>
