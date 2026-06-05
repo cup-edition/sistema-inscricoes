@@ -19,7 +19,7 @@
         .aviso-limite-atingido {background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba; padding: 15px; border-radius: 8px; font-weight: bold; font-size: 16px; margin-bottom: 20px;}
         .aviso-reiniciando {background-color: #f39c12; color: #fff; border: 1px solid #e67e22; padding: 12px; border-radius: 6px; font-weight: bold; font-size: 15px; margin-bottom: 15px; display: none;}
         .grupo-campo {margin-bottom: 15px; text-align: left;}
-        label {display: block; margin-bottom: 6px; font-weight: 500; color: #555;}
+        label {display: block; margin-bottom: 6px; font-weight: bold; color: #555;} /* ✅ Negrito aplicado aqui */
         select, input {width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 16px; background-color: #fff;}
         input[type="number"] {width: 48%; display: inline-block; margin-right: 2%;}
         button {background-color: #27ae60; color: white; border: none; padding: 14px; border-radius: 6px; cursor: pointer; font-size: 16px; width: 100%; margin-top: 10px; font-weight: bold; transition: background 0.3s;}
@@ -55,14 +55,16 @@
             <p class="descricao">Escolha seu nome e preencha a data de nascimento para confirmar sua participação.</p>
 
             <div class="grupo-campo">
-                <label>Nome</label>
+                <!-- ✅ ALTERADO: NOME: em negrito -->
+                <label>NOME:</label>
                 <select id="ver_nome" onkeydown="avancarCampo(event, 'ver_dia')">
                     <option value="">-- Selecione seu nome --</option>
                 </select>
             </div>
 
             <div class="grupo-campo">
-                <label>Data de Nascimento</label>
+                <!-- ✅ ALTERADO: DATA DE NASCIMENTO: em negrito -->
+                <label>DATA DE NASCIMENTO:</label>
                 <!-- ✅ ADICIONADO: oninput="pularParaMes(this)" → Pula automaticamente quando completar 2 dígitos -->
                 <input type="number" id="ver_dia" min="1" max="31" placeholder="Dia" maxlength="2" oninput="limitarDigitos(this, 2); pularParaMes(this)" onkeydown="avancarCampo(event, 'ver_mes')">
                 <input type="number" id="ver_mes" min="1" max="12" placeholder="Mês" maxlength="2" oninput="limitarDigitos(this, 2)" onkeydown="avancarCampo(event, 'botaoConfirmar')">
