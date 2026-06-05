@@ -89,7 +89,8 @@
                     <div style="flex: 1;">
                         <!-- ✅ ADICIONADO: oninput="pularParaMes(this)" → Pula automaticamente quando completar 2 dígitos -->
                         <input type="number" id="ver_dia" min="1" max="31" placeholder="Dia" maxlength="2" oninput="limitarDigitos(this, 2); pularParaMes(this)" onkeydown="avancarCampo(event, 'ver_mes')">
-                        <input type="number" id="ver_mes" min="1" max="12" placeholder="Mês" maxlength="2" oninput="limitarDigitos(this, 2)" onkeydown="avancarCampo(event, 'botaoConfirmar')">
+                        <!-- ✅ ALTERADO: oninput="limitarDigitos(this, 2); pularParaBotao(this)" → Agora pula para o botão ao completar 2 dígitos -->
+                        <input type="number" id="ver_mes" min="1" max="12" placeholder="Mês" maxlength="2" oninput="limitarDigitos(this, 2); pularParaBotao(this)" onkeydown="avancarCampo(event, 'botaoConfirmar')">
                     </div>
                     <!-- ✅ Elemento da Foto -->
                     <img id="fotoUsuario" class="foto-preview" alt="Foto do usuário">
@@ -181,6 +182,14 @@
             // Se o tamanho do valor for igual a 2, pula para o campo Mês
             if (campo.value.length === 2) {
                 document.getElementById('ver_mes').focus();
+            }
+        }
+
+        // ✅ NOVA FUNÇÃO: PULAR AUTOMATICAMENTE QUANDO COMPLETAR 2 DÍGITOS NO MÊS → VAI PARA O BOTÃO
+        function pularParaBotao(campo) {
+            // Se o tamanho do valor for igual a 2, pula direto para o botão de confirmar
+            if (campo.value.length === 2) {
+                document.getElementById('botaoConfirmar').focus();
             }
         }
 
