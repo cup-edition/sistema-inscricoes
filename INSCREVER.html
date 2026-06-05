@@ -3,196 +3,159 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inscreva-se - Sistema de Inscrições</title>
+    <title>Sistema de Inscrições</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase.js"></script>
     <style>
         * {margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif;}
-        /* ✅ FUNDO ALTERADO PARA CINZA ESCURO */
-        body {background-color: #343a40; display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px;}
-        .container {background: #ffffff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); width: 100%; max-width: 450px; text-align: center;}
-        h1 {color: #2c3e50; margin-bottom: 10px; font-size: 22px;}
-        p.descricao {color: #666; margin-bottom: 25px; font-size: 15px;}
-        .encerrado {background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; padding: 20px; border-radius: 8px; font-weight: bold; font-size: 18px;}
-        .aviso-limite-atingido {background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba; padding: 15px; border-radius: 8px; font-weight: bold; font-size: 16px; margin-bottom: 20px;}
-        .grupo-campo {margin-bottom: 15px; text-align: left;}
-        label {display: block; margin-bottom: 6px; font-weight: 500; color: #555;}
-        select, input {width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 16px; background-color: #fff;}
-        input[type="number"] {width: 48%; display: inline-block; margin-right: 2%;}
-        button {background-color: #27ae60; color: white; border: none; padding: 14px; border-radius: 6px; cursor: pointer; font-size: 16px; width: 100%; margin-top: 10px; font-weight: bold; transition: background 0.3s;}
-        button:hover {background-color: #219653;}
-        button:disabled {background-color: #95a5a6; cursor: not-allowed;}
-        .resultado {margin-top: 20px; padding: 15px; border-radius: 6px; font-weight: bold; font-size: 15px; display: none;}
-        .sucesso {background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb;}
-        .erro {background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb;}
+        body {background-color: #f0f2f5; padding: 15px;}
+        .container {max-width: 500px; margin: 0 auto; background: white; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); overflow: hidden;}
+        
+        .cabecalho {background-color: #27ae60; color: white; padding: 20px; text-align: center;}
+        .cabecalho h1 {font-size: 20px; margin-bottom: 5px;}
+        .cabecalho p {font-size: 14px; opacity: 0.9;}
+
+        .aviso-encerrado {background-color: #e74c3c; color: white; padding: 15px; text-align: center; font-weight: bold; display: none;}
+        .aviso-reiniciando {background-color: #f39c12; color: white; padding: 15px; text-align: center; font-weight: bold; display: none;}
+
+        .lista-pessoas {padding: 20px;}
+        .grupo-pessoa {border: 1px solid #ddd; border-radius: 8px; padding: 12px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;}
+        .info-pessoa {display: flex; align-items: center; gap: 10px; flex: 1; min-width: 200px;}
+        .foto-mini {width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 1px solid #ccc;}
+        .dados-pessoa h3 {font-size: 15px; color: #333; margin-bottom: 2px;}
+        .dados-pessoa p {font-size: 12px; color: #666;}
+
+        .btn-confirmar {background-color: #27ae60; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: bold; transition: 0.2s;}
+        .btn-confirmar:hover {background-color: #219653;}
+        .btn-confirmar:disabled {background-color: #bdc3c7; cursor: not-allowed;}
+        .confirmado {background-color: #d4edda; color: #155724; padding: 8px 12px; border-radius: 6px; font-size: 13px; font-weight: bold;}
+        .limite-atingido {color: #e74c3c; font-weight: bold; text-align: center; padding: 10px; display: none;}
     </style>
 </head>
 <body>
-
     <div class="container">
-        <div id="telaEncerrado" style="display: none;" class="encerrado">
-            🚫 INSCRIÇÕES ENCERRADAS<br><br>
-            Todas as vagas foram preenchidas ou o período de inscrições finalizou.<br>
-            <span style="font-size:14px; margin-top:10px; display:block;">Limite máximo: 16 confirmados</span>
+        <div class="cabecalho">
+            <h1>📋 Lista de Confirmações</h1>
+            <p>Confirme sua presença na lista abaixo</p>
         </div>
 
-        <div id="telaNormal">
-            <div id="avisoLimite" class="aviso-limite-atingido" style="display: none;">
-                ⚠️ ATENÇÃO: Restam poucas vagas. Ao atingir 16 confirmados, o sistema será bloqueado automaticamente.
-            </div>
-
-            <h1>✅ Confirmar Inscrição</h1>
-            <p class="descricao">Escolha seu nome e preencha a data de nascimento para confirmar sua participação.</p>
-
-            <div class="grupo-campo">
-                <label>Nome</label>
-                <select id="ver_nome">
-                    <option value="">-- Selecione seu nome --</option>
-                </select>
-            </div>
-
-            <div class="grupo-campo">
-                <label>Data de Nascimento</label>
-                <input type="number" id="ver_dia" min="1" max="31" placeholder="Dia" maxlength="2" oninput="limitarDigitos(this, 2)">
-                <input type="number" id="ver_mes" min="1" max="12" placeholder="Mês" maxlength="2" oninput="limitarDigitos(this, 2)">
-            </div>
-
-            <button id="botaoConfirmar" onclick="confirmarInscricao()">CONFIRMAR INSCRIÇÃO</button>
-
-            <div id="msg_verificacao" class="resultado"></div>
+        <!-- ✅ AVISO DE REINÍCIO AUTOMÁTICO -->
+        <div id="avisoReiniciando" class="aviso-reiniciando">
+            ⏰ REINICIANDO SISTEMA... AGUARDE UM MOMENTO!
         </div>
+
+        <div id="avisoEncerrado" class="aviso-encerrado">
+            ⚠️ AS INSCRIÇÕES ESTÃO ENCERRADAS (LIMITE DE 16 CONFIRMADOS ATINGIDO)
+        </div>
+
+        <div class="lista-pessoas" id="lista"></div>
+        <div id="avisoLimite" class="limite-atingido">⚠️ Você atingiu o limite máximo de confirmações</div>
     </div>
 
     <script>
-        // ✅ DADOS DO SEU PROJETO - NÃO ALTERE
+        // ✅ SEUS DADOS DO FIREBASE
         var firebaseConfig = {
-            apiKey: "AIzaSyAR--VWkuPUBzKtJlEHPXnwBwbapB8JY_w",
-            authDomain: "sistema-inscricoes-e9241.firebaseapp.com",
-            databaseURL: "https://sistema-inscricoes-e9241-default-rtdb.firebaseio.com",
-            projectId: "sistema-inscricoes-e9241",
-            storageBucket: "sistema-inscricoes-e9241.firebasestorage.app",
-            messagingSenderId: "232618438422",
-            appId: "1:232618438422:web:1c62103b2169e64e862a37"
+          apiKey: "AIzaSyAR--VWkuPUBzKtJlEHPXnwBwbapB8JY_w",
+          authDomain: "sistema-inscricoes-e9241.firebaseapp.com",
+          databaseURL: "https://sistema-inscricoes-e9241-default-rtdb.firebaseio.com",
+          projectId: "sistema-inscricoes-e9241",
+          storageBucket: "sistema-inscricoes-e9241.firebasestorage.app",
+          messagingSenderId: "232618438422",
+          appId: "1:232618438422:web:1c62103b2169e64e862a37"
         };
 
         firebase.initializeApp(firebaseConfig);
         var db = firebase.database();
-        const LIMITE_MAXIMO = 16;
+        const LIMITE = 16;
 
-        window.onload = function() {
-            verificarStatusSistema();
-            carregarListaNomes();
-            setInterval(verificarStatusSistema, 3000);
-        };
+        // ✅ FUNÇÃO PRINCIPAL: VERIFICA SE É HORA DE REINICIAR (GRATUITO)
+        async function verificarAgendamentoEExecutar() {
+            const snap = await db.ref('agendamento_reinicio').once('value');
+            const agendamento = snap.val();
 
-        // Função para limitar a quantidade de dígitos
-        function limitarDigitos(campo, maximo) {
-            if (campo.value.length > maximo) {
-                campo.value = campo.value.slice(0, maximo);
-            }
-        }
+            // Se não tem agendamento ou já foi executado, sai fora
+            if (!agendamento || agendamento.executado === true) return;
 
-        function carregarListaNomes() {
-            db.ref('inscricoes').once('value').then(snap => {
-                var inscricoes = snap.val() || [];
-                var selectNome = document.getElementById('ver_nome');
-                selectNome.innerHTML = '<option value="">-- Selecione seu nome --</option>';
+            const agora = Date.now();
+            const horarioMarcado = agendamento.timestamp;
 
-                var nomesPendentes = inscricoes.filter(insc => insc && insc.status === 'pendente').map(insc => insc.nome);
-                var nomesUnicos = [...new Set(nomesPendentes)].sort();
+            // ✅ SE JÁ PASSOU DO HORÁRIO MARCADO: EXECUTA O REINÍCIO
+            if (agora >= horarioMarcado) {
+                document.getElementById('avisoReiniciando').style.display = 'block';
 
-                nomesUnicos.forEach(nome => {
-                    var opcao = document.createElement('option');
-                    opcao.value = nome;
-                    opcao.textContent = nome;
-                    selectNome.appendChild(opcao);
-                });
-            });
-        }
+                // 1. Pegar todas as inscrições
+                const inscSnap = await db.ref('inscricoes').once('value');
+                const lista = inscSnap.val() || [];
 
-        function verificarStatusSistema() {
-            db.ref('configuracao/inscricoes_abertas').once('value').then(snap => {
-                var aberto = snap.val() !== null ? snap.val() : true;
-                
-                db.ref('inscricoes').once('value').then(snapIns => {
-                    var lista = snapIns.val() || [];
-                    var qtdConfirmados = lista.filter(i => i && i.status === 'confirmado').length;
-
-                    if (!aberto || qtdConfirmados >= LIMITE_MAXIMO) {
-                        document.getElementById('telaEncerrado').style.display = 'block';
-                        document.getElementById('telaNormal').style.display = 'none';
-                    } else {
-                        document.getElementById('telaEncerrado').style.display = 'none';
-                        document.getElementById('telaNormal').style.display = 'block';
-                        
-                        if (qtdConfirmados >= 12) {
-                            document.getElementById('avisoLimite').style.display = 'block';
-                        } else {
-                            document.getElementById('avisoLimite').style.display = 'none';
-                        }
+                // 2. Mudar TODOS para PENDENTE
+                const novaLista = lista.map(insc => {
+                    if(insc) {
+                        insc.status = 'pendente';
+                        insc.data_confirmacao = null;
                     }
+                    return insc;
                 });
-            });
+
+                // 3. Salvar tudo de novo
+                await db.ref('inscricoes').set(novaLista);
+                
+                // 4. Reabrir inscrições
+                await db.ref('configuracao').update({inscricoes_abertas: true});
+
+                // 5. Marcar agendamento como executado para não repetir
+                await db.ref('agendamento_reinicio').update({executado: true});
+
+                // Recarrega a página para atualizar tudo
+                location.reload();
+            }
         }
 
-        function confirmarInscricao() {
-            var nome = document.getElementById('ver_nome').value.trim();
-            var dia = parseInt(document.getElementById('ver_dia').value);
-            var mes = parseInt(document.getElementById('ver_mes').value);
-            var msg = document.getElementById('msg_verificacao');
-            msg.style.display = 'none';
+        // ✅ Chamar a verificação assim que a página carregar
+        verificarAgendamentoEExecutar();
 
-            if (!nome || !dia || !mes) {
-                msg.className = 'resultado erro';
-                msg.innerText = '❌ Selecione o nome e preencha dia e mês corretamente!';
-                msg.style.display = 'block';
-                return;
-            }
-
-            db.ref('inscricoes').once('value').then(snap => {
-                var inscricoes = snap.val() || [];
-                
-                var qtdAtual = inscricoes.filter(i => i && i.status === 'confirmado').length;
-                if (qtdAtual >= LIMITE_MAXIMO) {
-                    msg.className = 'resultado erro';
-                    msg.innerText = '❌ LIMITE DE 16 CONFIRMADOS ATINGIDO! Inscrições encerradas.';
-                    msg.style.display = 'block';
-                    verificarStatusSistema();
+        // ===== SISTEMA DE CONFIRMAÇÃO =====
+        function confirmarPresenca(id) {
+            db.ref('configuracao').once('value').then(snapConf => {
+                const conf = snapConf.val();
+                if (!conf || conf.inscricoes_abertas === false) {
+                    alert('⚠️ As inscrições estão encerradas!');
                     return;
                 }
 
-                var encontrado = inscricoes.find(insc => insc && insc.nome === nome && insc.dia === dia && insc.mes === mes && insc.status === 'pendente');
+                db.ref('inscricoes').once('value').then(snap => {
+                    let lista = snap.val() || [];
+                    let qtdConfirmados = lista.filter(i => i && i.status === 'confirmado').length;
 
-                if (encontrado) {
-                    // ✅ GUARDA A DATA E HORA ATUAL NO MOMENTO DA CONFIRMAÇÃO
-                    const dataHoraAtual = new Date().getTime();
+                    if (qtdConfirmados >= LIMITE) {
+                        alert('⚠️ Limite de confirmações atingido!');
+                        return;
+                    }
 
-                    inscricoes = inscricoes.map(insc => { 
-                        if (insc && insc.id === encontrado.id) {
-                            insc.status = 'confirmado'; 
-                            insc.data_confirmacao = dataHoraAtual; // ✅ SALVA AQUI
+                    lista = lista.map(pessoa => {
+                        if (pessoa && pessoa.id === id) {
+                            if (pessoa.status === 'pendente') {
+                                pessoa.status = 'confirmado';
+                                pessoa.data_confirmacao = Date.now();
+                            }
                         }
-                        return insc; 
+                        return pessoa;
                     });
-                    db.ref('inscricoes').set(inscricoes);
                     
-                    msg.className = 'resultado sucesso';
-                    msg.innerText = '🎉 INSCRIÇÃO CONFIRMADA COM SUCESSO!';
-                    msg.style.display = 'block';
-                    
-                    document.getElementById('ver_nome').value = '';
-                    document.getElementById('ver_dia').value = '';
-                    document.getElementById('ver_mes').value = '';
-                    
-                    carregarListaNomes();
-                    verificarStatusSistema();
-                } else {
-                    msg.className = 'resultado erro';
-                    msg.innerText = '❌ DADOS INCORRETOS COM A BASE DE DADOS';
-                    msg.style.display = 'block';
-                }
+                    db.ref('inscricoes').set(lista);
+                });
             });
         }
-    </script>
 
-</body>
-</html>
+        function carregarLista() {
+            db.ref('inscricoes').on('value', snap => {
+                const lista = snap.val() || [];
+                const htmlLista = document.getElementById('lista');
+                const avisoEncerrado = document.getElementById('avisoEncerrado');
+                const avisoLimite = document.getElementById('avisoLimite');
+                let qtdConfirmados = lista.filter(i => i && i.status === 'confirmado').length;
+
+                db.ref('configuracao').once('value').then(snapConf => {
+                    const conf = snapConf.val();
+                    
+                    if (conf && conf.inscricoes_abertas === false) {
+                        avisoEncerrado.style.display = 'block';
+                        aviso
