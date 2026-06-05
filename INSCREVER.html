@@ -516,6 +516,11 @@
                     msg.innerText = '🎉 INSCRIÇÃO CONFIRMADA COM SUCESSO!';
                     msg.style.display = 'block';
                     
+                    // ✅ NOVO: A MENSAGEM SOME APÓS 3 SEGUNDOS
+                    setTimeout(() => {
+                        msg.style.display = 'none';
+                    }, 3000);
+                    
                     // ✅ Limpa campos e esconde foto após confirmação
                     document.getElementById('ver_nome').value = '';
                     document.getElementById('ver_dia').value = '';
