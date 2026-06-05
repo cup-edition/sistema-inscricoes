@@ -202,6 +202,32 @@
             color: #155724;
             border: 1px solid #c3e6cb;
         }
+
+        /* ✅ NOVO ESTILO: ÁREA DE CADASTRO OCULTÁVEL */
+        #btnMostrarCadastro {
+            width: 100%;
+            background-color: #27ae60;
+            color: white;
+            padding: 12px;
+            font-size: 15px;
+            font-weight: bold;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-bottom: 15px;
+            transition: background 0.2s;
+        }
+        #btnMostrarCadastro:hover {
+            background-color: #219653;
+        }
+        #secaoCadastro {
+            display: none;
+            animation: aparecer 0.3s ease;
+        }
+        @keyframes aparecer {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
     </style>
 </head>
 <body>
@@ -330,7 +356,10 @@
             </div>
         </div>
 
-        <div class="secao">
+        <!-- ✅ SEÇÃO DE CADASTRO DENTRO DE BOTÃO -->
+        <button id="btnMostrarCadastro" onclick="alternarCadastro()">📝 Cadastrar Nova Pessoa</button>
+
+        <div id="secaoCadastro" class="secao">
             <h2>📝 Cadastrar Nova Pessoa</h2>
             <div class="grupo-campo">
                 <label>Nome Completo:</label>
@@ -369,6 +398,20 @@
         const LIMITE_MAXIMO = 16;
         let quantidadeAnterior = 0;
         let idEmEdicao = null;
+
+        // ✅ FUNÇÃO PARA MOSTRAR/OCULTAR CADASTRO
+        function alternarCadastro() {
+            const secao = document.getElementById('secaoCadastro');
+            const botao = document.getElementById('btnMostrarCadastro');
+            
+            if (secao.style.display === 'none' || secao.style.display === '') {
+                secao.style.display = 'block';
+                botao.innerText = '🔽 Ocultar Cadastro';
+            } else {
+                secao.style.display = 'none';
+                botao.innerText = '📝 Cadastrar Nova Pessoa';
+            }
+        }
 
         // ===== LOGIN =====
         function fazerLogin() {
