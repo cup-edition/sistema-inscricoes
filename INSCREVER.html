@@ -14,6 +14,7 @@
         p.descricao {color: #666; margin-bottom: 25px; font-size: 15px;}
         .encerrado {background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; padding: 20px; border-radius: 8px; font-weight: bold; font-size: 18px;}
         .aviso-limite-atingido {background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba; padding: 15px; border-radius: 8px; font-weight: bold; font-size: 16px; margin-bottom: 20px;}
+        .aviso-reiniciando {background-color: #f39c12; color: #fff; border: 1px solid #e67e22; padding: 12px; border-radius: 6px; font-weight: bold; font-size: 15px; margin-bottom: 15px; display: none;}
         .grupo-campo {margin-bottom: 15px; text-align: left;}
         label {display: block; margin-bottom: 6px; font-weight: 500; color: #555;}
         select, input {width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 16px; background-color: #fff;}
@@ -29,6 +30,11 @@
 <body>
 
     <div class="container">
+        <!-- ✅ NOVO AVISO DE REINÍCIO -->
+        <div id="avisoReiniciando" class="aviso-reiniciando">
+            ⏰ REINICIANDO O SISTEMA... AGUARDE!
+        </div>
+
         <div id="telaEncerrado" style="display: none;" class="encerrado">
             🚫 INSCRIÇÕES ENCERRADAS<br><br>
             Todas as vagas foram preenchidas ou o período de inscrições finalizou.<br>
@@ -79,10 +85,53 @@
         const LIMITE_MAXIMO = 16;
 
         window.onload = function() {
+            verificarAgendamentoEExecutar(); // ✅ NOVA FUNÇÃO CHAMADA AQUI
             verificarStatusSistema();
             carregarListaNomes();
             setInterval(verificarStatusSistema, 3000);
         };
+
+        // ✅ NOVA FUNÇÃO: VERIFICA SE DEVE REINICIAR (GRATUITA)
+        async function verificarAgendamentoEExecutar() {
+            const snap = await db.ref('agendamento_reinicio').once('value');
+            const agendamento = snap.val();
+
+            // Se não tem agendamento ou já foi executado, não faz nada
+            if (!agendamento || agendamento.executado === true) return;
+
+            const agora = Date.now();
+            const horarioMarcado = agendamento.timestamp;
+
+            // ✅ SE JÁ PASSOU DO HORÁRIO MARCADO: EXECUTA O REINÍCIO
+            if (agora >= horarioMarcado) {
+                document.getElementById('avisoReiniciando').style.display = 'block';
+
+                // 1. Pegar todas as inscrições
+                const inscSnap = await db.ref('inscricoes').once('value');
+                const lista = inscSnap.val() || [];
+
+                // 2. Mudar TODOS para PENDENTE e limpar data
+                const novaLista = lista.map(insc => {
+                    if(insc) {
+                        insc.status = 'pendente';
+                        insc.data_confirmacao = null;
+                    }
+                    return insc;
+                });
+
+                // 3. Salvar alterações
+                await db.ref('inscricoes').set(novaLista);
+                
+                // 4. Reabrir inscrições
+                await db.ref('configuracao').update({inscricoes_abertas: true});
+
+                // 5. Marcar agendamento como executado para não repetir
+                await db.ref('agendamento_reinicio').update({executado: true});
+
+                // Recarrega a página para atualizar tudo
+                location.reload();
+            }
+        }
 
         // Função para limitar a quantidade de dígitos
         function limitarDigitos(campo, maximo) {
