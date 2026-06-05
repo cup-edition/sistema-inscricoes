@@ -8,7 +8,7 @@
     <style>
         * {margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif;}
         /* ✅ FUNDO ALTERADO PARA CINZA ESCURO */
-        body {background-color: #343a40; display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px;}
+        body {background-color: #343a40; display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; position: relative;}
         .container {background: #ffffff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); width: 100%; max-width: 450px; text-align: center;}
         /* ✅ NOVO ESTILO PARA O TÍTULO PRINCIPAL MAIOR */
         h1 {color: #2c3e50; margin-bottom: 5px; font-size: 32px; /* AUMENTADO MAIS O TAMANHO */ font-weight: bold;}
@@ -46,9 +46,110 @@
             display: none; /* Começa escondida */
             box-shadow: 0 2px 6px rgba(0,0,0,0.15); /* ✅ Adicionei uma sombra leve para destacar */
         }
+
+        /* ✅ ESTILO PARA O BOTÃO PEQUENO */
+        .botao-lista {
+            background-color: #6c757d;
+            color: white;
+            border: none;
+            padding: 6px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+            width: auto;
+            margin-top: 8px;
+            font-weight: normal;
+        }
+        .botao-lista:hover {
+            background-color: #495057;
+        }
+
+        /* ✅ ESTILO PARA A JANELA FLUTUANTE */
+        .janela-flutuante {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #ffffff;
+            width: 90%;
+            max-width: 400px;
+            max-height: 80vh;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            z-index: 1000;
+            overflow: hidden;
+        }
+        .cabecalho-janela {
+            background-color: #2c3e50;
+            color: white;
+            padding: 12px;
+            font-weight: bold;
+            font-size: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .fechar-janela {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            width: auto;
+            padding: 0;
+            margin: 0;
+        }
+        .conteudo-janela {
+            padding: 15px;
+            overflow-y: auto;
+            max-height: 65vh;
+        }
+        .item-inscrito {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .foto-inscrito {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 1px solid #ddd;
+        }
+        .nome-inscrito {
+            font-weight: 500;
+            color: #333;
+        }
+        .fundo-escuro {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            z-index: 999;
+        }
     </style>
 </head>
 <body>
+
+    <!-- ✅ FUNDO ESCURO PARA QUANDO A JANELA ABRIR -->
+    <div id="fundoEscuro" class="fundo-escuro" onclick="fecharJanela()"></div>
+
+    <!-- ✅ JANELA FLUTUANTE -->
+    <div id="janelaLista" class="janela-flutuante">
+        <div class="cabecalho-janela">
+            <span>✅ INSCRITOS CONFIRMADOS ✅</span>
+            <button class="fechar-janela" onclick="fecharJanela()">&times;</button>
+        </div>
+        <div class="conteudo-janela" id="listaConfirmados">
+            <p style="text-align:center; color:#666;">Carregando...</p>
+        </div>
+    </div>
 
     <div class="container">
         <!-- ✅ NOVO AVISO DE REINÍCIO -->
@@ -98,6 +199,9 @@
             </div>
 
             <button id="botaoConfirmar" onclick="confirmarInscricao()">CONFIRMAR INSCRIÇÃO</button>
+
+            <!-- ✅ NOVO BOTÃO PEQUENO ADICIONADO AQUI -->
+            <button class="botao-lista" onclick="abrirJanelaLista()">✅LISTA DE INSCRITOS✅</button>
 
             <div id="msg_verificacao" class="resultado"></div>
         </div>
@@ -200,6 +304,46 @@
             if (nomeEscolhido !== "") {
                 document.getElementById('ver_dia').focus();
             }
+        }
+
+        // ✅ FUNÇÕES PARA A JANELA FLUTUANTE
+        function abrirJanelaLista() {
+            const fundo = document.getElementById('fundoEscuro');
+            const janela = document.getElementById('janelaLista');
+            const conteudo = document.getElementById('listaConfirmados');
+
+            // Busca os confirmados no banco
+            db.ref('inscricoes').once('value').then(snap => {
+                const lista = snap.val() || [];
+                const confirmados = lista.filter(insc => insc && insc.status === 'confirmado');
+
+                if (confirmados.length === 0) {
+                    conteudo.innerHTML = '<p style="text-align:center; color:#666;">Nenhum inscrito confirmado ainda.</p>';
+                } else {
+                    // Ordena por ordem alfabética
+                    confirmados.sort((a, b) => a.nome.localeCompare(b.nome));
+                    let html = '';
+                    confirmados.forEach(insc => {
+                        const foto = insc.foto || 'https://via.placeholder.com/50?text=Sem+Foto';
+                        html += `
+                            <div class="item-inscrito">
+                                <img src="${foto}" class="foto-inscrito" alt="Foto de ${insc.nome}">
+                                <span class="nome-inscrito">${insc.nome}</span>
+                            </div>
+                        `;
+                    });
+                    conteudo.innerHTML = html;
+                }
+
+                // Mostra a janela
+                fundo.style.display = 'block';
+                janela.style.display = 'block';
+            });
+        }
+
+        function fecharJanela() {
+            document.getElementById('fundoEscuro').style.display = 'none';
+            document.getElementById('janelaLista').style.display = 'none';
         }
 
         // Função para limitar a quantidade de dígitos
