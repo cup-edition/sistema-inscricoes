@@ -64,8 +64,8 @@
         .btn-amarelo:hover {background-color: #e67e22;}
         .btn-roxo {background-color: #9b59b6;}
         .btn-roxo:hover {background-color: #8e44ad;}
-        .btn-ocultar-coluna, .btn-sorteio, .btn-agendar {background-color: #9b59b6; padding: 5px 10px; font-size: 12px; border-radius: 4px; font-weight: bold;}
-        .btn-ocultar-coluna:hover, .btn-sorteio:hover, .btn-agendar:hover {background-color: #8e44ad;}
+        .btn-ocultar-coluna, .btn-sorteio, .btn-agendar, .btn-inscricao {background-color: #9b59b6; padding: 5px 10px; font-size: 12px; border-radius: 4px; font-weight: bold;}
+        .btn-ocultar-coluna:hover, .btn-sorteio:hover, .btn-agendar:hover, .btn-inscricao:hover {background-color: #8e44ad;}
         .btn-editar {background-color: #3498db; padding: 4px 8px; font-size: 12px; font-weight: bold;}
         .btn-editar:hover {background-color: #2980b9;}
         .btn-pendente {background-color: #f39c12; padding: 4px 8px; font-size: 12px; font-weight: bold;}
@@ -326,6 +326,7 @@
                 <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
                     <button class="btn-ocultar-coluna" onclick="alternarVisibilidadeData()">🙈 OCULTAR DATA NASC.</button>
                     <button class="btn-agendar" onclick="abrirAgendamento()">⏰ AGENDAR REINÍCIO</button>
+                    <button class="btn-inscricao" onclick="window.open('https://endrilsilva.github.io/sistema-inscricoes/INSCREVER.html', '_blank')">📝 SITE DE INSCRIÇÃO</button>
                     <button class="btn-sorteio" onclick="window.open('https://endrilsilva.github.io/sorteio-nomes/SORTEIO.html', '_blank')">🎰 SITE DE SORTEIO</button>
                     <span class="mensagem-copia" id="msgCopia">COPIADO!</span>
                 </div>
