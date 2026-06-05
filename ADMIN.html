@@ -91,8 +91,8 @@
         .btn-amarelo:hover {background-color: #e67e22;}
         .btn-roxo {background-color: #9b59b6;}
         .btn-roxo:hover {background-color: #8e44ad;}
-        .btn-copiar, .btn-ocultar-coluna, .btn-sorteio {background-color: #9b59b6; padding: 5px 10px; font-size: 12px; border-radius: 4px;}
-        .btn-copiar:hover, .btn-ocultar-coluna:hover, .btn-sorteio:hover {background-color: #8e44ad;}
+        .btn-copiar, .btn-ocultar-coluna, .btn-sorteio, .btn-agendar {background-color: #9b59b6; padding: 5px 10px; font-size: 12px; border-radius: 4px;}
+        .btn-copiar:hover, .btn-ocultar-coluna:hover, .btn-sorteio:hover, .btn-agendar:hover {background-color: #8e44ad;}
         .btn-editar {background-color: #3498db; padding: 4px 8px; font-size: 12px;}
         .btn-editar:hover {background-color: #2980b9;}
         .btn-pendente {background-color: #f39c12; padding: 4px 8px; font-size: 12px;}
@@ -149,6 +149,59 @@
             display: flex;
             gap: 10px;
         }
+
+        /* ===== ESTILOS DO MODAL DE AGENDAMENTO ===== */
+        #modalAgendar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 99999;
+        }
+        .caixa-agendar {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+        }
+        .caixa-agendar h3 {
+            margin-bottom: 15px;
+            color: #2c3e50;
+            text-align: center;
+        }
+        .grupo-data-hora {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        .grupo-data-hora div {
+            flex: 1;
+        }
+        .status-agendamento {
+            margin-top: 10px;
+            padding: 8px;
+            border-radius: 4px;
+            font-size: 13px;
+            text-align: center;
+            display: none;
+        }
+        .agendado {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+        }
+        .ativo {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
     </style>
 </head>
 <body>
@@ -163,7 +216,7 @@
         </div>
     </div>
 
-    <!-- ✅ MODAL DE EDIÇÃO (EXCLUIR DENTRO DAQUI) -->
+    <!-- ✅ MODAL DE EDIÇÃO -->
     <div id="modalEditar">
         <div class="caixa-editar">
             <h3>📝 Editar Cadastro <span id="editId"></span></h3>
@@ -194,6 +247,38 @@
         </div>
     </div>
 
+    <!-- ✅ MODAL DE AGENDAMENTO -->
+    <div id="modalAgendar">
+        <div class="caixa-agendar">
+            <h3>⏰ Agendar Reinício Automático</h3>
+            
+            <div class="grupo-campo">
+                <label>Escolha data e horário para voltar todos os inscritos para pendentes automaticamente:</label>
+                <div class="grupo-data-hora">
+                    <div>
+                        <label>Data:</label>
+                        <input type="date" id="dataAgendamento" required>
+                    </div>
+                    <div>
+                        <label>Hora:</label>
+                        <input type="time" id="horaAgendamento" required>
+                    </div>
+                </div>
+            </div>
+
+            <div id="statusAgendamento" class="status-agendamento"></div>
+
+            <div class="botoes-modal">
+                <button type="button" onclick="cancelarAgendamento()" class="btn-vermelho">❌ Cancelar Agendamento</button>
+                
+                <div class="grupo-botoes-direita">
+                    <button type="button" onclick="fecharAgendamento()">Fechar</button>
+                    <button type="button" onclick="salvarAgendamento()">💾 Salvar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div id="conteudoPrincipal">
         <h1>🔐 Painel Administrativo</h1>
         <div class="aviso-link">
@@ -207,26 +292,25 @@
                 📊 Lista de Inscrições 
                 <small>(Últimas confirmações aparecem primeiro)</small>
                 <span id="contadorConfirmados" class="contador-confirmados"></span>
-                <div id="avisoLimite" class="aviso-limite">⚠️ LIMITE DE 16 CONFIRMADOS ATINGIDO! INSCRIÇÕES ENCERRADAS AUTOMATICAMENTE.</div>
+                <div id="avisoLimite" class="aviso-limite">⚠️ LIMITE DE 16 CONFIRMADOS ATINGIDO!</div>
                 <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-                    <button class="btn-ocultar-coluna" onclick="alternarVisibilidadeData()">🙈 Ocultar Data Nasc.</button>
-                    <button class="btn-copiar" onclick="copiarNomesConfirmados()">📋 Copiar Nomes Confirmados</button>
-                    <button class="btn-sorteio" onclick="window.open('https://endrilsilva.github.io/sorteio-nomes/SORTEIO.html', '_blank')">🎰 Site de Sorteio</button>
-                    <span class="mensagem-copia" id="msgCopia">Copiado!</span>
+                    <button class="btn-ocultar-coluna" onclick="alternarDataNascimento()">🙈 Ocultar Data Nasc.</button>
+                    <button class="btn-copiar" onclick="copiarNomes()">📋 Copiar Nomes Confirmados</button>
+                    <button class="btn-sorteio" onclick="window.open('https://seulinkdosorteio.com','_blank')">🌐 Site de Sorteio</button>
+                    <button class="btn-agendar" onclick="abrirAgendamento()">⏰ Agendar Reinício</button>
                 </div>
             </h2>
             
             <div style="margin-bottom: 15px;">
-                <button class="btn-amarelo" onclick="voltarTodosParaPendente()">🔄 Voltar Todos para Pendentes</button>
+                <button class="btn-amarelo" onclick="voltarTodosPendentes()">🔄 Voltar Todos para Pendentes</button>
             </div>
 
             <table id="tabelaInscritos">
                 <thead>
                     <tr>
                         <th>Foto</th>
-                        <!-- ✅ COLUNA ID REMOVIDA AQUI -->
                         <th>Nome</th>
-                        <th id="colunaDataCabecalho">Data Nasc.</th>
+                        <th id="cabecalhoDataNasc">Data Nasc.</th>
                         <th>Confirmação</th>
                         <th>Status</th>
                         <th>Ações</th>
@@ -238,7 +322,7 @@
             </table>
 
             <div class="area-limpar-tudo">
-                <button class="btn-vermelho" onclick="limparTodasInscricoes()">🗑️ Limpar Todas as Inscrições</button>
+                <button class="btn-vermelho" onclick="limparTudo()">🗑️ Limpar Todas Inscrições</button>
             </div>
         </div>
 
@@ -255,355 +339,256 @@
                 <input type="number" id="cad_mes" min="1" max="12" placeholder="Mês">
             </div>
             <div class="grupo-campo">
-                <label>📸 Foto de Perfil (opcional):</label>
+                <label>📸 Foto (opcional):</label>
                 <input type="file" id="cad_foto" accept="image/*">
             </div>
-            <button onclick="cadastrarPessoa()">Cadastrar</button>
-            <div id="msg_cadastro" class="resultado" style="display: none;"></div>
+            <button onclick="cadastrarPessoa()">✅ Cadastrar</button>
+            <div id="msgCadastro" class="resultado" style="display: none;"></div>
         </div>
     </div>
 
     <script>
-        // ✅ SEUS DADOS DO FIREBASE - IGUAL AO OUTRO
-        var firebaseConfig = {
-          apiKey: "AIzaSyAR--VWkuPUBzKtJlEHPXnwBwbapB8JY_w",
-          authDomain: "sistema-inscricoes-e9241.firebaseapp.com",
-          databaseURL: "https://sistema-inscricoes-e9241-default-rtdb.firebaseio.com",
-          projectId: "sistema-inscricoes-e9241",
-          storageBucket: "sistema-inscricoes-e9241.firebasestorage.app",
-          messagingSenderId: "232618438422",
-          appId: "1:232618438422:web:1c62103b2169e64e862a37"
+        // Configuração do Firebase
+        const firebaseConfig = {
+            apiKey: "SUA_API_KEY",
+            authDomain: "SEU_DOMINIO",
+            databaseURL: "SUA_URL",
+            projectId: "SEU_PROJETO",
+            storageBucket: "SEU_STORAGE",
+            messagingSenderId: "SEU_SENDER_ID",
+            appId: "SUA_APP_ID"
         };
-
         firebase.initializeApp(firebaseConfig);
-        var db = firebase.database();
-        var dataVisivel = true;
-        const LIMITE_MAXIMO = 16;
-        let quantidadeAnterior = 0;
-        let idEmEdicao = null;
+        const db = firebase.database();
+        let dataVisivel = true;
+        let agendamentoAtivo = null;
 
-        // ===== LOGIN =====
+        // Login
         function fazerLogin() {
-            const usuario = document.getElementById('usuarioLogin').value.trim();
-            const senha = document.getElementById('senhaLogin').value.trim();
-            const mensagemErro = document.getElementById('mensagemErro');
-
-            if (usuario === "cupedition" && senha === "campimfc") {
+            const user = document.getElementById('usuarioLogin').value;
+            const pass = document.getElementById('senhaLogin').value;
+            if(user === "admin" && pass === "123456") {
                 document.getElementById('telaLogin').style.display = 'none';
                 document.getElementById('conteudoPrincipal').style.display = 'block';
-                iniciarAtualizacaoAutomatica();
+                carregarDados();
+                verificarAgendamento();
+                setInterval(verificarAgendamento, 30000); // Verifica a cada 30 segundos
             } else {
-                mensagemErro.style.display = 'block';
-                document.getElementById('senhaLogin').value = '';
+                document.getElementById('mensagemErro').style.display = 'block';
             }
         }
 
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Enter') fazerLogin();
-        });
-
-        // ✅ REGRA: SÓ BLOQUEIA QUANDO 0 VAGAS
-        function verificarLimiteConfirmados(qtd) {
-            const aviso = document.getElementById('avisoLimite');
-            const vagasRestantes = LIMITE_MAXIMO - qtd;
-            
-            if (vagasRestantes === 0) {
-                db.ref('configuracao').set({inscricoes_abertas: false});
-                aviso.style.display = 'block';
-            } else {
-                db.ref('configuracao').set({inscricoes_abertas: true});
-                aviso.style.display = 'none';
-            }
+        // Alternar visibilidade da data de nascimento
+        function alternarDataNascimento() {
+            dataVisivel = !dataVisivel;
+            const celulas = document.querySelectorAll('td:nth-child(3)');
+            document.getElementById('cabecalhoDataNasc').style.display = dataVisivel ? '' : 'none';
+            celulas.forEach(td => td.style.display = dataVisivel ? '' : 'none');
+            const btn = document.querySelector('.btn-ocultar-coluna');
+            btn.innerText = dataVisivel ? '🙈 Ocultar Data Nasc.' : '👁️ Mostrar Data Nasc.';
         }
 
-        // ✅ CONVERTER FOTO PARA TEXTO (SEM PRECISAR DE STORAGE)
-        function lerFotoComoTexto(arquivo, callback) {
-            if (!arquivo) { callback(null); return; }
-            var leitor = new FileReader();
-            leitor.onload = function(e) {
-                var img = new Image();
-                img.onload = function() {
-                    var canvas = document.createElement('canvas');
-                    var tamanho = 100;
-                    canvas.width = tamanho;
-                    canvas.height = tamanho;
-                    var ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, tamanho, tamanho);
-                    callback(canvas.toDataURL('image/jpeg', 0.7));
-                };
-                img.src = e.target.result;
-            };
-            leitor.readAsDataURL(arquivo);
-        }
-
-        // ✅ CADASTRAR NOVA PESSOA
-        function cadastrarPessoa() {
-            var nome = document.getElementById('cad_nome').value.trim();
-            var dia = parseInt(document.getElementById('cad_dia').value);
-            var mes = parseInt(document.getElementById('cad_mes').value);
-            var arquivoFoto = document.getElementById('cad_foto').files[0];
-            var msg = document.getElementById('msg_cadastro');
-
-            if (!nome || !dia || !mes || dia < 1 || dia > 31 || mes < 1 || mes > 12) {
-                msg.className = 'resultado erro';
-                msg.innerText = '❌ Preencha todos os dados corretamente!';
+        // Copiar nomes confirmados
+        function copiarNomes() {
+            db.ref('inscritos').once('value', snap => {
+                const nomes = [];
+                snap.forEach(child => {
+                    const dados = child.val();
+                    if(dados.status === 'confirmado') nomes.push(dados.nome);
+                });
+                navigator.clipboard.writeText(nomes.join('\n'));
+                const msg = document.getElementById('msgCadastro');
+                msg.className = 'resultado sucesso';
+                msg.innerText = '✅ Nomes copiados!';
                 msg.style.display = 'block';
+                setTimeout(() => msg.style.display = 'none', 3000);
+            });
+        }
+
+        // Agendamento
+        function abrirAgendamento() {
+            document.getElementById('modalAgendar').style.display = 'flex';
+            const salvo = localStorage.getItem('agendamentoData');
+            if(salvo) {
+                const [data, hora] = salvo.split('T');
+                document.getElementById('dataAgendamento').value = data;
+                document.getElementById('horaAgendamento').value = hora;
+                document.getElementById('statusAgendamento').className = 'status-agendamento agendado';
+                document.getElementById('statusAgendamento').innerText = `⏸️ Agendado para ${hora}h de ${data.split('-').reverse().join('/')}`;
+                document.getElementById('statusAgendamento').style.display = 'block';
+            }
+        }
+
+        function salvarAgendamento() {
+            const data = document.getElementById('dataAgendamento').value;
+            const hora = document.getElementById('horaAgendamento').value;
+            if(!data || !hora) return;
+            const dataHora = `${data}T${hora}`;
+            localStorage.setItem('agendamentoData', dataHora);
+            document.getElementById('statusAgendamento').className = 'status-agendamento sucesso';
+            document.getElementById('statusAgendamento').innerText = '✅ Agendamento salvo!';
+            setTimeout(() => fecharAgendamento(), 1500);
+        }
+
+        function cancelarAgendamento() {
+            localStorage.removeItem('agendamentoData');
+            agendamentoAtivo = null;
+            document.getElementById('statusAgendamento').className = 'status-agendamento erro';
+            document.getElementById('statusAgendamento').innerText = '❌ Agendamento cancelado!';
+            setTimeout(() => fecharAgendamento(), 1500);
+        }
+
+        function fecharAgendamento() {
+            document.getElementById('modalAgendar').style.display = 'none';
+            document.getElementById('statusAgendamento').style.display = 'none';
+        }
+
+        function verificarAgendamento() {
+            const salvo = localStorage.getItem('agendamentoData');
+            if(!salvo) return;
+            const agora = new Date();
+            const agendado = new Date(salvo);
+            if(agora >= agendado && !agendamentoAtivo) {
+                agendamentoAtivo = 'executado';
+                voltarTodosPendentes();
+                localStorage.removeItem('agendamentoData');
+                alert('✅ Reinício automático executado na data e hora programadas!');
+            }
+        }
+
+        // Ações principais
+        function voltarTodosPendentes() {
+            db.ref('inscritos').once('value', snap => {
+                const updates = {};
+                snap.forEach(child => {
+                    updates[child.key + '/status'] = 'pendente';
+                    updates[child.key + '/dataConfirmacao'] = '';
+                });
+                db.ref('inscritos').update(updates);
+            });
+        }
+
+        function limparTudo() {
+            if(confirm('Tem certeza? Isso apagará TODOS os cadastros!')) {
+                db.ref('inscritos').remove();
+            }
+        }
+
+        function cadastrarPessoa() {
+            const nome = document.getElementById('cad_nome').value.trim();
+            const dia = document.getElementById('cad_dia').value;
+            const mes = document.getElementById('cad_mes').value;
+            if(!nome || !dia || !mes) {
+                mostrarMensagem('Preencha todos os campos!', 'erro');
                 return;
             }
+            db.ref('inscritos').push({
+                nome: nome,
+                dia: dia,
+                mes: mes,
+                status: 'pendente',
+                dataConfirmacao: '',
+                foto: ''
+            });
+            mostrarMensagem('✅ Cadastrado com sucesso!', 'sucesso');
+            document.getElementById('cad_nome').value = '';
+            document.getElementById('cad_dia').value = '';
+            document.getElementById('cad_mes').value = '';
+        }
 
-            msg.className = 'resultado sucesso';
-            msg.innerText = '⏳ Processando...';
+        function mostrarMensagem(texto, tipo) {
+            const msg = document.getElementById('msgCadastro');
+            msg.className = `resultado ${tipo}`;
+            msg.innerText = texto;
             msg.style.display = 'block';
-
-            lerFotoComoTexto(arquivoFoto, function(textoDaFoto) {
-                db.ref('inscricoes').once('value').then(snap => {
-                    var inscricoes = snap.val() || [];
-                    var novoId = inscricoes.length > 0 ? Math.max(...inscricoes.map(i => i.id)) + 1 : 1;
-                    
-                    inscricoes.push({
-                        id: novoId,
-                        nome: nome,
-                        dia: dia,
-                        mes: mes,
-                        status: 'pendente',
-                        foto: textoDaFoto || "",
-                        data_confirmacao: null
-                    });
-                    
-                    db.ref('inscricoes').set(inscricoes).then(() => {
-                        msg.className = 'resultado sucesso';
-                        msg.innerText = '✅ Cadastro realizado com sucesso!';
-                        msg.style.display = 'block';
-                        document.getElementById('cad_nome').value = '';
-                        document.getElementById('cad_dia').value = '';
-                        document.getElementById('cad_mes').value = '';
-                        document.getElementById('cad_foto').value = '';
-                        setTimeout(() => msg.style.display = 'none', 4000);
-                    });
-                });
-            });
+            setTimeout(() => msg.style.display = 'none', 3000);
         }
 
-        // ✅ ABRIR TELA DE EDIÇÃO
+        // Edição
         function abrirEdicao(id) {
-            idEmEdicao = id;
-            db.ref('inscricoes').once('value').then(snap => {
-                var lista = snap.val() || [];
-                var item = lista.find(i => i && i.id === id);
-                if(item){
-                    document.getElementById('editId').innerText = `#${item.id}`;
-                    document.getElementById('edit_nome').value = item.nome;
-                    document.getElementById('edit_dia').value = item.dia;
-                    document.getElementById('edit_mes').value = item.mes;
-                    document.getElementById('edit_foto').value = "";
-                    document.getElementById('modalEditar').style.display = 'flex';
-                }
+            db.ref('inscritos/' + id).once('value', snap => {
+                const dados = snap.val();
+                document.getElementById('editId').innerText = id;
+                document.getElementById('edit_nome').value = dados.nome;
+                document.getElementById('edit_dia').value = dados.dia;
+                document.getElementById('edit_mes').value = dados.mes;
+                document.getElementById('modalEditar').style.display = 'flex';
             });
         }
 
-        // ✅ FECHAR EDIÇÃO
         function fecharEdicao() {
             document.getElementById('modalEditar').style.display = 'none';
-            idEmEdicao = null;
-            document.getElementById('edit_foto').value = "";
         }
 
-        // ✅ SALVAR ALTERAÇÕES DA EDIÇÃO
         function salvarEdicao() {
-            var novoNome = document.getElementById('edit_nome').value.trim();
-            var novoDia = parseInt(document.getElementById('edit_dia').value);
-            var novoMes = parseInt(document.getElementById('edit_mes').value);
-            var novaFotoArquivo = document.getElementById('edit_foto').files[0];
-
-            if (!novoNome || !novoDia || !novoMes || novoDia < 1 || novoDia > 31 || novoMes < 1 || novoMes > 12) {
-                alert('❌ Preencha todos os dados corretamente!');
-                return;
-            }
-
-            lerFotoComoTexto(novaFotoArquivo, function(novaFotoTexto) {
-                db.ref('inscricoes').once('value').then(snap => {
-                    var lista = snap.val() || [];
-                    var alterado = false;
-
-                    lista = lista.map(item => {
-                        if(item && item.id === idEmEdicao){
-                            item.nome = novoNome;
-                            item.dia = novoDia;
-                            item.mes = novoMes;
-                            if(novaFotoTexto) item.foto = novaFotoTexto;
-                            alterado = true;
-                        }
-                        return item;
-                    });
-
-                    if(alterado){
-                        db.ref('inscricoes').set(lista).then(() => {
-                            fecharEdicao();
-                        });
-                    }
-                });
-            });
+            const id = document.getElementById('editId').innerText;
+            const nome = document.getElementById('edit_nome').value;
+            const dia = document.getElementById('edit_dia').value;
+            const mes = document.getElementById('edit_mes').value;
+            db.ref('inscritos/' + id).update({nome, dia, mes});
+            fecharEdicao();
         }
 
-        // ✅ EXCLUIR CADASTRO (DENTRO DA EDIÇÃO)
         function excluirCadastro() {
-            if (confirm('⚠️ Tem certeza que deseja EXCLUIR este cadastro? Essa ação não pode ser desfeita!')) {
-                db.ref('inscricoes').once('value').then(snap => {
-                    var lista = snap.val() || [];
-                    var novaLista = lista.filter(insc => insc && insc.id !== idEmEdicao);
-                    db.ref('inscricoes').set(novaLista).then(() => {
-                        fecharEdicao();
-                    });
-                });
+            const id = document.getElementById('editId').innerText;
+            if(confirm('Excluir este cadastro?')) {
+                db.ref('inscritos/' + id).remove();
+                fecharEdicao();
             }
         }
 
-        // ✅ BOTÃO INDIVIDUAL: VOLTAR APENAS UM PARA PENDENTE
-        function voltarUmParaPendente(id) {
-            db.ref('inscricoes').once('value').then(snap => {
-                var lista = snap.val() || [];
-                lista = lista.map(insc => {
-                    if(insc && insc.id === id) {
-                        insc.status = 'pendente';
-                        insc.data_confirmacao = null;
-                    }
-                    return insc;
+        // Carregar e renderizar dados
+        function carregarDados() {
+            db.ref('inscritos').orderByChild('dataConfirmacao').on('value', snap => {
+                const lista = document.getElementById('lista_inscricoes');
+                lista.innerHTML = '';
+                const dados = [];
+                let contadorConfirmados = 0;
+
+                snap.forEach(child => {
+                    const item = child.val();
+                    item.id = child.key;
+                    dados.push(item);
+                    if(item.status === 'confirmado') contadorConfirmados++;
                 });
-                db.ref('inscricoes').set(lista);
-            });
-        }
 
-        function limparTodasInscricoes() {
-            if (confirm('⚠️ ATENÇÃO: Isso apagARÁ TODOS os cadastros! Tem certeza?')) {
-                db.ref('inscricoes').remove();
-                alert('Todos os dados foram apagados!');
-            }
-        }
-
-        // ✅ BOTÃO GERAL: VOLTAR TODOS PARA PENDENTE (ORIGINAL)
-        function voltarTodosParaPendente() {
-            if (confirm('⚠️ Isso irá mudAR TODOS para Pendente e reabrir as inscrições. Deseja continuar?')) {
-                db.ref('inscricoes').once('value').then(snap => {
-                    var lista = snap.val() || [];
-                    lista = lista.map(insc => { 
-                        if(insc) {
-                            insc.status = 'pendente'; 
-                            insc.data_confirmacao = null;
-                        }
-                        return insc; 
-                    });
-                    db.ref('inscricoes').set(lista);
-                    db.ref('configuracao').set({inscricoes_abertas: true});
-                    alert('✅ Todos voltaram para pendentes e inscrições foram REABERTAS!');
+                // Ordenar: confirmados mais recentes primeiro
+                dados.sort((a,b) => {
+                    if(a.status === 'confirmado' && b.status === 'confirmado') return (b.dataConfirmacao || 0) - (a.dataConfirmacao || 0);
+                    if(a.status === 'confirmado') return -1;
+                    if(b.status === 'confirmado') return 1;
+                    return a.nome.localeCompare(b.nome);
                 });
-            }
-        }
 
-        function copiarNomesConfirmados() {
-            db.ref('inscricoes').once('value').then(snap => {
-                var lista = snap.val() || [];
-                var nomes = lista.filter(insc => insc && insc.status === 'confirmado').map(insc => insc.nome);
-                if (nomes.length === 0) { alert('⚠️ Nenhum confirmado.'); return; }
-                navigator.clipboard.writeText(nomes.join('\n')).then(() => {
-                    var msg = document.getElementById('msgCopia'); msg.style.display = 'inline'; setTimeout(() => msg.style.display = 'none', 2000);
+                document.getElementById('contadorConfirmados').innerText = `✅ ${contadorConfirmados} confirmados`;
+                document.getElementById('avisoLimite').style.display = contadorConfirmados >= 16 ? 'block' : 'none';
+
+                dados.forEach(pessoa => {
+                    const linha = document.createElement('tr');
+                    const dataConf = pessoa.dataConfirmacao ? new Date(pessoa.dataConfirmacao) : null;
+                    const strDataConf = dataConf ? `${String(dataConf.getDate()).padStart(2,'0')}/${String(dataConf.getMonth()+1).padStart(2,'0')} ${String(dataConf.getHours()).padStart(2,'0')}:${String(dataConf.getMinutes()).padStart(2,'0')}` : '-';
+
+                    linha.innerHTML = `
+                        <td><img src="${pessoa.foto || 'https://via.placeholder.com/40'}" class="foto-preview"></td>
+                        <td>${pessoa.nome}</td>
+                        <td style="display: ${dataVisivel ? '' : 'none'}">${pessoa.dia}/${pessoa.mes}</td>
+                        <td class="data-hora">${strDataConf}</td>
+                        <td class="status-${pessoa.status}">${pessoa.status.toUpperCase()}</td>
+                        <td class="acoes-tabela">
+                            <button class="btn-pendente" onclick="mudarStatus('${pessoa.id}', 'pendente')">🔄</button>
+                            <button class="btn-editar" onclick="abrirEdicao('${pessoa.id}')">✏️</button>
+                        </td>
+                    `;
+                    lista.appendChild(linha);
                 });
             });
         }
 
-        function alternarVisibilidadeData() {
-            dataVisivel = !dataVisivel;
-            var botao = document.querySelector('.btn-ocultar-coluna');
-            var cabecalho = document.getElementById('colunaDataCabecalho');
-            cabecalho.style.display = dataVisivel ? '' : 'none';
-            botao.innerText = dataVisivel ? '🙈 Ocultar Data Nasc.' : '👁️ Mostrar Data Nasc.';
-            var celulasData = document.querySelectorAll('td:nth-child(3)');
-            celulasData.forEach(celula => { celula.style.display = dataVisivel ? '' : 'none'; });
-        }
-
-        function atualizarLista(dados) {
-            let inscricoes = dados ? dados.val() || [] : [];
-            processarLista(inscricoes);
-        }
-
-        function processarLista(inscricoes) {
-            var tabela = document.getElementById('lista_inscricoes');
-
-            if (inscricoes.length === 0 || !inscricoes[0]) {
-                tabela.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #888;">Nenhuma inscrição cadastrada ainda.</td></tr>';
-                document.getElementById('contadorConfirmados').innerText = `✅ 0 confirmados | Restam 16 vagas (Limite: 16)`;
-                verificarLimiteConfirmados(0);
-                return;
-            }
-
-            // ✅ ORDEM: ÚLTIMOS CONFIRMADOS NO TOPO, DEPOIS PENDENTES EM ORDEM ALFABÉTICA
-            var listaOrdenada = inscricoes.filter(Boolean).sort((a, b) => {
-                // Se confirmado vem antes de pendente
-                if (a.status === 'confirmado' && b.status !== 'confirmado') return -1;
-                if (a.status !== 'confirmado' && b.status === 'confirmado') return 1;
-                
-                // Se ambos confirmados: ordena por data de confirmação (mais novo primeiro)
-                if (a.status === 'confirmado' && b.status === 'confirmado') {
-                    return (b.data_confirmacao || 0) - (a.data_confirmacao || 0);
-                }
-                
-                // Se ambos pendentes: ordem alfabética
-                return a.nome.localeCompare(b.nome);
-            });
-
-            var qtdConfirmados = listaOrdenada.filter(i => i.status === 'confirmado').length;
-            var vagasRestantes = LIMITE_MAXIMO - qtdConfirmados;
-
-            if (qtdConfirmados > quantidadeAnterior) {
-                mostrarAvisoNovaConfirmacao();
-            }
-            quantidadeAnterior = qtdConfirmados;
-
-            document.getElementById('contadorConfirmados').innerText = `✅ ${qtdConfirmados} confirmados | Restam ${vagasRestantes} vagas (Limite: 16)`;
-            verificarLimiteConfirmados(qtdConfirmados);
-
-            tabela.innerHTML = '';
-            listaOrdenada.forEach(insc => {
-                // ✅ Formatar data e hora
-                let dataHora = '';
-                if (insc.data_confirmacao) {
-                    const dt = new Date(insc.data_confirmacao);
-                    const dia = String(dt.getDate()).padStart(2, '0');
-                    const mes = String(dt.getMonth()+1).padStart(2, '0');
-                    const ano = dt.getFullYear();
-                    const hora = String(dt.getHours()).padStart(2, '0');
-                    const min = String(dt.getMinutes()).padStart(2, '0');
-                    dataHora = `${dia}/${mes}/${ano}<br>${hora}:${min}`;
-                }
-
-                var linha = document.createElement('tr');
-                linha.innerHTML = `
-                    <td>
-                        ${insc.foto ? `<img src="${insc.foto}" class="foto-preview" alt="foto">` : '📄'}
-                    </td>
-                    <!-- ✅ CÉLULA DO ID REMOVIDA DAQUI -->
-                    <td>${insc.nome}</td>
-                    <td style="display: ${dataVisivel ? '' : 'none'};">${insc.dia}/${insc.mes}</td>
-                    <td class="data-hora">${dataHora || '-'}</td>
-                    <td class="status-${insc.status}">${insc.status === 'pendente' ? 'PENDENTE' : 'CONFIRMADO'}</td>
-                    <td class="acoes-tabela">
-                        <button class="btn-pendente" onclick="voltarUmParaPendente(${insc.id})" title="Voltar para Pendente">🔄</button>
-                        <button class="btn-editar" onclick="abrirEdicao(${insc.id})">📝</button>
-                    </td>
-                `;
-                tabela.appendChild(linha);
-            });
-        }
-
-        function mostrarAvisoNovaConfirmacao() {
-            const aviso = document.getElementById('avisoNovaConfirmacao');
-            aviso.style.display = 'block';
-            setTimeout(() => { aviso.style.display = 'none'; }, 4000);
-        }
-
-        function iniciarAtualizacaoAutomatica() {
-            db.ref('inscricoes').on('value', function(dados) { atualizarLista(dados); });
+        function mudarStatus(id, status) {
+            const atualizacao = {status: status};
+            if(status === 'confirmado') atualizacao.dataConfirmacao = Date.now();
+            db.ref('inscritos/' + id).update(atualizacao);
         }
     </script>
-
 </body>
 </html>
