@@ -142,8 +142,7 @@
             display: flex;
             gap: 10px;
             justify-content: space-between;
-            align-items: center;
-            margin-top: 20px;
+            align-items: center; margin-top: 20px;
         }
         .grupo-botoes-direita {
             display: flex;
@@ -216,7 +215,7 @@
         </div>
     </div>
 
-    <!-- ✅ MODAL DE EDIÇÃO (EXCLUIR DENTRO DAQUI) -->
+    <!-- ✅ MODAL DE EDIÇÃO -->
     <div id="modalEditar">
         <div class="caixa-editar">
             <h3>📝 Editar Cadastro <span id="editId"></span></h3>
@@ -247,13 +246,14 @@
         </div>
     </div>
 
-    <!-- ✅ NOVO MODAL DE AGENDAMENTO ADICIONADO -->
+    <!-- ✅ MODAL DE AGENDAMENTO -->
     <div id="modalAgendar">
         <div class="caixa-agendar">
             <h3>⏰ Agendar Reinício Automático</h3>
+            <p style="text-align:center; font-size:12px; color:#666; margin-bottom:10px;">*Funciona mesmo com a página fechada (GRATUITO)</p>
             
             <div class="grupo-campo">
-                <label>Defina data e horário para que o sistema retorne todos para "Pendentes" automaticamente:</label>
+                <label>Defina data e horário para reiniciar:</label>
                 <div class="grupo-data-hora">
                     <div>
                         <label>Data:</label>
@@ -297,7 +297,6 @@
                     <button class="btn-ocultar-coluna" onclick="alternarVisibilidadeData()">🙈 Ocultar Data Nasc.</button>
                     <button class="btn-copiar" onclick="copiarNomesConfirmados()">📋 Copiar Nomes Confirmados</button>
                     <button class="btn-sorteio" onclick="window.open('https://endrilsilva.github.io/sorteio-nomes/SORTEIO.html', '_blank')">🎰 Site de Sorteio</button>
-                    <!-- ✅ NOVO BOTÃO ADICIONADO AO LADO -->
                     <button class="btn-agendar" onclick="abrirAgendamento()">⏰ Agendar Reinício</button>
                     <span class="mensagem-copia" id="msgCopia">Copiado!</span>
                 </div>
@@ -311,7 +310,6 @@
                 <thead>
                     <tr>
                         <th>Foto</th>
-                        <!-- ✅ COLUNA ID REMOVIDA AQUI -->
                         <th>Nome</th>
                         <th id="colunaDataCabecalho">Data Nasc.</th>
                         <th>Confirmação</th>
@@ -351,7 +349,7 @@
     </div>
 
     <script>
-        // ✅ SEUS DADOS DO FIREBASE - IGUAL AO OUTRO
+        // ✅ SEUS DADOS DO FIREBASE
         var firebaseConfig = {
           apiKey: "AIzaSyAR--VWkuPUBzKtJlEHPXnwBwbapB8JY_w",
           authDomain: "sistema-inscricoes-e9241.firebaseapp.com",
@@ -368,7 +366,6 @@
         const LIMITE_MAXIMO = 16;
         let quantidadeAnterior = 0;
         let idEmEdicao = null;
-        let intervaloVerificacao; // Variável para controlar o temporizador
 
         // ===== LOGIN =====
         function fazerLogin() {
@@ -380,7 +377,6 @@
                 document.getElementById('telaLogin').style.display = 'none';
                 document.getElementById('conteudoPrincipal').style.display = 'block';
                 iniciarAtualizacaoAutomatica();
-                iniciarVerificacaoAgendamento(); // Inicia a checagem do horário
             } else {
                 mensagemErro.style.display = 'block';
                 document.getElementById('senhaLogin').value = '';
@@ -405,7 +401,7 @@
             }
         }
 
-        // ✅ CONVERTER FOTO PARA TEXTO (SEM PRECISAR DE STORAGE)
+        // ✅ CONVERTER FOTO PARA TEXTO
         function lerFotoComoTexto(arquivo, callback) {
             if (!arquivo) { callback(null); return; }
             var leitor = new FileReader();
@@ -534,7 +530,7 @@
             });
         }
 
-        // ✅ EXCLUIR CADASTRO (DENTRO DA EDIÇÃO)
+        // ✅ EXCLUIR CADASTRO
         function excluirCadastro() {
             if (confirm('⚠️ Tem certeza que deseja EXCLUIR este cadastro? Essa ação não pode ser desfeita!')) {
                 db.ref('inscricoes').once('value').then(snap => {
@@ -569,7 +565,7 @@
             }
         }
 
-        // ✅ BOTÃO GERAL: VOLTAR TODOS PARA PENDENTE (ORIGINAL)
+        // ✅ BOTÃO GERAL: VOLTAR TODOS PARA PENDENTE
         function voltarTodosParaPendente() {
             if (confirm('⚠️ Isso irá mudAR TODOS para Pendente e reabrir as inscrições. Deseja continuar?')) {
                 db.ref('inscricoes').once('value').then(snap => {
@@ -582,25 +578,28 @@
                         return insc; 
                     });
                     db.ref('inscricoes').set(lista);
-                    db.ref('configuracao').set({inscricoes_abertas: true});
+                    db.ref('configuracao').set({inscricoes_abertas: true, ultimo_reinicio: Date.now()});
                     alert('✅ Todos voltaram para pendentes e inscrições foram REABERTAS!');
                 });
             }
         }
 
-        // ✅ NOVAS FUNÇÕES DE AGENDAMENTO
+        // ✅ SISTEMA DE AGENDAMENTO (SALVA NO BANCO - GRATUITO)
         function abrirAgendamento() {
             document.getElementById('modalAgendar').style.display = 'flex';
-            const dataSalva = localStorage.getItem('dataAgendada');
-            const horaSalva = localStorage.getItem('horaAgendada');
-            
-            if(dataSalva && horaSalva) {
-                document.getElementById('dataAgendamento').value = dataSalva;
-                document.getElementById('horaAgendamento').value = horaSalva;
-                mostrarStatusAgendamento(`Agendado para ${horaSalva}h do dia ${dataSalva.split('-').reverse().join('/')}`, 'agendado');
-            } else {
-                document.getElementById('statusAgendamento').style.display = 'none';
-            }
+            db.ref('agendamento_reinicio').once('value').then(snap => {
+                const dados = snap.val();
+                if(dados && dados.timestamp) {
+                    const dataObj = new Date(dados.timestamp);
+                    const data = dataObj.toISOString().split('T')[0];
+                    const hora = dataObj.toTimeString().split(' ')[0].substring(0,5);
+                    document.getElementById('dataAgendamento').value = data;
+                    document.getElementById('horaAgendamento').value = hora;
+                    mostrarStatusAgendamento(`⏸️ Agendado para ${hora}h de ${data.split('-').reverse().join('/')}`, 'agendado');
+                } else {
+                    document.getElementById('statusAgendamento').style.display = 'none';
+                }
+            });
         }
 
         function salvarAgendamento() {
@@ -608,23 +607,33 @@
             const hora = document.getElementById('horaAgendamento').value;
             
             if(!data || !hora) {
-                mostrarStatusAgendamento('Preencha data e hora!', 'erro');
+                mostrarStatusAgendamento('❌ Preencha data e hora!', 'erro');
                 return;
             }
 
-            // Salva no navegador
-            localStorage.setItem('dataAgendada', data);
-            localStorage.setItem('horaAgendada', hora);
-            
-            mostrarStatusAgendamento('✅ Agendamento salvo com sucesso!', 'ativo');
-            setTimeout(() => fecharAgendamento(), 1500);
+            const dataHoraMarcada = new Date(`${data}T${hora}:00`);
+            const timestamp = dataHoraMarcada.getTime();
+
+            if(timestamp < Date.now()) {
+                mostrarStatusAgendamento('❌ Escolha uma data/hora futura!', 'erro');
+                return;
+            }
+
+            // Salva horário no banco
+            db.ref('agendamento_reinicio').set({
+                timestamp: timestamp,
+                executado: false
+            }).then(() => {
+                mostrarStatusAgendamento('✅ Agendamento SALVO! Funcionará automaticamente.', 'ativo');
+                setTimeout(() => fecharAgendamento(), 2000);
+            });
         }
 
         function cancelarAgendamento() {
-            localStorage.removeItem('dataAgendada');
-            localStorage.removeItem('horaAgendada');
-            mostrarStatusAgendamento('❌ Agendamento cancelado!', 'erro');
-            setTimeout(() => fecharAgendamento(), 1500);
+            db.ref('agendamento_reinicio').remove().then(() => {
+                mostrarStatusAgendamento('❌ Agendamento CANCELADO!', 'erro');
+                setTimeout(() => fecharAgendamento(), 1500);
+            });
         }
 
         function fecharAgendamento() {
@@ -638,51 +647,6 @@
             status.className = `status-agendamento ${tipo}`;
             status.style.display = 'block';
         }
-
-        function iniciarVerificacaoAgendamento() {
-            // Verifica a cada 30 segundos se já chegou o horário
-            intervaloVerificacao = setInterval(verificarHorarioAgendado, 30000);
-            // Verifica também na hora que entra
-            verificarHorarioAgendado();
-        }
-
-        function verificarHorarioAgendado() {
-            const dataSalva = localStorage.getItem('dataAgendada');
-            const horaSalva = localStorage.getItem('horaAgendada');
-
-            if(!dataSalva || !horaSalva) return;
-
-            const agora = new Date();
-            const dataHoraAgendada = new Date(`${dataSalva}T${horaSalva}:00`);
-
-            // Se a data/hora atual for maior ou igual a agendada
-            if(agora >= dataHoraAgendada) {
-                // Executa a função
-                executarReinicioAutomatico();
-                // Limpa o agendamento para não repetir
-                localStorage.removeItem('dataAgendada');
-                localStorage.removeItem('horaAgendada');
-            }
-        }
-
-        function executarReinicioAutomatico() {
-            db.ref('inscricoes').once('value').then(snap => {
-                var lista = snap.val() || [];
-                lista = lista.map(insc => { 
-                    if(insc) {
-                        insc.status = 'pendente'; 
-                        insc.data_confirmacao = null;
-                    }
-                    return insc; 
-                });
-                db.ref('inscricoes').set(lista);
-                db.ref('configuracao').set({inscricoes_abertas: true});
-                
-                // Avisa o usuário
-                alert('⏰ AUTOMÁTICO: Todos os inscritos foram retornados para Pendentes conforme agendado!');
-            });
-        }
-        // ✅ FIM DAS FUNÇÕES DE AGENDAMENTO
 
         function copiarNomesConfirmados() {
             db.ref('inscricoes').once('value').then(snap => {
@@ -722,16 +686,9 @@
 
             // ✅ ORDEM: ÚLTIMOS CONFIRMADOS NO TOPO, DEPOIS PENDENTES EM ORDEM ALFABÉTICA
             var listaOrdenada = inscricoes.filter(Boolean).sort((a, b) => {
-                // Se confirmado vem antes de pendente
                 if (a.status === 'confirmado' && b.status !== 'confirmado') return -1;
                 if (a.status !== 'confirmado' && b.status === 'confirmado') return 1;
-                
-                // Se ambos confirmados: ordena por data de confirmação (mais novo primeiro)
-                if (a.status === 'confirmado' && b.status === 'confirmado') {
-                    return (b.data_confirmacao || 0) - (a.data_confirmacao || 0);
-                }
-                
-                // Se ambos pendentes: ordem alfabética
+                if (a.status === 'confirmado' && b.status === 'confirmado') return (b.data_confirmacao || 0) - (a.data_confirmacao || 0);
                 return a.nome.localeCompare(b.nome);
             });
 
@@ -748,7 +705,6 @@
 
             tabela.innerHTML = '';
             listaOrdenada.forEach(insc => {
-                // ✅ Formatar data e hora
                 let dataHora = '';
                 if (insc.data_confirmacao) {
                     const dt = new Date(insc.data_confirmacao);
@@ -765,7 +721,6 @@
                     <td>
                         ${insc.foto ? `<img src="${insc.foto}" class="foto-preview" alt="foto">` : '📄'}
                     </td>
-                    <!-- ✅ CÉLULA DO ID REMOVIDA DAQUI -->
                     <td>${insc.nome}</td>
                     <td style="display: ${dataVisivel ? '' : 'none'};">${insc.dia}/${insc.mes}</td>
                     <td class="data-hora">${dataHora || '-'}</td>
