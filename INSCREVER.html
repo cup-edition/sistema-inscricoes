@@ -47,18 +47,22 @@
             box-shadow: 0 2px 6px rgba(0,0,0,0.15); /* ✅ Adicionei uma sombra leve para destacar */
         }
 
-        /* ✅ ESTILO PARA O BOTÃO PEQUENO */
+        /* ✅ ESTILO PARA O BOTÃO PEQUENO - AGORA NO CANTO INFERIOR DIREITO */
         .botao-lista {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
             background-color: #6c757d;
             color: white;
             border: none;
-            padding: 6px 10px;
+            padding: 8px 12px;
             border-radius: 4px;
             cursor: pointer;
-            font-size: 11px;
+            font-size: 12px;
             width: auto;
-            margin-top: 8px;
             font-weight: normal;
+            z-index: 99;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
         .botao-lista:hover {
             background-color: #495057;
@@ -109,7 +113,7 @@
             display: flex;
             align-items: center;
             gap: 10px;
-            padding: 8px 0;
+            padding: 10px 0;
             border-bottom: 1px solid #eee;
         }
         .foto-inscrito {
@@ -119,9 +123,19 @@
             object-fit: cover;
             border: 1px solid #ddd;
         }
+        .dados-inscrito {
+            flex: 1;
+            text-align: left;
+        }
         .nome-inscrito {
-            font-weight: 500;
+            font-weight: 600;
             color: #333;
+            font-size: 15px;
+        }
+        .data-hora-inscrito {
+            font-size: 12px;
+            color: #666;
+            margin-top: 2px;
         }
         .fundo-escuro {
             display: none;
@@ -136,6 +150,9 @@
     </style>
 </head>
 <body>
+
+    <!-- ✅ BOTÃO AGORA NO CANTO INFERIOR DIREITO -->
+    <button class="botao-lista" onclick="abrirJanelaLista()">✅LISTA DE INSCRITOS✅</button>
 
     <!-- ✅ FUNDO ESCURO PARA QUANDO A JANELA ABRIR -->
     <div id="fundoEscuro" class="fundo-escuro" onclick="fecharJanela()"></div>
@@ -199,9 +216,6 @@
             </div>
 
             <button id="botaoConfirmar" onclick="confirmarInscricao()">CONFIRMAR INSCRIÇÃO</button>
-
-            <!-- ✅ NOVO BOTÃO PEQUENO ADICIONADO AQUI -->
-            <button class="botao-lista" onclick="abrirJanelaLista()">✅LISTA DE INSCRITOS✅</button>
 
             <div id="msg_verificacao" class="resultado"></div>
         </div>
@@ -297,15 +311,6 @@
             }
         }
 
-        // ✅ NOVA FUNÇÃO: ASSIM QUE SELECIONAR O NOME, VAI DIRETO PARA O DIA
-        function focarNoDia() {
-            const nomeEscolhido = document.getElementById('ver_nome').value;
-            // Só pula se tiver selecionado um nome (não for a opção vazia)
-            if (nomeEscolhido !== "") {
-                document.getElementById('ver_dia').focus();
-            }
-        }
-
         // ✅ FUNÇÕES PARA A JANELA FLUTUANTE
         function abrirJanelaLista() {
             const fundo = document.getElementById('fundoEscuro');
@@ -315,20 +320,35 @@
             // Busca os confirmados no banco
             db.ref('inscricoes').once('value').then(snap => {
                 const lista = snap.val() || [];
-                const confirmados = lista.filter(insc => insc && insc.status === 'confirmado');
+                // Pega apenas os confirmados e ordena por data/hora (mais recente primeiro)
+                const confirmados = lista.filter(insc => insc && insc.status === 'confirmado')
+                                         .sort((a, b) => (b.data_confirmacao || 0) - (a.data_confirmacao || 0));
 
                 if (confirmados.length === 0) {
                     conteudo.innerHTML = '<p style="text-align:center; color:#666;">Nenhum inscrito confirmado ainda.</p>';
                 } else {
-                    // Ordena por ordem alfabética
-                    confirmados.sort((a, b) => a.nome.localeCompare(b.nome));
                     let html = '';
                     confirmados.forEach(insc => {
                         const foto = insc.foto || 'https://via.placeholder.com/50?text=Sem+Foto';
+                        // Formata a data e hora SEM OS SEGUNDOS
+                        let dataHora = 'Data não registrada';
+                        if (insc.data_confirmacao) {
+                            const data = new Date(insc.data_confirmacao);
+                            dataHora = data.toLocaleString('pt-BR', {
+                                day: '2-digit',
+                                month: '2-digit',
+                                year: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                            });
+                        }
                         html += `
                             <div class="item-inscrito">
                                 <img src="${foto}" class="foto-inscrito" alt="Foto de ${insc.nome}">
-                                <span class="nome-inscrito">${insc.nome}</span>
+                                <div class="dados-inscrito">
+                                    <div class="nome-inscrito">${insc.nome}</div>
+                                    <div class="data-hora-inscrito">✅ Confirmado em: ${dataHora}</div>
+                                </div>
                             </div>
                         `;
                     });
