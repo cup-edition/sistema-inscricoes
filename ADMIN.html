@@ -584,18 +584,29 @@
             }
         }
 
-        // ✅ SISTEMA DE AGENDAMENTO (SALVA NO BANCO - GRATUITO)
+        // ✅ SISTEMA DE AGENDAMENTO (CORRIGIDO PARA HORÁRIO LOCAL)
         function abrirAgendamento() {
             document.getElementById('modalAgendar').style.display = 'flex';
+            
+            // Define data mínima como hoje
+            const hoje = new Date();
+            const dia = String(hoje.getDate()).padStart(2, '0');
+            const mes = String(hoje.getMonth() + 1).padStart(2, '0');
+            const ano = hoje.getFullYear();
+            document.getElementById('dataAgendamento').min = `${ano}-${mes}-${dia}`;
+
             db.ref('agendamento_reinicio').once('value').then(snap => {
                 const dados = snap.val();
                 if(dados && dados.timestamp) {
+                    // ✅ CORREÇÃO: Converte o timestamp para data/hora local BR
                     const dataObj = new Date(dados.timestamp);
-                    const data = dataObj.toISOString().split('T')[0];
-                    const hora = dataObj.toTimeString().split(' ')[0].substring(0,5);
-                    document.getElementById('dataAgendamento').value = data;
-                    document.getElementById('horaAgendamento').value = hora;
-                    mostrarStatusAgendamento(`⏸️ Agendado para ${hora}h de ${data.split('-').reverse().join('/')}`, 'agendado');
+                    const diaAg = String(dataObj.getDate()).padStart(2, '0');
+                    const mesAg = String(dataObj.getMonth() + 1).padStart(2, '0');
+                    const anoAg = dataObj.getFullYear();
+                    const horaAg = String(dataObj.getHours()).padStart(2, '0');
+                    const minAg = String(dataObj.getMinutes()).padStart(2, '0');
+                    
+                    mostrarStatusAgendamento(`⏸️ Agendado para ${horaAg}:${minAg}h de ${diaAg}/${mesAg}/${anoAg}`, 'agendado');
                 } else {
                     document.getElementById('statusAgendamento').style.display = 'none';
                 }
@@ -603,15 +614,26 @@
         }
 
         function salvarAgendamento() {
-            const data = document.getElementById('dataAgendamento').value;
-            const hora = document.getElementById('horaAgendamento').value;
+            const dataInput = document.getElementById('dataAgendamento').value;
+            const horaInput = document.getElementById('horaAgendamento').value;
             
-            if(!data || !hora) {
+            if(!dataInput || !horaInput) {
                 mostrarStatusAgendamento('❌ Preencha data e hora!', 'erro');
                 return;
             }
 
-            const dataHoraMarcada = new Date(`${data}T${hora}:00`);
+            // ✅ CORREÇÃO: Separa ano, mês, dia, hora e minuto manualmente para evitar conversão UTC
+            const partesData = dataInput.split('-'); // [ANO, MÊS, DIA]
+            const anoEscolhido = parseInt(partesData[0]);
+            const mesEscolhido = parseInt(partesData[1]) - 1; // mês no JS começa do 0
+            const diaEscolhido = parseInt(partesData[2]);
+
+            const partesHora = horaInput.split(':'); // [HORA, MINUTO]
+            const horaEscolhida = parseInt(partesHora[0]);
+            const minutoEscolhido = parseInt(partesHora[1]);
+
+            // ✅ CRIA A DATA EXATAMENTE NO HORÁRIO LOCAL DO BRASIL
+            const dataHoraMarcada = new Date(anoEscolhido, mesEscolhido, diaEscolhido, horaEscolhida, minutoEscolhido, 0);
             const timestamp = dataHoraMarcada.getTime();
 
             if(timestamp < Date.now()) {
