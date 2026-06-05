@@ -91,7 +91,7 @@
     <!-- ✅ JANELA FLUTUANTE -->
     <div id="janelaLista" class="janela-flutuante">
         <div class="cabecalho-janela">
-            <span>✅ INSCRITOS CONFIRMADOS ✅</span>
+            <span id="tituloJanela">✅ 0 INSCRITOS CONFIRMADOS ✅</span>
             <button class="fechar-janela" onclick="fecharJanela()">&times;</button>
         </div>
         <div class="conteudo-janela" id="listaConfirmados">
@@ -276,10 +276,14 @@
         // ✅ FUNÇÃO PARA ATUALIZAR A LISTA SEMPRE QUE HOUVER MUDANÇA
         function atualizarListaConfirmados() {
             const conteudo = document.getElementById('listaConfirmados');
+            const tituloJanela = document.getElementById('tituloJanela');
             
             // Pega apenas os confirmados e ordena por data/hora (mais recente primeiro)
             const confirmados = listaCompletaInscricoes.filter(insc => insc && insc.status === 'confirmado')
                                      .sort((a, b) => (b.data_confirmacao || 0) - (a.data_confirmacao || 0));
+
+            // ✅ ATUALIZA O TÍTULO COM O NÚMERO DE INSCRITOS
+            tituloJanela.innerText = `✅ ${confirmados.length} INSCRITOS CONFIRMADOS ✅`;
 
             if (confirmados.length === 0) {
                 conteudo.innerHTML = '<p style="text-align:center; color:#666;">Nenhum inscrito confirmado ainda.</p>';
