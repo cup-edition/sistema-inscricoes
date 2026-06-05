@@ -803,6 +803,15 @@
         function iniciarAtualizacaoAutomatica() {
             db.ref('inscricoes').on('value', function(dados) { atualizarLista(dados); });
         }
+
+        // ✅ FUNÇÃO PARA FECHAR TODAS AS JANELAS AO APERTAR "ESC"
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                ocultarCadastro();
+                fecharEdicao();
+                fecharAgendamento();
+            }
+        });
     </script>
 
 </body>
