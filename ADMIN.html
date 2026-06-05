@@ -782,7 +782,7 @@
                     <td>${insc.nome}</td>
                     <td style="display: ${dataVisivel ? '' : 'none'};">${insc.dia}/${insc.mes}</td>
                     <td class="data-hora">${dataHora || '-'}</td>
-                    <td class="status-${insc.status}">${insc.status === 'pendente' ? 'PENDENTE' : 'CONFIRMADO'}</td>
+                    <td class="status-${insc.status}">${insc.status === 'pendente' ? 'PENDENTE' : 'CONFIRMADO✅'}</td>
                     <td class="acoes-tabela">
                         <button class="btn-pendente" onclick="voltarUmParaPendente(${insc.id})" title="VOLTAR PARA PENDENTE">🔄</button>
                         <button class="btn-editar" onclick="abrirEdicao(${insc.id})">📝</button>
