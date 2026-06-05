@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel Administrativo - Sistema de Inscrições</title>
+    <title>PAINEL ADMINISTRATIVO - SISTEMA DE INSCRIÇÕES</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase.js"></script>
     <style>
-        * {margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif;}
+        * {margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; text-transform: uppercase; font-weight: bold;}
         body {background-color: #343a40; padding: 20px; max-width: 900px; margin: 0 auto;}
 
         /* ===== ESTILOS DA TELA DE LOGIN ===== */
@@ -28,7 +28,7 @@
             width: 100%; max-width: 350px; text-align: center;
         }
         .caixa-login h2 {color: #2c3e50; margin-bottom: 20px; font-size: 22px;}
-        .caixa-login input {width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 6px; font-size: 15px;}
+        .caixa-login input {width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 6px; font-size: 15px; text-transform: none; font-weight: normal;}
         .caixa-login button {width: 100%; padding: 12px; background-color: #27ae60; color: white; border: none; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; transition: background 0.2s;}
         .caixa-login button:hover {background-color: #219653;}
         .errologin {color: #e74c3c; font-size: 14px; margin-top: 10px; display: none; font-weight: bold;}
@@ -51,12 +51,12 @@
         .aviso-limite {color: #e74c3c; font-weight: bold; font-size: 14px; background: #ffebee; padding: 4px 8px; border-radius: 4px; animation: piscar 1s infinite; display: none;}
         @keyframes piscar { 0%{opacity:1;} 50%{opacity:0.5;} 100%{opacity:1;} }
         .grupo-campo {margin-bottom: 12px;}
-        label {display: block; margin-bottom: 5px; font-weight: 500; color: #555;}
-        input {padding: 8px 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;}
+        label {display: block; margin-bottom: 5px; font-weight: bold; color: #555;}
+        input {padding: 8px 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; text-transform: none; font-weight: normal;}
         input[type="number"] {width: 80px;}
-        input[type="file"] {padding: 6px; font-size: 13px; border: 1px dashed #27ae60; background: #f8f9fa;}
+        input[type="file"] {padding: 6px; font-size: 13px; border: 1px dashed #27ae60; background: #f8f9fa; text-transform: none; font-weight: normal;}
         .foto-preview {width: 45px; height: 45px; border-radius: 50%; object-fit: cover; border: 2px solid #ddd;}
-        button {background-color: #27ae60; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; font-size: 14px; margin-top: 8px; margin-right: 8px; transition: background 0.2s;}
+        button {background-color: #27ae60; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; font-size: 14px; margin-top: 8px; margin-right: 8px; transition: background 0.2s; font-weight: bold;}
         button:hover {background-color: #219653;}
         .btn-vermelho {background-color: #e74c3c;}
         .btn-vermelho:hover {background-color: #c0392b;}
@@ -64,22 +64,22 @@
         .btn-amarelo:hover {background-color: #e67e22;}
         .btn-roxo {background-color: #9b59b6;}
         .btn-roxo:hover {background-color: #8e44ad;}
-        .btn-copiar, .btn-ocultar-coluna, .btn-sorteio, .btn-agendar {background-color: #9b59b6; padding: 5px 10px; font-size: 12px; border-radius: 4px;}
-        .btn-copiar:hover, .btn-ocultar-coluna:hover, .btn-sorteio:hover, .btn-agendar:hover {background-color: #8e44ad;}
-        .btn-editar {background-color: #3498db; padding: 4px 8px; font-size: 12px;}
+        .btn-ocultar-coluna, .btn-sorteio, .btn-agendar {background-color: #9b59b6; padding: 5px 10px; font-size: 12px; border-radius: 4px; font-weight: bold;}
+        .btn-ocultar-coluna:hover, .btn-sorteio:hover, .btn-agendar:hover {background-color: #8e44ad;}
+        .btn-editar {background-color: #3498db; padding: 4px 8px; font-size: 12px; font-weight: bold;}
         .btn-editar:hover {background-color: #2980b9;}
-        .btn-pendente {background-color: #f39c12; padding: 4px 8px; font-size: 12px;}
+        .btn-pendente {background-color: #f39c12; padding: 4px 8px; font-size: 12px; font-weight: bold;}
         .btn-pendente:hover {background-color: #e67e22;}
-        .mensagem-copia {font-size: 12px; color: #27ae60; font-weight: normal; margin-left: 10px; display: none;}
+        .mensagem-copia {font-size: 12px; color: #27ae60; font-weight: bold; margin-left: 10px; display: none;}
         .resultado {margin-top: 12px; padding: 10px; border-radius: 4px; font-weight: bold;}
         .sucesso {background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb;}
         .erro {background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb;}
         table {width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 13px;}
-        th, td {padding: 8px 6px; text-align: left; border-bottom: 1px solid #eee;}
+        th, td {padding: 8px 6px; text-align: left; border-bottom: 1px solid #eee; font-weight: bold;}
         th {background-color: #f8f9fa; color: #333; font-size: 12px;}
         .status-pendente {color: #f39c12; font-weight: bold;}
         .status-confirmado {color: #27ae60; font-weight: bold;}
-        .acoes-tabela button {padding: 4px 6px; font-size: 11px; margin: 0 1px;}
+        .acoes-tabela button {padding: 4px 6px; font-size: 11px; margin: 0 1px; font-weight: bold;}
         
         .area-botoes-finais {
             display: flex;
@@ -94,9 +94,9 @@
             gap: 10px;
         }
 
-        .carregando {color: #3498db; font-style: italic;}
+        .carregando {color: #3498db; font-style: italic; font-weight: bold;}
         #conteudoPrincipal {display: none;}
-        .data-hora {font-size: 11px; color: #666; white-space: nowrap;}
+        .data-hora {font-size: 11px; color: #666; white-space: nowrap; font-weight: bold;}
 
         /* ===== MODAL DE EDIÇÃO ===== */
         #modalEditar {
@@ -110,7 +110,7 @@
             width: 100%; max-width: 400px;
             box-shadow: 0 5px 20px rgba(0,0,0,0.3);
         }
-        .caixa-editar h3 {margin-bottom: 15px; color: #2c3e50; text-align: center;}
+        .caixa-editar h3 {margin-bottom: 15px; color: #2c3e50; text-align: center; font-weight: bold;}
         .botoes-modal {display: flex; gap: 10px; justify-content: space-between; align-items: center; margin-top: 20px;}
         .grupo-botoes-direita-modal {display: flex; gap: 10px;}
 
@@ -126,10 +126,10 @@
             width: 100%; max-width: 400px;
             box-shadow: 0 5px 20px rgba(0,0,0,0.3);
         }
-        .caixa-agendar h3 {margin-bottom: 15px; color: #2c3e50; text-align: center;}
+        .caixa-agendar h3 {margin-bottom: 15px; color: #2c3e50; text-align: center; font-weight: bold;}
         .grupo-data-hora {display: flex; gap: 10px; margin-bottom: 15px;}
         .grupo-data-hora div {flex: 1;}
-        .status-agendamento {margin-top: 10px; padding: 8px; border-radius: 4px; font-size: 13px; text-align: center; display: none;}
+        .status-agendamento {margin-top: 10px; padding: 8px; border-radius: 4px; font-size: 13px; text-align: center; display: none; font-weight: bold;}
         .agendado {background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba;}
         .ativo {background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb;}
 
@@ -142,7 +142,7 @@
             border-radius: 4px;
             cursor: pointer;
             font-size: 14px;
-            font-weight: normal;
+            font-weight: bold;
             transition: background 0.2s;
             margin: 0;
         }
@@ -158,7 +158,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.6); /* Fundo escuro transparente */
+            background-color: rgba(0, 0, 0, 0.6);
             align-items: center;
             justify-content: center;
             z-index: 9999;
@@ -180,11 +180,13 @@
             display: flex;
             align-items: center;
             gap: 8px;
+            font-weight: bold;
         }
         #janelaCadastro label {
             font-size: 14px;
             margin-bottom: 4px;
             display: block;
+            font-weight: bold;
         }
         #janelaCadastro input[type="text"],
         #janelaCadastro input[type="number"] {
@@ -193,14 +195,17 @@
             margin-bottom: 10px;
             border: 1px solid #ccc;
             border-radius: 4px;
+            text-transform: none;
+            font-weight: normal;
         }
         #janelaCadastro input[type="file"] {
             width: 100%;
-            padding: 6px;
-            border: 1px dashed #27ae60;
+            padding: 6px; border: 1px dashed #27ae60;
             border-radius: 4px;
             background: #f8f9fa;
             margin-bottom: 15px;
+            text-transform: none;
+            font-weight: normal;
         }
         #btnOcultarCadastro {
             background-color: #28a745;
@@ -214,6 +219,7 @@
             display: inline-flex;
             align-items: center;
             gap: 5px;
+            font-weight: bold;
         }
         #btnCadastrarPessoa {
             background-color: #28a745;
@@ -224,10 +230,12 @@
             font-size: 14px;
             cursor: pointer;
             width: 100%;
+            font-weight: bold;
         }
         #msg_cadastro {
             margin-top: 10px;
             font-size: 13px;
+            font-weight: bold;
         }
     </style>
 </head>
@@ -236,36 +244,36 @@
     <div id="telaLogin">
         <div class="caixa-login">
             <h2>🔐 ACESSO RESTRITO</h2>
-            <input type="text" id="usuarioLogin" placeholder="Usuário" required onkeydown="if(event.key === 'Enter') document.getElementById('senhaLogin').focus()">
-            <input type="password" id="senhaLogin" placeholder="Senha" required onkeydown="if(event.key === 'Enter') fazerLogin()">
+            <input type="text" id="usuarioLogin" placeholder="USUÁRIO" required onkeydown="if(event.key === 'Enter') document.getElementById('senhaLogin').focus()">
+            <input type="password" id="senhaLogin" placeholder="SENHA" required onkeydown="if(event.key === 'Enter') fazerLogin()">
             <button onclick="fazerLogin()">ENTRAR</button>
-            <div class="errologin" id="mensagemErro">Usuário ou senha incorretos!</div>
+            <div class="errologin" id="mensagemErro">USUÁRIO OU SENHA INCORRETOS!</div>
         </div>
     </div>
 
     <!-- ✅ MODAL DE EDIÇÃO -->
     <div id="modalEditar">
         <div class="caixa-editar">
-            <h3>📝 Editar Cadastro <span id="editId"></span></h3>
+            <h3>📝 EDITAR CADASTRO <span id="editId"></span></h3>
             <div class="grupo-campo">
-                <label>Nome Completo:</label>
-                <input type="text" id="edit_nome" placeholder="Digite o nome">
+                <label>NOME COMPLETO:</label>
+                <input type="text" id="edit_nome" placeholder="DIGITE O NOME">
             </div>
             <div class="grupo-campo">
-                <label>Dia de Nascimento:</label>
-                <input type="number" id="edit_dia" min="1" max="31" placeholder="Dia">
-                <label style="margin-left: 10px;">Mês de Nascimento:</label>
-                <input type="number" id="edit_mes" min="1" max="12" placeholder="Mês">
+                <label>DIA DE NASCIMENTO:</label>
+                <input type="number" id="edit_dia" min="1" max="31" placeholder="DIA">
+                <label style="margin-left: 10px;">MÊS DE NASCIMENTO:</label>
+                <input type="number" id="edit_mes" min="1" max="12" placeholder="MÊS">
             </div>
             <div class="grupo-campo">
-                <label>📸 Trocar Foto (opcional):</label>
+                <label>📸 TROCAR FOTO (OPCIONAL):</label>
                 <input type="file" id="edit_foto" accept="image/*">
             </div>
             <div class="botoes-modal">
-                <button type="button" onclick="excluirCadastro()" class="btn-vermelho">🗑️ Excluir</button>
+                <button type="button" onclick="excluirCadastro()" class="btn-vermelho">🗑️ EXCLUIR</button>
                 <div class="grupo-botoes-direita-modal">
-                    <button type="button" onclick="fecharEdicao()">Cancelar</button>
-                    <button type="button" onclick="salvarEdicao()">Salvar</button>
+                    <button type="button" onclick="fecharEdicao()">CANCELAR</button>
+                    <button type="button" onclick="salvarEdicao()">SALVAR</button>
                 </div>
             </div>
         </div>
@@ -274,80 +282,78 @@
     <!-- ✅ MODAL DE AGENDAMENTO -->
     <div id="modalAgendar">
         <div class="caixa-agendar">
-            <h3>⏰ Agendar Reinício Automático</h3>
-            <p style="text-align:center; font-size:12px; color:#666; margin-bottom:10px;">*Funciona mesmo com a página fechada (GRATUITO)</p>
+            <h3>⏰ AGENDAR REINÍCIO AUTOMÁTICO</h3>
+            <p style="text-align:center; font-size:12px; color:#666; margin-bottom:10px; font-weight: bold;">*FUNCIONA MESMO COM A PÁGINA FECHADA (GRATUITO)</p>
             <div class="grupo-campo">
-                <label>Defina data e horário para reiniciar:</label>
+                <label>DEFINA DATA E HORÁRIO PARA REINICIAR:</label>
                 <div class="grupo-data-hora">
                     <div>
-                        <label>Data:</label>
+                        <label>DATA:</label>
                         <input type="date" id="dataAgendamento" required>
                     </div>
                     <div>
-                        <label>Hora:</label>
+                        <label>HORA:</label>
                         <input type="time" id="horaAgendamento" required>
                     </div>
                 </div>
             </div>
             <div id="statusAgendamento" class="status-agendamento"></div>
             <div class="botoes-modal">
-                <button type="button" onclick="cancelarAgendamento()" class="btn-vermelho">❌ Cancelar Agendamento</button>
+                <button type="button" onclick="cancelarAgendamento()" class="btn-vermelho">❌ CANCELAR AGENDAMENTO</button>
                 <div class="grupo-botoes-direita-modal">
-                    <button type="button" onclick="fecharAgendamento()">Fechar</button>
-                    <button type="button" onclick="salvarAgendamento()">💾 Salvar</button>
+                    <button type="button" onclick="fecharAgendamento()">FECHAR</button>
+                    <button type="button" onclick="salvarAgendamento()">💾 SALVAR</button>
                 </div>
             </div>
         </div>
     </div>
 
     <div id="conteudoPrincipal">
-        <h1>🔐 Painel Administrativo</h1>
+        <h1>🔐 PAINEL ADMINISTRATIVO</h1>
         <div class="aviso-link">
-            <p>Envie a página <strong>inscrever.html</strong> para as pessoas se cadastrarem/confirmarem.</p>
+            <p>ENVIE A PÁGINA <strong>INSCREVER.HTML</strong> PARA AS PESSOAS SE CADASTRarem/CONFIRMAREM.</p>
         </div>
 
         <div id="avisoNovaConfirmacao">🎉 NOVA INSCRIÇÃO CONFIRMADA!</div>
 
         <div class="secao">
             <h2>
-                📊 Lista de Inscrições 
-                <small>(Últimas confirmações aparecem primeiro)</small>
+                📊 LISTA DE INSCRIÇÕES 
                 <span id="contadorConfirmados" class="contador-confirmados"></span>
                 <div id="avisoLimite" class="aviso-limite">⚠️ LIMITE DE 16 CONFIRMADOS ATINGIDO! INSCRIÇÕES ENCERRADAS AUTOMATICAMENTE.</div>
                 <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-                    <button class="btn-ocultar-coluna" onclick="alternarVisibilidadeData()">🙈 Ocultar Data Nasc.</button>
-                    <button class="btn-copiar" onclick="copiarNomesConfirmados()">📋 Copiar Nomes Confirmados</button>
-                    <button class="btn-agendar" onclick="abrirAgendamento()">⏰ Agendar Reinício</button>
-                    <button class="btn-sorteio" onclick="window.open('https://endrilsilva.github.io/sorteio-nomes/SORTEIO.html', '_blank')">🎰 Site de Sorteio</button>
-                    <span class="mensagem-copia" id="msgCopia">Copiado!</span>
+                    <button class="btn-ocultar-coluna" onclick="alternarVisibilidadeData()">🙈 OCULTAR DATA NASC.</button>
+                    <button class="btn-agendar" onclick="abrirAgendamento()">⏰ AGENDAR REINÍCIO</button>
+                    <button class="btn-sorteio" onclick="window.open('https://endrilsilva.github.io/sorteio-nomes/SORTEIO.html', '_blank')">🎰 SITE DE SORTEIO</button>
+                    <span class="mensagem-copia" id="msgCopia">COPIADO!</span>
                 </div>
             </h2>
 
             <table id="tabelaInscritos">
                 <thead>
                     <tr>
-                        <th>Foto</th>
-                        <th>Nome</th>
-                        <th id="colunaDataCabecalho">Data Nasc.</th>
-                        <th>Confirmação</th>
-                        <th>Status</th>
-                        <th>Ações</th>
+                        <th>FOTO</th>
+                        <th>NOME</th>
+                        <th id="colunaDataCabecalho">DATA NASC.</th>
+                        <th>CONFIRMAÇÃO</th>
+                        <th>STATUS</th>
+                        <th>AÇÕES</th>
                     </tr>
                 </thead>
                 <tbody id="lista_inscricoes">
-                    <tr><td colspan="6" style="text-align: center; color: #888;">Carregando...</td></tr>
+                    <tr><td colspan="6" style="text-align: center; color: #888;">CARREGANDO...</td></tr>
                 </tbody>
             </table>
 
             <!-- ✅ ÁREA DOS BOTÕES -->
             <div class="area-botoes-finais">
                 <div>
-                    <button id="btnMostrarCadastro" onclick="mostrarCadastro()">📝 Cadastrar Nova Pessoa</button>
+                    <button id="btnMostrarCadastro" onclick="mostrarCadastro()">📝 CADASTRAR NOVA PESSOA</button>
                 </div>
                 
                 <div class="grupo-botoes-direita">
-                    <button class="btn-amarelo" onclick="voltarTodosParaPendente()">🔄 Voltar Todos para Pendentes</button>
-                    <button class="btn-vermelho" onclick="limparTodasInscricoes()">🗑️ Limpar Todas as Inscrições</button>
+                    <button class="btn-amarelo" onclick="voltarTodosParaPendente()">🔄 VOLTAR TODOS PARA PENDENTES</button>
+                    <button class="btn-vermelho" onclick="limparTodasInscricoes()">🗑️ LIMPAR TODAS AS INSCRIÇÕES</button>
                 </div>
             </div>
 
@@ -357,23 +363,23 @@
     <!-- ✅ JANELINHA DE CADASTRO - AGORA CENTRALIZADA -->
     <div id="fundoCadastro">
         <div id="janelaCadastro">
-            <button id="btnOcultarCadastro" onclick="ocultarCadastro()">✅ Ocultar Cadastro</button>
+            <button id="btnOcultarCadastro" onclick="ocultarCadastro()">✅ OCULTAR CADASTRO</button>
             
-            <h3>📋 Cadastrar Nova Pessoa</h3>
+            <h3>📋 CADASTRAR NOVA PESSOA</h3>
             
-            <label>Nome Completo:</label>
-            <input type="text" id="cad_nome" placeholder="Digite o nome">
+            <label>NOME COMPLETO:</label>
+            <input type="text" id="cad_nome" placeholder="DIGITE O NOME">
 
-            <label>Dia de Nascimento:</label>
-            <input type="number" id="cad_dia" min="1" max="31" placeholder="Dia">
+            <label>DIA DE NASCIMENTO:</label>
+            <input type="number" id="cad_dia" min="1" max="31" placeholder="DIA">
 
-            <label>Mês de Nascimento:</label>
-            <input type="number" id="cad_mes" min="1" max="12" placeholder="Mês">
+            <label>MÊS DE NASCIMENTO:</label>
+            <input type="number" id="cad_mes" min="1" max="12" placeholder="MÊS">
 
-            <label>📸 Foto de Perfil (opcional):</label>
+            <label>📸 FOTO DE PERFIL (OPCIONAL):</label>
             <input type="file" id="cad_foto" accept="image/*">
 
-            <button id="btnCadastrarPessoa" onclick="cadastrarPessoa()">Cadastrar</button>
+            <button id="btnCadastrarPessoa" onclick="cadastrarPessoa()">CADASTRAR</button>
             
             <div id="msg_cadastro" class="resultado" style="display: none;"></div>
         </div>
@@ -475,13 +481,13 @@
 
             if (!nome || !dia || !mes || dia < 1 || dia > 31 || mes < 1 || mes > 12) {
                 msg.className = 'resultado erro';
-                msg.innerText = '❌ Preencha todos os dados corretamente!';
+                msg.innerText = '❌ PREENCHA TODOS OS DADOS CORRETAMENTE!';
                 msg.style.display = 'block';
                 return;
             }
 
             msg.className = 'resultado sucesso';
-            msg.innerText = '⏳ Processando...';
+            msg.innerText = '⏳ PROCESSANDO...';
             msg.style.display = 'block';
 
             lerFotoComoTexto(arquivoFoto, function(textoDaFoto) {
@@ -501,7 +507,7 @@
                     
                     db.ref('inscricoes').set(inscricoes).then(() => {
                         msg.className = 'resultado sucesso';
-                        msg.innerText = '✅ Cadastro realizado com sucesso!';
+                        msg.innerText = '✅ CADASTRO REALIZADO COM SUCESSO!';
                         msg.style.display = 'block';
                         document.getElementById('cad_nome').value = '';
                         document.getElementById('cad_dia').value = '';
@@ -545,7 +551,7 @@
             var novaFotoArquivo = document.getElementById('edit_foto').files[0];
 
             if (!novoNome || !novoDia || !novoMes || novoDia < 1 || novoDia > 31 || novoMes < 1 || novoMes > 12) {
-                alert('❌ Preencha todos os dados corretamente!');
+                alert('❌ PREENCHA TODOS OS DADOS CORRETAMENTE!');
                 return;
             }
 
@@ -576,7 +582,7 @@
 
         // ✅ EXCLUIR CADASTRO
         function excluirCadastro() {
-            if (confirm('⚠️ Tem certeza que deseja EXCLUIR este cadastro? Essa ação não pode ser desfeita!')) {
+            if (confirm('⚠️ TEM CERTEZA QUE DESEJA EXCLUIR ESTE CADASTRO? ESSA AÇÃO NÃO PODE SER DESFEITA!')) {
                 db.ref('inscricoes').once('value').then(snap => {
                     var lista = snap.val() || [];
                     var novaLista = lista.filter(insc => insc && insc.id !== idEmEdicao);
@@ -603,15 +609,15 @@
         }
 
         function limparTodasInscricoes() {
-            if (confirm('⚠️ ATENÇÃO: Isso apagARÁ TODOS os cadastros! Tem certeza?')) {
+            if (confirm('⚠️ ATENÇÃO: ISSO APAGARÁ TODOS OS CADASTROS! TEM CERTEZA?')) {
                 db.ref('inscricoes').remove();
-                alert('Todos os dados foram apagados!');
+                alert('TODOS OS DADOS FORAM APAGADOS!');
             }
         }
 
         // ✅ BOTÃO GERAL: VOLTAR TODOS PARA PENDENTE
         function voltarTodosParaPendente() {
-            if (confirm('⚠️ Isso irá mudAR TODOS para Pendente e reabrir as inscrições. Deseja continuar?')) {
+            if (confirm('⚠️ ISSO IRÁ MUDAR TODOS PARA PENDENTE E REABRIR AS INSCRIÇÕES. DESEJA CONTINUAR?')) {
                 db.ref('inscricoes').once('value').then(snap => {
                     var lista = snap.val() || [];
                     lista = lista.map(insc => { 
@@ -623,7 +629,7 @@
                     });
                     db.ref('inscricoes').set(lista);
                     db.ref('configuracao').set({inscricoes_abertas: true, ultimo_reinicio: Date.now()});
-                    alert('✅ Todos voltaram para pendentes e inscrições foram REABERTAS!');
+                    alert('✅ TODOS VOLTARAM PARA PENDENTES E INSCRIÇÕES FORAM REABERTAS!');
                 });
             }
         }
@@ -648,7 +654,7 @@
                     const horaAg = String(dataObj.getHours()).padStart(2, '0');
                     const minAg = String(dataObj.getMinutes()).padStart(2, '0');
                     
-                    mostrarStatusAgendamento(`⏸️ Agendado para ${horaAg}:${minAg}h de ${diaAg}/${mesAg}/${anoAg}`, 'agendado');
+                    mostrarStatusAgendamento(`⏸️ AGENDADO PARA ${horaAg}:${minAg}H DE ${diaAg}/${mesAg}/${anoAg}`, 'agendado');
                 } else {
                     document.getElementById('statusAgendamento').style.display = 'none';
                 }
@@ -660,7 +666,7 @@
             const horaInput = document.getElementById('horaAgendamento').value;
             
             if(!dataInput || !horaInput) {
-                mostrarStatusAgendamento('❌ Preencha data e hora!', 'erro');
+                mostrarStatusAgendamento('❌ PREENCHA DATA E HORA!', 'erro');
                 return;
             }
 
@@ -677,7 +683,7 @@
             const timestamp = dataHoraMarcada.getTime();
 
             if(timestamp < Date.now()) {
-                mostrarStatusAgendamento('❌ Escolha uma data/hora futura!', 'erro');
+                mostrarStatusAgendamento('❌ ESCOLHA UMA DATA/HORA FUTURA!', 'erro');
                 return;
             }
 
@@ -685,14 +691,14 @@
                 timestamp: timestamp,
                 executado: false
             }).then(() => {
-                mostrarStatusAgendamento('✅ Agendamento SALVO! Funcionará automaticamente.', 'ativo');
+                mostrarStatusAgendamento('✅ AGENDAMENTO SALVO! FUNCIONARÁ AUTOMATICAMENTE.', 'ativo');
                 setTimeout(() => fecharAgendamento(), 2000);
             });
         }
 
         function cancelarAgendamento() {
             db.ref('agendamento_reinicio').remove().then(() => {
-                mostrarStatusAgendamento('❌ Agendamento CANCELADO!', 'erro');
+                mostrarStatusAgendamento('❌ AGENDAMENTO CANCELADO!', 'erro');
                 setTimeout(() => fecharAgendamento(), 1500);
             });
         }
@@ -709,23 +715,12 @@
             status.style.display = 'block';
         }
 
-        function copiarNomesConfirmados() {
-            db.ref('inscricoes').once('value').then(snap => {
-                var lista = snap.val() || [];
-                var nomes = lista.filter(insc => insc && insc.status === 'confirmado').map(insc => insc.nome);
-                if (nomes.length === 0) { alert('⚠️ Nenhum confirmado.'); return; }
-                navigator.clipboard.writeText(nomes.join('\n')).then(() => {
-                    var msg = document.getElementById('msgCopia'); msg.style.display = 'inline'; setTimeout(() => msg.style.display = 'none', 2000);
-                });
-            });
-        }
-
         function alternarVisibilidadeData() {
             dataVisivel = !dataVisivel;
             var botao = document.querySelector('.btn-ocultar-coluna');
             var cabecalho = document.getElementById('colunaDataCabecalho');
             cabecalho.style.display = dataVisivel ? '' : 'none';
-            botao.innerText = dataVisivel ? '🙈 Ocultar Data Nasc.' : '👁️ Mostrar Data Nasc.';
+            botao.innerText = dataVisivel ? '🙈 OCULTAR DATA NASC.' : '👁️ MOSTRAR DATA NASC.';
             var celulasData = document.querySelectorAll('td:nth-child(3)');
             celulasData.forEach(celula => { celula.style.display = dataVisivel ? '' : 'none'; });
         }
@@ -739,8 +734,8 @@
             var tabela = document.getElementById('lista_inscricoes');
 
             if (inscricoes.length === 0 || !inscricoes[0]) {
-                tabela.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #888;">Nenhuma inscrição cadastrada ainda.</td></tr>';
-                document.getElementById('contadorConfirmados').innerText = `✅ 0 confirmados | Restam 16 vagas (Limite: 16)`;
+                tabela.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #888;">NENHUMA INSCRIÇÃO CADASTRADA AINDA.</td></tr>';
+                document.getElementById('contadorConfirmados').innerText = `✅ 0 CONFIRMADOS | RESTAM 16 VAGAS (LIMITE: 16)`;
                 verificarLimiteConfirmados(0);
                 return;
             }
@@ -760,7 +755,7 @@
             }
             quantidadeAnterior = qtdConfirmados;
 
-            document.getElementById('contadorConfirmados').innerText = `✅ ${qtdConfirmados} confirmados | Restam ${vagasRestantes} vagas (Limite: 16)`;
+            document.getElementById('contadorConfirmados').innerText = `✅ ${qtdConfirmados} CONFIRMADOS | RESTAM ${vagasRestantes} VAGAS (LIMITE: 16)`;
             verificarLimiteConfirmados(qtdConfirmados);
 
             tabela.innerHTML = '';
@@ -786,7 +781,7 @@
                     <td class="data-hora">${dataHora || '-'}</td>
                     <td class="status-${insc.status}">${insc.status === 'pendente' ? 'PENDENTE' : 'CONFIRMADO'}</td>
                     <td class="acoes-tabela">
-                        <button class="btn-pendente" onclick="voltarUmParaPendente(${insc.id})" title="Voltar para Pendente">🔄</button>
+                        <button class="btn-pendente" onclick="voltarUmParaPendente(${insc.id})" title="VOLTAR PARA PENDENTE">🔄</button>
                         <button class="btn-editar" onclick="abrirEdicao(${insc.id})">📝</button>
                     </td>
                 `;
