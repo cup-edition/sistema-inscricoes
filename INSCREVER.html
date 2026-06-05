@@ -158,4 +158,56 @@
                     
                     if (conf && conf.inscricoes_abertas === false) {
                         avisoEncerrado.style.display = 'block';
-                        aviso
+                        avisoLimite.style.display = 'none';
+                    } else {
+                        avisoEncerrado.style.display = 'none';
+                        avisoLimite.style.display = qtdConfirmados >= LIMITE ? 'block' : 'none';
+                    }
+
+                    if (lista.length === 0 || !lista[0]) {
+                        htmlLista.innerHTML = '<p style="text-align:center; color:#888; padding:20px;">Nenhuma inscrição cadastrada ainda.</p>';
+                        return;
+                    }
+
+                    // ✅ ORDENAR: Pendentes primeiro, depois confirmados
+                    let listaOrdenada = lista.filter(Boolean).sort((a, b) => {
+                        if (a.status === 'pendente' && b.status === 'confirmado') return -1;
+                        if (a.status === 'confirmado' && b.status === 'pendente') return 1;
+                        return a.nome.localeCompare(b.nome);
+                    });
+
+                    htmlLista.innerHTML = '';
+                    listaOrdenada.forEach(pessoa => {
+                        let botaoOuStatus = '';
+                        if (pessoa.status === 'pendente') {
+                            botaoOuStatus = `<button class="btn-confirmar" onclick="confirmarPresenca(${pessoa.id})">✓ Confirmar</button>`;
+                        } else {
+                            botaoOuStatus = `<span class="confirmado">✅ Confirmado</span>`;
+                        }
+
+                        let foto = pessoa.foto ? `<img src="${pessoa.foto}" class="foto-mini">` : '📷';
+
+                        const linha = document.createElement('div');
+                        linha.className = 'grupo-pessoa';
+                        linha.innerHTML = `
+                            <div class="info-pessoa">
+                                ${foto}
+                                <div class="dados-pessoa">
+                                    <h3>${pessoa.nome}</h3>
+                                    <p>Nasc: ${pessoa.dia}/${pessoa.mes}</p>
+                                </div>
+                            </div>
+                            ${botaoOuStatus}
+                        `;
+                        htmlLista.appendChild(linha);
+                    });
+                });
+            });
+        }
+
+        // Carregar tudo quando abrir a página
+        carregarLista();
+    </script>
+
+</body>
+</html>
