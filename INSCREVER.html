@@ -75,7 +75,8 @@
             <div class="grupo-campo">
                 <!-- ✅ ALTERADO: NOME: em negrito -->
                 <label>NOME:</label>
-                <select id="ver_nome" onkeydown="avancarCampo(event, 'ver_dia')" onchange="mostrarFotoSelecionado()">
+                <!-- ✅ ADICIONADO: onchange="mostrarFotoSelecionado(); focarNoDia()" → Pula automaticamente ao selecionar -->
+                <select id="ver_nome" onkeydown="avancarCampo(event, 'ver_dia')" onchange="mostrarFotoSelecionado(); focarNoDia()">
                     <option value="">-- Selecione seu nome --</option>
                 </select>
             </div>
@@ -180,6 +181,15 @@
             // Se o tamanho do valor for igual a 2, pula para o campo Mês
             if (campo.value.length === 2) {
                 document.getElementById('ver_mes').focus();
+            }
+        }
+
+        // ✅ NOVA FUNÇÃO: ASSIM QUE SELECIONAR O NOME, VAI DIRETO PARA O DIA
+        function focarNoDia() {
+            const nomeEscolhido = document.getElementById('ver_nome').value;
+            // Só pula se tiver selecionado um nome (não for a opção vazia)
+            if (nomeEscolhido !== "") {
+                document.getElementById('ver_dia').focus();
             }
         }
 
