@@ -107,7 +107,8 @@
         .status-pendente {color: #f39c12; font-weight: bold;}
         .status-confirmado {color: #27ae60; font-weight: bold;}
         .acoes-tabela button {padding: 4px 6px; font-size: 11px; margin: 0 1px;}
-        .area-limpar-tudo {text-align: right; margin-top: 10px;}
+        /* ✅ ALINHAMENTO DOS BOTÕES NO MESMO LOCAL */
+        .area-botoes-finais {text-align: right; margin-top: 10px; display: flex; justify-content: flex-end; gap: 10px; flex-wrap: wrap;}
         .carregando {color: #3498db; font-style: italic;}
         #conteudoPrincipal {display: none;}
         .data-hora {font-size: 11px; color: #666; white-space: nowrap;}
@@ -301,10 +302,6 @@
                     <span class="mensagem-copia" id="msgCopia">Copiado!</span>
                 </div>
             </h2>
-            
-            <div style="margin-bottom: 15px;">
-                <button class="btn-amarelo" onclick="voltarTodosParaPendente()">🔄 Voltar Todos para Pendentes</button>
-            </div>
 
             <table id="tabelaInscritos">
                 <thead>
@@ -322,7 +319,9 @@
                 </tbody>
             </table>
 
-            <div class="area-limpar-tudo">
+            <!-- ✅ BOTÕES AGORA LADO A LADO -->
+            <div class="area-botoes-finais">
+                <button class="btn-amarelo" onclick="voltarTodosParaPendente()">🔄 Voltar Todos para Pendentes</button>
                 <button class="btn-vermelho" onclick="limparTodasInscricoes()">🗑️ Limpar Todas as Inscrições</button>
             </div>
         </div>
