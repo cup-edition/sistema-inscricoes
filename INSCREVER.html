@@ -132,8 +132,6 @@
 
             <div class="grupo-campo">
                 <!-- ✅ ALTERADO: DATA DE NASCIMENTO: em negrito -->
-                <label>DATA DE NASCIMENTO:</label>
-                <!-- ✅ Container para colocar a foto ao lado -->
                 <div class="foto-container">
                     <div style="flex: 1;">
                         <!-- ✅ ADICIONADO: oninput="pularParaMes(this)" → Pula automaticamente quando completar 2 dígitos -->
@@ -176,13 +174,18 @@
             carregarListaNomes();
             setInterval(verificarStatusSistema, 3000);
             
-            // ✅ ATUALIZAÇÃO EM TEMPO REAL DA LISTA
+            // ✅ ATUALIZAÇÃO EM TEMPO REAL: AGORA VAI PEGAR QUALQUER MUDANÇA DE STATUS, INCLUSIVE VOLTAR PARA PENDENTE
             db.ref('inscricoes').on('value', function(snap) {
                 listaCompletaInscricoes = snap.val() || [];
-                // Se a janela estiver aberta, atualiza o conteúdo automaticamente
+                
+                // ✅ Se a janela estiver aberta, atualiza automaticamente
                 if (janelaAberta) {
                     atualizarListaConfirmados();
                 }
+
+                // ✅ SEMPRE RECARREGA A LISTA DE NOMES PENDENTES QUANDO HOUVER MUDANÇA
+                // Isso faz com que quem voltou para pendente apareça novamente na lista de seleção
+                carregarListaNomes();
             });
         };
 
@@ -342,6 +345,7 @@
                 var selectNome = document.getElementById('ver_nome');
                 selectNome.innerHTML = '<option value="">-- Selecione seu nome --</option>';
 
+                // ✅ AGORA PEGA TODOS OS QUE ESTÃO PENDENTES, MESMO QUE JÁ TENHAM SIDO CONFIRMADOS ANTES
                 var nomesPendentes = listaCompletaInscricoes.filter(insc => insc && insc.status === 'pendente').map(insc => insc.nome);
                 var nomesUnicos = [...new Set(nomesPendentes)].sort();
 
