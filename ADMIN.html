@@ -401,7 +401,7 @@
             }
         }
 
-        // ✅ CONVERTER FOTO PARA TEXTO
+        // ✅ CONVERTER FOTO PARA TEXTO - AGORA COM ALTA QUALIDADE
         function lerFotoComoTexto(arquivo, callback) {
             if (!arquivo) { callback(null); return; }
             var leitor = new FileReader();
@@ -409,12 +409,25 @@
                 var img = new Image();
                 img.onload = function() {
                     var canvas = document.createElement('canvas');
-                    var tamanho = 100;
+                    // ✅ AUMENTADO O TAMANHO E QUALIDADE
+                    var tamanho = 300; // Antes era 100, agora é 3x maior
                     canvas.width = tamanho;
                     canvas.height = tamanho;
                     var ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, tamanho, tamanho);
-                    callback(canvas.toDataURL('image/jpeg', 0.7));
+                    
+                    // ✅ MELHOR RENDERIZAÇÃO PARA MANTER NITIDEZ
+                    ctx.imageSmoothingEnabled = true;
+                    ctx.imageSmoothingQuality = 'high';
+                    
+                    // ✅ CORTAR IMAGEM PARA FICAR QUADRADA ANTES DE REDIMENSIONAR
+                    const tamanhoOriginal = Math.min(img.width, img.height);
+                    const xInicio = (img.width - tamanhoOriginal) / 2;
+                    const yInicio = (img.height - tamanhoOriginal) / 2;
+                    
+                    ctx.drawImage(img, xInicio, yInicio, tamanhoOriginal, tamanhoOriginal, 0, 0, tamanho, tamanho);
+                    
+                    // ✅ QUALIDADE 0.9 (QUASE SEM PERDA)
+                    callback(canvas.toDataURL('image/jpeg', 0.9));
                 };
                 img.src = e.target.result;
             };
