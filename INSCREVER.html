@@ -28,6 +28,23 @@
         .resultado {margin-top: 20px; padding: 15px; border-radius: 6px; font-weight: bold; font-size: 15px; display: none;}
         .sucesso {background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb;}
         .erro {background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb;}
+        
+        /* ✅ ESTILO PARA A FOTO */
+        .foto-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .foto-preview {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #ddd;
+            display: none; /* Começa escondida */
+        }
     </style>
 </head>
 <body>
@@ -57,7 +74,7 @@
             <div class="grupo-campo">
                 <!-- ✅ ALTERADO: NOME: em negrito -->
                 <label>NOME:</label>
-                <select id="ver_nome" onkeydown="avancarCampo(event, 'ver_dia')">
+                <select id="ver_nome" onkeydown="avancarCampo(event, 'ver_dia')" onchange="mostrarFotoSelecionado()">
                     <option value="">-- Selecione seu nome --</option>
                 </select>
             </div>
@@ -65,9 +82,16 @@
             <div class="grupo-campo">
                 <!-- ✅ ALTERADO: DATA DE NASCIMENTO: em negrito -->
                 <label>DATA DE NASCIMENTO:</label>
-                <!-- ✅ ADICIONADO: oninput="pularParaMes(this)" → Pula automaticamente quando completar 2 dígitos -->
-                <input type="number" id="ver_dia" min="1" max="31" placeholder="Dia" maxlength="2" oninput="limitarDigitos(this, 2); pularParaMes(this)" onkeydown="avancarCampo(event, 'ver_mes')">
-                <input type="number" id="ver_mes" min="1" max="12" placeholder="Mês" maxlength="2" oninput="limitarDigitos(this, 2)" onkeydown="avancarCampo(event, 'botaoConfirmar')">
+                <!-- ✅ Container para colocar a foto ao lado -->
+                <div class="foto-container">
+                    <div style="flex: 1;">
+                        <!-- ✅ ADICIONADO: oninput="pularParaMes(this)" → Pula automaticamente quando completar 2 dígitos -->
+                        <input type="number" id="ver_dia" min="1" max="31" placeholder="Dia" maxlength="2" oninput="limitarDigitos(this, 2); pularParaMes(this)" onkeydown="avancarCampo(event, 'ver_mes')">
+                        <input type="number" id="ver_mes" min="1" max="12" placeholder="Mês" maxlength="2" oninput="limitarDigitos(this, 2)" onkeydown="avancarCampo(event, 'botaoConfirmar')">
+                    </div>
+                    <!-- ✅ Elemento da Foto -->
+                    <img id="fotoUsuario" class="foto-preview" alt="Foto do usuário">
+                </div>
             </div>
 
             <button id="botaoConfirmar" onclick="confirmarInscricao()">CONFIRMAR INSCRIÇÃO</button>
@@ -91,6 +115,7 @@
         firebase.initializeApp(firebaseConfig);
         var db = firebase.database();
         const LIMITE_MAXIMO = 16;
+        var listaCompletaInscricoes = []; // ✅ Variável global para guardar todos os dados (incluindo fotos)
 
         window.onload = function() {
             verificarAgendamentoEExecutar(); // ✅ NOVA FUNÇÃO CHAMADA AQUI
@@ -166,11 +191,11 @@
 
         function carregarListaNomes() {
             db.ref('inscricoes').once('value').then(snap => {
-                var inscricoes = snap.val() || [];
+                listaCompletaInscricoes = snap.val() || []; // ✅ Guarda a lista toda na variável global
                 var selectNome = document.getElementById('ver_nome');
                 selectNome.innerHTML = '<option value="">-- Selecione seu nome --</option>';
 
-                var nomesPendentes = inscricoes.filter(insc => insc && insc.status === 'pendente').map(insc => insc.nome);
+                var nomesPendentes = listaCompletaInscricoes.filter(insc => insc && insc.status === 'pendente').map(insc => insc.nome);
                 var nomesUnicos = [...new Set(nomesPendentes)].sort();
 
                 nomesUnicos.forEach(nome => {
@@ -180,6 +205,30 @@
                     selectNome.appendChild(opcao);
                 });
             });
+        }
+
+        // ✅ NOVA FUNÇÃO: MOSTRAR A FOTO AO SELECIONAR O NOME
+        function mostrarFotoSelecionado() {
+            const nomeEscolhido = document.getElementById('ver_nome').value;
+            const fotoElement = document.getElementById('fotoUsuario');
+
+            if (!nomeEscolhido) {
+                // Se não escolheu ninguém, limpa tudo
+                fotoElement.style.display = 'none';
+                return;
+            }
+
+            // Procura o cadastro na lista para pegar a foto
+            const usuario = listaCompletaInscricoes.find(insc => insc && insc.nome === nomeEscolhido);
+
+            if (usuario && usuario.foto) {
+                // Se tem foto cadastrada, mostra
+                fotoElement.src = usuario.foto;
+                fotoElement.style.display = 'block';
+            } else {
+                // Se não tem foto, esconde ou pode colcoar um ícone padrão
+                fotoElement.style.display = 'none';
+            }
         }
 
         function verificarStatusSistema() {
@@ -252,9 +301,11 @@
                     msg.innerText = '🎉 INSCRIÇÃO CONFIRMADA COM SUCESSO!';
                     msg.style.display = 'block';
                     
+                    // ✅ Limpa campos e esconde foto após confirmação
                     document.getElementById('ver_nome').value = '';
                     document.getElementById('ver_dia').value = '';
                     document.getElementById('ver_mes').value = '';
+                    document.getElementById('fotoUsuario').style.display = 'none';
                     
                     carregarListaNomes();
                     verificarStatusSistema();
