@@ -400,16 +400,14 @@
 
         firebase.initializeApp(firebaseConfig);
         var db = firebase.database();
-        // ✅ NOVO: ATIVA CACHE PARA NÃO BAIXAR DADOS IGUAIS DE NOVO
         db.ref().keepSynced(true);
         var dataVisivel = true;
         const LIMITE_MAXIMO = 16;
         let quantidadeAnterior = 0;
         let idEmEdicao = null;
-        // ✅ NOVO: GUARDA DADOS EM MEMÓRIA
         let dadosEmCache = [];
 
-        // ✅ FUNÇÕES PARA MOSTRAR/OCULTAR JANELINHA CENTRALIZADA
+        // ✅ MOSTRAR/OCULTAR CADASTRO
         function mostrarCadastro() {
             document.getElementById('fundoCadastro').style.display = 'flex';
         }
@@ -440,7 +438,7 @@
             }
         }
 
-        // ✅ REGRA: SÓ BLOQUEIA QUANDO 0 VAGAS
+        // ✅ VERIFICAR LIMITE
         function verificarLimiteConfirmados(qtd) {
             const aviso = document.getElementById('avisoLimite');
             const vagasRestantes = LIMITE_MAXIMO - qtd;
@@ -454,7 +452,7 @@
             }
         }
 
-        // ✅ CONVERTER FOTO PARA TEXTO - AGORA COM TAMANHO MUITO MENOR (30KB em vez de 300KB)
+        // ✅ CONVERTER FOTO - OTIMIZADA
         function lerFotoComoTexto(arquivo, callback) {
             if (!arquivo) { callback(null); return; }
             var leitor = new FileReader();
@@ -462,22 +460,16 @@
                 var img = new Image();
                 img.onload = function() {
                     var canvas = document.createElement('canvas');
-                    // ✅ TAMANHO MENOR: 100px em vez de 300px
                     var tamanho = 100;
                     canvas.width = tamanho;
                     canvas.height = tamanho;
                     var ctx = canvas.getContext('2d');
-                    
                     ctx.imageSmoothingEnabled = true;
                     ctx.imageSmoothingQuality = 'high';
-                    
                     const tamanhoOriginal = Math.min(img.width, img.height);
                     const xInicio = (img.width - tamanhoOriginal) / 2;
                     const yInicio = (img.height - tamanhoOriginal) / 2;
-                    
                     ctx.drawImage(img, xInicio, yInicio, tamanhoOriginal, tamanhoOriginal, 0, 0, tamanho, tamanho);
-                    
-                    // ✅ QUALIDADE MENOR: 0.6 em vez de 0.9
                     callback(canvas.toDataURL('image/jpeg', 0.6));
                 };
                 img.src = e.target.result;
@@ -506,8 +498,18 @@
 
             lerFotoComoTexto(arquivoFoto, function(textoDaFoto) {
                 db.ref('inscricoes').once('value').then(snap => {
-                    var inscricoes = snap.val() || [];
-                    var novoId = inscricoes.length > 0 ? Math.max(...inscricoes.filter(Boolean).map(i => i.id)) + 1 : 1;
+                    var dadosBrutos = snap.val() || {};
+                    var inscricoes = [];
+                    if (Array.isArray(dadosBrutos)) {
+                        inscricoes = dadosBrutos.filter(Boolean);
+                    } else {
+                        Object.keys(dadosBrutos).forEach(chave => {
+                            if (dadosBrutos[chave] && typeof dadosBrutos[chave] === 'object') {
+                                inscricoes.push(dadosBrutos[chave]);
+                            }
+                        });
+                    }
+                    var novoId = inscricoes.length > 0 ? Math.max(...inscricoes.map(i => i.id || 0)) + 1 : 1;
                     
                     inscricoes.push({
                         id: novoId,
@@ -533,17 +535,21 @@
             });
         }
 
-        // ✅ ABRIR TELA DE EDIÇÃO
+        // ✅ ABRIR EDIÇÃO
         function abrirEdicao(id) {
             idEmEdicao = id;
             db.ref('inscricoes').once('value').then(snap => {
-                var lista = snap.val() || [];
-                var item = lista.find(i => i && i.id === id);
+                var dadosBrutos = snap.val() || {};
+                var lista = [];
+                if (Array.isArray(dadosBrutos)) lista = dadosBrutos.filter(Boolean);
+                else lista = Object.values(dadosBrutos).filter(Boolean);
+                
+                var item = lista.find(i => i.id === id);
                 if(item){
                     document.getElementById('editId').innerText = `#${item.id}`;
-                    document.getElementById('edit_nome').value = item.nome;
-                    document.getElementById('edit_dia').value = item.dia;
-                    document.getElementById('edit_mes').value = item.mes;
+                    document.getElementById('edit_nome').value = item.nome || '';
+                    document.getElementById('edit_dia').value = item.dia || '';
+                    document.getElementById('edit_mes').value = item.mes || '';
                     document.getElementById('edit_foto').value = "";
                     document.getElementById('modalEditar').style.display = 'flex';
                 }
@@ -557,7 +563,7 @@
             document.getElementById('edit_foto').value = "";
         }
 
-        // ✅ SALVAR ALTERAÇÕES DA EDIÇÃO
+        // ✅ SALVAR EDIÇÃO
         function salvarEdicao() {
             var novoNome = document.getElementById('edit_nome').value.trim();
             var novoDia = parseInt(document.getElementById('edit_dia').value);
@@ -571,48 +577,53 @@
 
             lerFotoComoTexto(novaFotoArquivo, function(novaFotoTexto) {
                 db.ref('inscricoes').once('value').then(snap => {
-                    var lista = snap.val() || [];
-                    var alterado = false;
-
+                    var dadosBrutos = snap.val() || {};
+                    var lista = [];
+                    if (Array.isArray(dadosBrutos)) lista = dadosBrutos.filter(Boolean);
+                    else lista = Object.values(dadosBrutos).filter(Boolean);
+                    
                     lista = lista.map(item => {
-                        if(item && item.id === idEmEdicao){
+                        if(item.id === idEmEdicao){
                             item.nome = novoNome;
                             item.dia = novoDia;
                             item.mes = novoMes;
                             if(novaFotoTexto) item.foto = novaFotoTexto;
-                            alterado = true;
                         }
                         return item;
                     });
 
-                    if(alterado){
-                        db.ref('inscricoes').set(lista).then(() => {
-                            fecharEdicao();
-                        });
-                    }
+                    db.ref('inscricoes').set(lista).then(() => {
+                        fecharEdicao();
+                    });
                 });
             });
         }
 
-        // ✅ EXCLUIR CADASTRO
+        // ✅ EXCLUIR
         function excluirCadastro() {
-            if (confirm('⚠️ TEM CERTEZA QUE DESEJA EXCLUIR ESTE CADASTRO? ESSA AÇÃO NÃO PODE SER DESFEITA!')) {
+            if (confirm('⚠️ TEM CERTEZA?')) {
                 db.ref('inscricoes').once('value').then(snap => {
-                    var lista = snap.val() || [];
-                    var novaLista = lista.filter(insc => insc && insc.id !== idEmEdicao);
-                    db.ref('inscricoes').set(novaLista).then(() => {
-                        fecharEdicao();
-                    });
+                    var dadosBrutos = snap.val() || {};
+                    var lista = [];
+                    if (Array.isArray(dadosBrutos)) lista = dadosBrutos.filter(Boolean);
+                    else lista = Object.values(dadosBrutos).filter(Boolean);
+                    
+                    var novaLista = lista.filter(insc => insc.id !== idEmEdicao);
+                    db.ref('inscricoes').set(novaLista).then(() => fecharEdicao());
                 });
             }
         }
 
-        // ✅ BOTÃO INDIVIDUAL: VOLTAR APENAS UM PARA PENDENTE
+        // ✅ VOLTAR UM PARA PENDENTE
         function voltarUmParaPendente(id) {
             db.ref('inscricoes').once('value').then(snap => {
-                var lista = snap.val() || [];
+                var dadosBrutos = snap.val() || {};
+                var lista = [];
+                if (Array.isArray(dadosBrutos)) lista = dadosBrutos.filter(Boolean);
+                else lista = Object.values(dadosBrutos).filter(Boolean);
+                
                 lista = lista.map(insc => {
-                    if(insc && insc.id === id) {
+                    if(insc.id === id) {
                         insc.status = 'pendente';
                         insc.data_confirmacao = null;
                     }
@@ -622,18 +633,23 @@
             });
         }
 
+        // ✅ LIMPAR TUDO
         function limparTodasInscricoes() {
-            if (confirm('⚠️ ATENÇÃO: ISSO APAGARÁ TODOS OS CADASTROS! TEM CERTEZA?')) {
+            if (confirm('⚠️ TEM CERTEZA?')) {
                 db.ref('inscricoes').remove();
-                alert('TODOS OS DADOS FORAM APAGADOS!');
+                alert('TODOS APAGADOS!');
             }
         }
 
-        // ✅ BOTÃO GERAL: VOLTAR TODOS PARA PENDENTE
+        // ✅ VOLTAR TODOS PARA PENDENTE
         function voltarTodosParaPendente() {
-            if (confirm('⚠️ ISSO IRÁ MUDAR TODOS PARA PENDENTE E REABRIR AS INSCRIÇÕES. DESEJA CONTINUAR?')) {
+            if (confirm('⚠️ TEM CERTEZA?')) {
                 db.ref('inscricoes').once('value').then(snap => {
-                    var lista = snap.val() || [];
+                    var dadosBrutos = snap.val() || {};
+                    var lista = [];
+                    if (Array.isArray(dadosBrutos)) lista = dadosBrutos.filter(Boolean);
+                    else lista = Object.values(dadosBrutos).filter(Boolean);
+                    
                     lista = lista.map(insc => { 
                         if(insc) {
                             insc.status = 'pendente'; 
@@ -643,15 +659,14 @@
                     });
                     db.ref('inscricoes').set(lista);
                     db.ref('configuracao').set({inscricoes_abertas: true, ultimo_reinicio: Date.now()});
-                    alert('✅ TODOS VOLTARAM PARA PENDENTES E INSCRIÇÕES FORAM REABERTAS!');
+                    alert('✅ TODOS VOLTARAM!');
                 });
             }
         }
 
-        // ✅ SISTEMA DE AGENDAMENTO (CORRIGIDO PARA HORÁRIO LOCAL)
+        // ✅ AGENDAMENTO
         function abrirAgendamento() {
             document.getElementById('modalAgendar').style.display = 'flex';
-            
             const hoje = new Date();
             const dia = String(hoje.getDate()).padStart(2, '0');
             const mes = String(hoje.getMonth() + 1).padStart(2, '0');
@@ -667,7 +682,6 @@
                     const anoAg = dataObj.getFullYear();
                     const horaAg = String(dataObj.getHours()).padStart(2, '0');
                     const minAg = String(dataObj.getMinutes()).padStart(2, '0');
-                    
                     mostrarStatusAgendamento(`⏸️ AGENDADO PARA ${horaAg}:${minAg}H DE ${diaAg}/${mesAg}/${anoAg}`, 'agendado');
                 } else {
                     document.getElementById('statusAgendamento').style.display = 'none';
@@ -680,7 +694,7 @@
             const horaInput = document.getElementById('horaAgendamento').value;
             
             if(!dataInput || !horaInput) {
-                mostrarStatusAgendamento('❌ PREENCHA DATA E HORA!', 'erro');
+                mostrarStatusAgendamento('❌ PREENCHA TUDO!', 'erro');
                 return;
             }
 
@@ -697,22 +711,19 @@
             const timestamp = dataHoraMarcada.getTime();
 
             if(timestamp < Date.now()) {
-                mostrarStatusAgendamento('❌ ESCOLHA UMA DATA/HORA FUTURA!', 'erro');
+                mostrarStatusAgendamento('❌ DATA FUTURA!', 'erro');
                 return;
             }
 
-            db.ref('agendamento_reinicio').set({
-                timestamp: timestamp,
-                executado: false
-            }).then(() => {
-                mostrarStatusAgendamento('✅ AGENDAMENTO SALVO! FUNCIONARÁ AUTOMATICAMENTE.', 'ativo');
+            db.ref('agendamento_reinicio').set({timestamp: timestamp, executado: false}).then(() => {
+                mostrarStatusAgendamento('✅ SALVO!', 'ativo');
                 setTimeout(() => fecharAgendamento(), 2000);
             });
         }
 
         function cancelarAgendamento() {
             db.ref('agendamento_reinicio').remove().then(() => {
-                mostrarStatusAgendamento('❌ AGENDAMENTO CANCELADO!', 'erro');
+                mostrarStatusAgendamento('❌ CANCELADO!', 'erro');
                 setTimeout(() => fecharAgendamento(), 1500);
             });
         }
@@ -729,6 +740,7 @@
             status.style.display = 'block';
         }
 
+        // ✅ OCULTAR/MOSTRAR DATA
         function alternarVisibilidadeData() {
             dataVisivel = !dataVisivel;
             var botao = document.querySelector('.btn-ocultar-coluna');
@@ -739,34 +751,43 @@
             celulasData.forEach(celula => { celula.style.display = dataVisivel ? '' : 'none'; });
         }
 
-        // ✅ CORRIGIDO: AGORA CARREGA TUDO DIREITO
+        // ✅ FUNÇÃO PRINCIPAL DE CARREGAMENTO - CORRIGIDA 100%
         function atualizarLista(snapshot) {
-            let inscricoes = snapshot.val() || [];
-            // Se for objeto antigo, converte para array
-            if (!Array.isArray(inscricoes)) {
-                inscricoes = Object.values(inscricoes);
+            const dadosBrutos = snapshot.val();
+            let inscricoes = [];
+
+            // ACEITA QUALQUER FORMATO: ARRAY OU OBJETO
+            if (!dadosBrutos) {
+                inscricoes = [];
+            } else if (Array.isArray(dadosBrutos)) {
+                inscricoes = dadosBrutos.filter(item => item && typeof item === 'object');
+            } else {
+                inscricoes = Object.values(dadosBrutos).filter(item => item && typeof item === 'object');
             }
-            // Compara com cache, se igual não faz nada
+
+            // SE NÃO MUDOU, NÃO FAZ NADA
             if(JSON.stringify(inscricoes) === JSON.stringify(dadosEmCache)) return;
             dadosEmCache = inscricoes;
+
             processarLista(inscricoes);
         }
 
         function processarLista(inscricoes) {
             var tabela = document.getElementById('lista_inscricoes');
 
-            if (inscricoes.length === 0 || !inscricoes.some(Boolean)) {
+            if (inscricoes.length === 0) {
                 tabela.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #888;">NENHUMA INSCRIÇÃO CADASTRADA AINDA.</td></tr>';
                 document.getElementById('contadorConfirmados').innerText = `✅ 0 CONFIRMADOS | RESTAM 16 VAGAS (LIMITE: 16)`;
                 verificarLimiteConfirmados(0);
                 return;
             }
 
-            var listaOrdenada = inscricoes.filter(Boolean).sort((a, b) => {
+            // ORDENAR: CONFIRMADOS PRIMEIRO
+            var listaOrdenada = inscricoes.sort((a, b) => {
                 if (a.status === 'confirmado' && b.status !== 'confirmado') return -1;
                 if (a.status !== 'confirmado' && b.status === 'confirmado') return 1;
                 if (a.status === 'confirmado' && b.status === 'confirmado') return (b.data_confirmacao || 0) - (a.data_confirmacao || 0);
-                return a.nome.localeCompare(b.nome);
+                return (a.nome || '').localeCompare(b.nome || '');
             });
 
             var qtdConfirmados = listaOrdenada.filter(i => i.status === 'confirmado').length;
@@ -798,10 +819,10 @@
                     <td>
                         ${insc.foto ? `<img src="${insc.foto}" class="foto-preview" alt="foto">` : '📄'}
                     </td>
-                    <td>${insc.nome}</td>
-                    <td style="display: ${dataVisivel ? '' : 'none'};">${insc.dia}/${insc.mes}</td>
+                    <td>${insc.nome || 'SEM NOME'}</td>
+                    <td style="display: ${dataVisivel ? '' : 'none'};">${insc.dia || '00'}/${insc.mes || '00'}</td>
                     <td class="data-hora">${dataHora || '-'}</td>
-                    <td class="status-${insc.status}">${insc.status === 'pendente' ? 'PENDENTE' : 'CONFIRMADO✅'}</td>
+                    <td class="status-${insc.status || 'pendente'}">${(insc.status || 'pendente').toUpperCase() === 'PENDENTE' ? 'PENDENTE' : 'CONFIRMADO✅'}</td>
                     <td class="acoes-tabela">
                         <button class="btn-pendente" onclick="voltarUmParaPendente(${insc.id})" title="VOLTAR PARA PENDENTE">🔄</button>
                         <button class="btn-editar" onclick="abrirEdicao(${insc.id})">📝</button>
@@ -817,17 +838,16 @@
             setTimeout(() => { aviso.style.display = 'none'; }, 4000);
         }
 
+        // ✅ INICIAR CARREGAMENTO - GARANTIDO
         function iniciarAtualizacaoAutomatica() {
-            // ✅ CORRIGIDO: AGORA CARREGA E ATUALIZA SEMPRE
             db.ref('inscricoes').on('value', atualizarLista);
-            // ✅ NOVO: PARA DE OUVIR QUANDO A PÁGINA NÃO ESTÁ VISÍVEL
             document.addEventListener('visibilitychange', function() {
                 if(document.hidden) db.ref('inscricoes').off('value', atualizarLista);
                 else db.ref('inscricoes').on('value', atualizarLista);
             });
         }
 
-        // ✅ FUNÇÃO PARA FECHAR TODAS AS JANELAS AO APERTAR "ESC"
+        // ✅ FECHAR COM ESC
         document.addEventListener('keydown', function(event) {
             if (event.key === 'Escape') {
                 ocultarCadastro();
