@@ -387,6 +387,9 @@
     </div>
 
     <script>
+        // ✅ DEFINI A VARIÁVEL AQUI NO COMEÇO, ANTES DE TUDO
+        const LIMITE_MAXIMO = 16;
+
         // ✅ SEUS DADOS DO FIREBASE
         var firebaseConfig = {
           apiKey: "AIzaSyAR--VWkuPUBzKtJlEHPXnwBwbapB8JY_w",
@@ -402,7 +405,6 @@
         var db = firebase.database();
         db.ref().keepSynced(true);
         var dataVisivel = true;
-        const LIMITE_MAXIMO = 16;
         let quantidadeAnterior = 0;
         let idEmEdicao = null;
 
@@ -761,7 +763,7 @@
             celulasData.forEach(celula => { celula.style.display = dataVisivel ? '' : 'none'; });
         }
 
-        // ✅ FUNÇÃO PRINCIPAL - IGUAL AO TESTE QUE DEU CERTO
+        // ✅ FUNÇÃO PRINCIPAL - CORRIGIDA E SEM ERROS
         function carregarDados() {
             db.ref('inscricoes').once('value')
             .then(snapshot => {
@@ -771,7 +773,6 @@
                 if (!dadosBrutos) {
                     inscricoes = [];
                 } else {
-                    // ✅ PEGA EXATAMENTE COMO NO TESTE QUE FUNCIONOU
                     inscricoes = Object.values(dadosBrutos).filter(item => item && item.nome);
                 }
 
