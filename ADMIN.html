@@ -751,19 +751,19 @@
             celulasData.forEach(celula => { celula.style.display = dataVisivel ? '' : 'none'; });
         }
 
-        // ✅ FUNÇÃO PRINCIPAL DE CARREGAMENTO - CORRIGIDA 100% PARA OS SEUS DADOS
+        // ✅ FUNÇÃO PRINCIPAL DE CARREGAMENTO - ADAPTADA 100% PARA SEUS DADOS
         function atualizarLista(snapshot) {
             const dadosBrutos = snapshot.val();
             let inscricoes = [];
 
-            // ✅ FUNCIONA COM SEU FORMATO DE DADOS (OBJETO COM CHAVES)
+            // ✅ AGORA LÊ EXATAMENTE COMO ESTÁ NO SEU BANCO DE DADOS
             if (!dadosBrutos) {
                 inscricoes = [];
-            } else if (Array.isArray(dadosBrutos)) {
-                inscricoes = dadosBrutos.filter(item => item && typeof item === 'object');
             } else {
-                // ✅ AQUI ESTAVA O ERRO ANTES: AGORA PEGA TODOS OS SEUS 26 CADASTROS
-                inscricoes = Object.values(dadosBrutos).filter(item => item && typeof item === 'object');
+                // ✅ PEGA TODOS OS OBJETOS, INDEPENDENTE DO FORMATO
+                inscricoes = Object.values(dadosBrutos).filter(item => {
+                    return item && typeof item === 'object' && item.nome; // só pega itens que tem nome
+                });
             }
 
             // SE NÃO MUDOU, NÃO FAZ NADA
@@ -803,7 +803,10 @@
             verificarLimiteConfirmados(qtdConfirmados);
 
             tabela.innerHTML = '';
-            listaOrdenada.forEach(insc => {
+            listaOrdenada.forEach((insc, index) => {
+                // ✅ GARANTE QUE TEM ID, SE NÃO TIVER, CRIA UM
+                if (!insc.id) insc.id = index + 1;
+
                 let dataHora = '';
                 if (insc.data_confirmacao) {
                     const dt = new Date(insc.data_confirmacao);
