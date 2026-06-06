@@ -7,19 +7,16 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase.js"></script>
     <style>
         * {margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif;}
-        /* ✅ FUNDO ALTERADO PARA CINZA ESCURO */
         body {background-color: #343a40; display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; position: relative;}
         .container {background: #ffffff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); width: 100%; max-width: 450px; text-align: center;}
-        /* ✅ NOVO ESTILO PARA O TÍTULO PRINCIPAL MAIOR */
-        h1 {color: #2c3e50; margin-bottom: 5px; font-size: 32px; /* AUMENTADO MAIS O TAMANHO */ font-weight: bold;}
-        /* ✅ ESTILO PARA O TEXTO "INSCREVA-SE" - MESMO TAMANHO, SOMENTE ADICIONADO OS EMOJIS */
-        .subtitulo-principal {color: #2c3e50; font-size: 22px; /* MANTIDO O TAMANHO ORIGINAL */ font-weight: 600; margin-bottom: 15px; letter-spacing: 1px;}
+        h1 {color: #2c3e50; margin-bottom: 5px; font-size: 32px; font-weight: bold;}
+        .subtitulo-principal {color: #2c3e50; font-size: 22px; font-weight: 600; margin-bottom: 15px; letter-spacing: 1px;}
         p.descricao {color: #666; margin-bottom: 25px; font-size: 15px;}
         .encerrado {background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; padding: 20px; border-radius: 8px; font-weight: bold; font-size: 18px;}
         .aviso-limite-atingido {background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba; padding: 15px; border-radius: 8px; font-weight: bold; font-size: 16px; margin-bottom: 20px;}
         .aviso-reiniciando {background-color: #f39c12; color: #fff; border: 1px solid #e67e22; padding: 12px; border-radius: 6px; font-weight: bold; font-size: 15px; margin-bottom: 15px; display: none;}
         .grupo-campo {margin-bottom: 15px; text-align: left;}
-        label {display: block; margin-bottom: 6px; font-weight: bold; color: #555;} /* ✅ Negrito aplicado aqui */
+        label {display: block; margin-bottom: 6px; font-weight: bold; color: #555;}
         select, input {width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 16px; background-color: #fff;}
         input[type="number"] {width: 48%; display: inline-block; margin-right: 2%;}
         button {background-color: #27ae60; color: white; border: none; padding: 14px; border-radius: 6px; cursor: pointer; font-size: 16px; width: 100%; margin-top: 10px; font-weight: bold; transition: background 0.3s;}
@@ -29,31 +26,27 @@
         .sucesso {background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb;}
         .erro {background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb;}
         
-        /* ✅ ESTILO PARA A FOTO - AGORA AINDA MAIOR */
         .foto-container {
             display: flex; align-items: center; justify-content: space-between;
             gap: 12px;
         }
         .foto-preview {
-            width: 100px; /* ✅ Aumentado de 80px para 100px */
-            height: 100px; /* ✅ Aumentado de 80px para 100px */
+            width: 100px;
+            height: 100px;
             border-radius: 50%; object-fit: cover;
             border: 2px solid #ddd; display: none;
             box-shadow: 0 2px 6px rgba(0,0,0,0.15);
         }
 
-        /* ✅ ESTILO PARA O BOTÃO PEQUENO - AGORA NO CANTO INFERIOR DIREITO */
         .botao-lista {
             position: fixed; bottom: 20px; right: 20px;
             background-color: #6c757d; color: white; border: none;
-            padding: 8px 12px; border-radius: 4px;
-            cursor: pointer; font-size: 12px; width: auto;
+            padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; width: auto;
             font-weight: normal; z-index: 99;
             box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
         .botao-lista:hover {background-color: #495057;}
 
-        /* ✅ ESTILO PARA A JANELA FLUTUANTE */
         .janela-flutuante {
             display: none; position: fixed;
             top: 50%; left: 50%; transform: translate(-50%, -50%);
@@ -82,13 +75,10 @@
 </head>
 <body>
 
-    <!-- ✅ BOTÃO AGORA NO CANTO INFERIOR DIREITO -->
     <button class="botao-lista" onclick="abrirJanelaLista()">✅LISTA DE INSCRITOS✅</button>
 
-    <!-- ✅ FUNDO ESCURO PARA QUANDO A JANELA ABRIR -->
     <div id="fundoEscuro" class="fundo-escuro" onclick="fecharJanela()"></div>
 
-    <!-- ✅ JANELA FLUTUANTE -->
     <div id="janelaLista" class="janela-flutuante">
         <div class="cabecalho-janela">
             <span id="tituloJanela">✅ 0 INSCRITOS CONFIRMADOS ✅</span>
@@ -100,7 +90,6 @@
     </div>
 
     <div class="container">
-        <!-- ✅ NOVO AVISO DE REINÍCIO -->
         <div id="avisoReiniciando" class="aviso-reiniciando">
             ⏰ REINICIANDO O SISTEMA... AGUARDE!
         </div>
@@ -116,31 +105,24 @@
                 ⚠️ ATENÇÃO: Restam poucas vagas. Ao atingir 16 confirmados, o sistema será bloqueado automaticamente.
             </div>
 
-            <!-- ✅ ALTERADO AQUI: TÍTULO MAIOR + INSCREVA-SE COM EMOJIS, MESMO TAMANHO -->
             <h1>🏆 CUP EDITION 🏆</h1>
             <div class="subtitulo-principal">📝INSCREVA-SE📝</div>
             <p class="descricao">Escolha seu nome e preencha a data de nascimento para confirmar sua participação.</p>
 
             <div class="grupo-campo">
-                <!-- ✅ ALTERADO: NOME: em negrito -->
                 <label>NOME:</label>
-                <!-- ✅ CORRIGIDO: Agora o onchange funciona 100% para pular pro dia -->
                 <select id="ver_nome" onkeydown="avancarCampo(event, 'ver_dia')" onchange="mudouNome()">
                     <option value="">-- Selecione seu nome --</option>
                 </select>
             </div>
 
             <div class="grupo-campo">
-                <!-- ✅ COLOCADO O TÍTULO "DATA DE NASCIMENTO:" AQUI EM CIMA -->
                 <label>DATA DE NASCIMENTO:</label>
                 <div class="foto-container">
                     <div style="flex: 1;">
-                        <!-- ✅ ADICIONADO: oninput="pularParaMes(this)" → Pula automaticamente quando completar 2 dígitos -->
                         <input type="number" id="ver_dia" min="1" max="31" placeholder="Dia" maxlength="2" oninput="limitarDigitos(this, 2); pularParaMes(this)" onkeydown="avancarCampo(event, 'ver_mes')">
-                        <!-- ✅ ALTERADO: oninput="limitarDigitos(this, 2); pularParaBotao(this)" → Agora pula para o botão ao completar 2 dígitos -->
                         <input type="number" id="ver_mes" min="1" max="12" placeholder="Mês" maxlength="2" oninput="limitarDigitos(this, 2); pularParaBotao(this)" onkeydown="avancarCampo(event, 'botaoConfirmar')">
                     </div>
-                    <!-- ✅ Elemento da Foto -->
                     <img id="fotoUsuario" class="foto-preview" alt="Foto do usuário">
                 </div>
             </div>
@@ -152,7 +134,6 @@
     </div>
 
     <script>
-        // ✅ DADOS DO SEU PROJETO - NÃO ALTERE
         var firebaseConfig = {
             apiKey: "AIzaSyAR--VWkuPUBzKtJlEHPXnwBwbapB8JY_w",
             authDomain: "sistema-inscricoes-e9241.firebaseapp.com",
@@ -166,50 +147,40 @@
         firebase.initializeApp(firebaseConfig);
         var db = firebase.database();
         const LIMITE_MAXIMO = 16;
-        var listaCompletaInscricoes = []; // ✅ Variável global para guardar todos os dados (incluindo fotos)
-        var janelaAberta = false; // ✅ Controla se a janela está aberta para atualizar
+        var listaCompletaInscricoes = [];
+        var janelaAberta = false;
 
         window.onload = function() {
-            verificarAgendamentoEExecutar(); // ✅ NOVA FUNÇÃO CHAMADA AQUI
+            verificarAgendamentoEExecutar();
             verificarStatusSistema();
             carregarListaNomes();
             setInterval(verificarStatusSistema, 3000);
             
-            // ✅ ATUALIZAÇÃO EM TEMPO REAL: AGORA VAI PEGAR QUALQUER MUDANÇA DE STATUS, INCLUSIVE VOLTAR PARA PENDENTE
             db.ref('inscricoes').on('value', function(snap) {
                 listaCompletaInscricoes = snap.val() || [];
                 
-                // ✅ Se a janela estiver aberta, atualiza automaticamente
                 if (janelaAberta) {
                     atualizarListaConfirmados();
                 }
-
-                // ✅ SEMPRE RECARREGA A LISTA DE NOMES PENDENTES QUANDO HOUVER MUDANÇA
-                // Isso faz com que quem voltou para pendente apareça novamente na lista de seleção
                 carregarListaNomes();
             });
         };
 
-        // ✅ NOVA FUNÇÃO: VERIFICA SE DEVE REINICIAR (GRATUITA)
         async function verificarAgendamentoEExecutar() {
             const snap = await db.ref('agendamento_reinicio').once('value');
             const agendamento = snap.val();
 
-            // Se não tem agendamento ou já foi executado, não faz nada
             if (!agendamento || agendamento.executado === true) return;
 
             const agora = Date.now();
             const horarioMarcado = agendamento.timestamp;
 
-            // ✅ SE JÁ PASSOU DO HORÁRIO MARCADO: EXECUTA O REINÍCIO
             if (agora >= horarioMarcado) {
                 document.getElementById('avisoReiniciando').style.display = 'block';
 
-                // 1. Pegar todas as inscrições
                 const inscSnap = await db.ref('inscricoes').once('value');
                 const lista = inscSnap.val() || [];
 
-                // 2. Mudar TODOS para PENDENTE e limpar data
                 const novaLista = lista.map(insc => {
                     if(insc) {
                         insc.status = 'pendente';
@@ -218,72 +189,54 @@
                     return insc;
                 });
 
-                // 3. Salvar alterações
                 await db.ref('inscricoes').set(novaLista);
-                
-                // 4. Reabrir inscrições
                 await db.ref('configuracao').update({inscricoes_abertas: true});
-
-                // 5. Marcar agendamento como executado para não repetir
                 await db.ref('agendamento_reinicio').update({executado: true});
 
-                // Recarrega a página para atualizar tudo
                 location.reload();
             }
         }
 
-        // ✅ NOVA FUNÇÃO: AVANÇAR PARA PRÓXIMO CAMPO AO CLICAR ENTER
         function avancarCampo(event, proximoCampoId) {
             if (event.key === 'Enter') {
-                event.preventDefault(); // Evita o comportamento padrão
-                document.getElementById(proximoCampoId).focus(); // Vai para o próximo campo
+                event.preventDefault();
+                document.getElementById(proximoCampoId).focus();
             }
         }
 
-        // ✅ NOVA FUNÇÃO: PULAR AUTOMATICAMENTE QUANDO COMPLETAR 2 DÍGITOS NO DIA
         function pularParaMes(campo) {
-            // Se o tamanho do valor for igual a 2, pula para o campo Mês
             if (campo.value.length === 2) {
                 document.getElementById('ver_mes').focus();
             }
         }
 
-        // ✅ NOVA FUNÇÃO: PULAR AUTOMATICAMENTE QUANDO COMPLETAR 2 DÍGITOS NO MÊS → VAI PARA O BOTÃO
         function pularParaBotao(campo) {
-            // Se o tamanho do valor for igual a 2, pula direto para o botão de confirmar
             if (campo.value.length === 2) {
                 document.getElementById('botaoConfirmar').focus();
             }
         }
 
-        // ✅ FUNÇÃO PRINCIPAL CORRIGIDA: QUANDO SELECIONA O NOME, MOSTRA A FOTO E VAI PRO DIA
         function mudouNome() {
-            mostrarFotoSelecionado(); // Mostra a foto
-            focarNoDia(); // Pula para o campo Dia
+            mostrarFotoSelecionado();
+            focarNoDia();
         }
 
-        // ✅ NOVA FUNÇÃO: ASSIM QUE SELECIONAR O NOME, VAI DIRETO PARA O DIA
         function focarNoDia() {
             const nomeEscolhido = document.getElementById('ver_nome').value;
-            // Só pula se tiver selecionado um nome (não for a opção vazia)
             if (nomeEscolhido !== "") {
-                // ✅ Adicionei o pequeno atraso para garantir que funcione em todos os navegadores
                 setTimeout(() => {
                     document.getElementById('ver_dia').focus();
                 }, 10);
             }
         }
 
-        // ✅ FUNÇÃO PARA ATUALIZAR A LISTA SEMPRE QUE HOUVER MUDANÇA
         function atualizarListaConfirmados() {
             const conteudo = document.getElementById('listaConfirmados');
             const tituloJanela = document.getElementById('tituloJanela');
             
-            // Pega apenas os confirmados e ordena por data/hora (mais recente primeiro)
             const confirmados = listaCompletaInscricoes.filter(insc => insc && insc.status === 'confirmado')
                                      .sort((a, b) => (b.data_confirmacao || 0) - (a.data_confirmacao || 0));
 
-            // ✅ ATUALIZA O TÍTULO COM O NÚMERO DE INSCRITOS
             tituloJanela.innerText = `✅ ${confirmados.length} INSCRITOS CONFIRMADOS ✅`;
 
             if (confirmados.length === 0) {
@@ -292,7 +245,6 @@
                 let html = '';
                 confirmados.forEach(insc => {
                     const foto = insc.foto || 'https://via.placeholder.com/50?text=Sem+Foto';
-                    // Formata a data e hora SEM OS SEGUNDOS
                     let dataHora = 'Data não registrada';
                     if (insc.data_confirmacao) {
                         const data = new Date(insc.data_confirmacao);
@@ -318,15 +270,13 @@
             }
         }
 
-        // ✅ FUNÇÕES PARA A JANELA FLUTUANTE
         function abrirJanelaLista() {
             const fundo = document.getElementById('fundoEscuro');
             const janela = document.getElementById('janelaLista');
             
-            atualizarListaConfirmados(); // Atualiza na hora que abrir
-            janelaAberta = true; // Marca que está aberta para receber atualizações
+            atualizarListaConfirmados();
+            janelaAberta = true;
 
-            // Mostra a janela
             fundo.style.display = 'block';
             janela.style.display = 'block';
         }
@@ -334,10 +284,9 @@
         function fecharJanela() {
             document.getElementById('fundoEscuro').style.display = 'none';
             document.getElementById('janelaLista').style.display = 'none';
-            janelaAberta = false; // Marca que está fechada
+            janelaAberta = false;
         }
 
-        // Função para limitar a quantidade de dígitos
         function limitarDigitos(campo, maximo) {
             if (campo.value.length > maximo) {
                 campo.value = campo.value.slice(0, maximo);
@@ -346,11 +295,10 @@
 
         function carregarListaNomes() {
             db.ref('inscricoes').once('value').then(snap => {
-                listaCompletaInscricoes = snap.val() || []; // ✅ Guarda a lista toda na variável global
+                listaCompletaInscricoes = snap.val() || [];
                 var selectNome = document.getElementById('ver_nome');
                 selectNome.innerHTML = '<option value="">-- Selecione seu nome --</option>';
 
-                // ✅ AGORA PEGA TODOS OS QUE ESTÃO PENDENTES, MESMO QUE JÁ TENHAM SIDO CONFIRMADOS ANTES
                 var nomesPendentes = listaCompletaInscricoes.filter(insc => insc && insc.status === 'pendente').map(insc => insc.nome);
                 var nomesUnicos = [...new Set(nomesPendentes)].sort();
 
@@ -363,26 +311,21 @@
             });
         }
 
-        // ✅ NOVA FUNÇÃO: MOSTRAR A FOTO AO SELECIONAR O NOME
         function mostrarFotoSelecionado() {
             const nomeEscolhido = document.getElementById('ver_nome').value;
             const fotoElement = document.getElementById('fotoUsuario');
 
             if (!nomeEscolhido) {
-                // Se não escolheu ninguém, limpa tudo
                 fotoElement.style.display = 'none';
                 return;
             }
 
-            // Procura o cadastro na lista para pegar a foto
             const usuario = listaCompletaInscricoes.find(insc => insc && insc.nome === nomeEscolhido);
 
             if (usuario && usuario.foto) {
-                // Se tem foto cadastrada, mostra
                 fotoElement.src = usuario.foto;
                 fotoElement.style.display = 'block';
             } else {
-                // Se não tem foto, esconde ou pode colocar um ícone padrão
                 fotoElement.style.display = 'none';
             }
         }
@@ -412,6 +355,7 @@
             });
         }
 
+        // ✅ ESSA É A FUNÇÃO PRINCIPAL CORRIGIDA - AGORA ENVIA CERTO PARA O PAINEL
         function confirmarInscricao() {
             var nome = document.getElementById('ver_nome').value.trim();
             var dia = parseInt(document.getElementById('ver_dia').value);
@@ -423,7 +367,6 @@
                 msg.className = 'resultado erro';
                 msg.innerText = '❌ Selecione o nome e preencha dia e mês corretamente!';
                 msg.style.display = 'block';
-                // ✅ Mensagem de campo vazio some após 3 segundos
                 setTimeout(() => { msg.style.display = 'none'; }, 3000);
                 return;
             }
@@ -436,47 +379,49 @@
                     msg.className = 'resultado erro';
                     msg.innerText = '❌ LIMITE DE 16 CONFIRMADOS ATINGIDO! Inscrições encerradas.';
                     msg.style.display = 'block';
-                    // ❌ REMOVIDO O setTimeout AQUI → AGORA ESSA MENSAGEM FICA VISÍVEL ATÉ RECARREGAR
                     verificarStatusSistema();
                     return;
                 }
 
-                var encontrado = inscricoes.find(insc => insc && insc.nome === nome && insc.dia === dia && insc.mes === mes && insc.status === 'pendente');
+                // ✅ PROCURA EXATAMENTE O CADASTRO PENDENTE COM OS DADOS CORRETOS
+                var encontradoIndex = inscricoes.findIndex(insc => {
+                    return insc && insc.nome === nome && insc.dia === dia && insc.mes === mes && insc.status === 'pendente';
+                });
 
-                if (encontrado) {
-                    // ✅ GUARDA A DATA E HORA ATUAL NO MOMENTO DA CONFIRMAÇÃO
+                if (encontradoIndex !== -1) {
+                    // ✅ ALTERA APENAS O STATUS E A DATA, MANTENDO TODOS OS OUTROS DADOS
                     const dataHoraAtual = new Date().getTime();
+                    inscricoes[encontradoIndex].status = 'confirmado';
+                    inscricoes[encontradoIndex].data_confirmacao = dataHoraAtual;
 
-                    inscricoes = inscricoes.map(insc => { 
-                        if (insc && insc.id === encontrado.id) {
-                            insc.status = 'confirmado'; 
-                            insc.data_confirmacao = dataHoraAtual; // ✅ SALVA AQUI
-                        }
-                        return insc; 
+                    // ✅ SALVA NO BANCO DE FORMA GARANTIDA
+                    db.ref('inscricoes').set(inscricoes)
+                    .then(() => {
+                        msg.className = 'resultado sucesso';
+                        msg.innerText = '🎉 INSCRIÇÃO CONFIRMADA COM SUCESSO! ENVIADO AO PAINEL ✅';
+                        msg.style.display = 'block';
+                        
+                        setTimeout(() => { msg.style.display = 'none'; }, 3000);
+                        
+                        // Limpa os campos
+                        document.getElementById('ver_nome').value = '';
+                        document.getElementById('ver_dia').value = '';
+                        document.getElementById('ver_mes').value = '';
+                        document.getElementById('fotoUsuario').style.display = 'none';
+                        
+                        carregarListaNomes();
+                        verificarStatusSistema();
+                    })
+                    .catch((erro) => {
+                        msg.className = 'resultado erro';
+                        msg.innerText = '❌ ERRO AO ENVIAR: ' + erro.message;
+                        msg.style.display = 'block';
                     });
-                    db.ref('inscricoes').set(inscricoes);
-                    
-                    msg.className = 'resultado sucesso';
-                    msg.innerText = '🎉 INSCRIÇÃO CONFIRMADA COM SUCESSO!';
-                    msg.style.display = 'block';
-                    
-                    // ✅ A MENSAGEM DE SUCESSO SOME APÓS 3 SEGUNDOS
-                    setTimeout(() => { msg.style.display = 'none'; }, 3000);
-                    
-                    // ✅ Limpa campos e esconde foto após confirmação
-                    document.getElementById('ver_nome').value = '';
-                    document.getElementById('ver_dia').value = '';
-                    document.getElementById('ver_mes').value = '';
-                    document.getElementById('fotoUsuario').style.display = 'none';
-                    
-                    carregarListaNomes();
-                    verificarStatusSistema();
+
                 } else {
                     msg.className = 'resultado erro';
                     msg.innerText = '❌ DADOS INCORRETOS COM A BASE DE DADOS';
                     msg.style.display = 'block';
-                    
-                    // ✅ ESSA TAMBÉM SOME APÓS 3 SEGUNDOS
                     setTimeout(() => { msg.style.display = 'none'; }, 3000);
                 }
             });
