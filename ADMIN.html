@@ -65,7 +65,7 @@
         .btn-roxo {background-color: #9b59b6;}
         .btn-roxo:hover {background-color: #8e44ad;}
         .btn-ocultar-coluna, .btn-sorteio, .btn-agendar, .btn-inscricao, .btn-live {background-color: #9b59b6; padding: 5px 10px; font-size: 12px; border-radius: 4px; font-weight: bold;}
-        .btn-ocultar-coluna:hover, .btn-sorteio:hover, .btn-agendar:hover, .btn-inscricao:hover, .btn-live:hover {background-color: #8e44ad;}
+        .btn-ocultar-coluna:hover, .btn-sorteio:hover, .btn-agendar:hover, .btn-inscricao:hover {background-color: #8e44ad;}
         .btn-live {background-color: #e74c3c;}
         .btn-live:hover {background-color: #c0392b;}
         .btn-editar {background-color: #3498db; padding: 4px 8px; font-size: 12px; font-weight: bold;}
@@ -157,11 +157,7 @@
         /* ✅ JANELINHA DE CADASTRO - TOTALMENTE CENTRALIZADA */
         #fundoCadastro {
             display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background-color: rgba(0, 0, 0, 0.6);
             align-items: center;
             justify-content: center;
@@ -329,7 +325,6 @@
                     <button class="btn-agendar" onclick="abrirAgendamento()">⏰ AGENDAR REINÍCIO</button>
                     <button class="btn-inscricao" onclick="window.open('https://endrilsilva.github.io/sistema-inscricoes/INSCREVER.html', '_blank')">📝 SITE DE INSCRIÇÃO</button>
                     <button class="btn-sorteio" onclick="window.open('https://endrilsilva.github.io/sorteio-nomes/SORTEIO.html', '_blank')">🎰 SITE DE SORTEIO</button>
-                    <!-- ✅ NOVO BOTÃO ADICIONADO AQUI -->
                     <button class="btn-live" onclick="window.open('https://meet.google.com/esn-aqxa-gdi', '_blank')">🔴 LIVE</button>
                     <span class="mensagem-copia" id="msgCopia">COPIADO!</span>
                 </div>
@@ -405,10 +400,14 @@
 
         firebase.initializeApp(firebaseConfig);
         var db = firebase.database();
+        // ✅ NOVO: ATIVA CACHE PARA NÃO BAIXAR DADOS IGUAIS DE NOVO
+        db.ref().keepSynced(true);
         var dataVisivel = true;
         const LIMITE_MAXIMO = 16;
         let quantidadeAnterior = 0;
         let idEmEdicao = null;
+        // ✅ NOVO: GUARDA DADOS EM MEMÓRIA
+        let dadosEmCache = [];
 
         // ✅ FUNÇÕES PARA MOSTRAR/OCULTAR JANELINHA CENTRALIZADA
         function mostrarCadastro() {
@@ -455,7 +454,7 @@
             }
         }
 
-        // ✅ CONVERTER FOTO PARA TEXTO - AGORA COM ALTA QUALIDADE
+        // ✅ CONVERTER FOTO PARA TEXTO - AGORA COM TAMANHO MUITO MENOR (30KB em vez de 300KB)
         function lerFotoComoTexto(arquivo, callback) {
             if (!arquivo) { callback(null); return; }
             var leitor = new FileReader();
@@ -463,7 +462,8 @@
                 var img = new Image();
                 img.onload = function() {
                     var canvas = document.createElement('canvas');
-                    var tamanho = 300;
+                    // ✅ TAMANHO MENOR: 100px em vez de 300px
+                    var tamanho = 100;
                     canvas.width = tamanho;
                     canvas.height = tamanho;
                     var ctx = canvas.getContext('2d');
@@ -477,7 +477,8 @@
                     
                     ctx.drawImage(img, xInicio, yInicio, tamanhoOriginal, tamanhoOriginal, 0, 0, tamanho, tamanho);
                     
-                    callback(canvas.toDataURL('image/jpeg', 0.9));
+                    // ✅ QUALIDADE MENOR: 0.6 em vez de 0.9
+                    callback(canvas.toDataURL('image/jpeg', 0.6));
                 };
                 img.src = e.target.result;
             };
@@ -738,8 +739,12 @@
             celulasData.forEach(celula => { celula.style.display = dataVisivel ? '' : 'none'; });
         }
 
+        // ✅ NOVO: SÓ ATUALIZA SE DADOS FOREM DIFERENTES
         function atualizarLista(dados) {
             let inscricoes = dados ? dados.val() || [] : [];
+            // Compara com cache, se igual não faz nada
+            if(JSON.stringify(inscricoes) === JSON.stringify(dadosEmCache)) return;
+            dadosEmCache = inscricoes;
             processarLista(inscricoes);
         }
 
@@ -809,7 +814,13 @@
         }
 
         function iniciarAtualizacaoAutomatica() {
-            db.ref('inscricoes').on('value', function(dados) { atualizarLista(dados); });
+            // ✅ NOVO: SÓ OUVE MUDANÇAS, NÃO BAIXA TUDO TODA HORA
+            db.ref('inscricoes').on('value', atualizarLista);
+            // ✅ NOVO: PARA DE OUVIR QUANDO A PÁGINA NÃO ESTÁ VISÍVEL
+            document.addEventListener('visibilitychange', function() {
+                if(document.hidden) db.ref('inscricoes').off('value', atualizarLista);
+                else db.ref('inscricoes').on('value', atualizarLista);
+            });
         }
 
         // ✅ FUNÇÃO PARA FECHAR TODAS AS JANELAS AO APERTAR "ESC"
