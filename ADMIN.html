@@ -35,7 +35,7 @@
 
         /* ===== ESTILOS DO SISTEMA ===== */
         h1 {color: #f8f9fa; text-align: center; margin-bottom: 10px;}
-        .aviso-link {background: #495057; padding: 10px; border-radius: 8px; margin-bottom: 30px; color: #ffffff; display: none;} /* ✅ MANTIVE A CAIXA MAS REMOVI O TEXTO */
+        .aviso-link {background: #495057; padding: 10px; border-radius: 8px; margin-bottom: 30px; color: #ffffff; display: none;}
         
         #avisoNovaConfirmacao {
             background-color: #d4edda; color: #155724; border: 2px solid #27ae60;
@@ -246,7 +246,7 @@
     <div id="telaLogin">
         <div class="caixa-login">
             <h2>🔐 ACESSO RESTRITO</h2>
-            <input type="text" id="usuarioLogin" placeholder="USUÁRIO" required onkeydown="if(event.key === 'Enter') document.getElementById('senhaLogin').focus()">
+            <input type="text" id="usuarioLogin" placeholder="USUÁRIO" required oninput="verificarUsuario()">
             <input type="password" id="senhaLogin" placeholder="SENHA" required onkeydown="if(event.key === 'Enter') fazerLogin()">
             <button onclick="fazerLogin()">ENTRAR</button>
             <div class="errologin" id="mensagemErro">USUÁRIO OU SENHA INCORRETOS!</div>
@@ -313,7 +313,6 @@
     <div id="conteudoPrincipal">
         <h1>🔐 PAINEL ADMINISTRATIVO</h1>
         <div class="aviso-link">
-            <!-- ✅ MENSAGEM REMOVIDA AQUI -->
         </div>
 
         <div id="avisoNovaConfirmacao">🎉 NOVA INSCRIÇÃO CONFIRMADA!</div>
@@ -416,12 +415,19 @@
         }
 
         // ===== LOGIN =====
+        function verificarUsuario() {
+            const usuario = document.getElementById('usuarioLogin').value.trim();
+            if (usuario === "campim") {
+                document.getElementById('senhaLogin').focus();
+            }
+        }
+
         function fazerLogin() {
             const usuario = document.getElementById('usuarioLogin').value.trim();
             const senha = document.getElementById('senhaLogin').value.trim();
             const mensagemErro = document.getElementById('mensagemErro');
 
-            if (usuario === "cupedition" && senha === "campimfc") {
+            if (usuario === "campim" && senha === "4262") {
                 document.getElementById('telaLogin').style.display = 'none';
                 document.getElementById('conteudoPrincipal').style.display = 'block';
                 iniciarAtualizacaoAutomatica();
