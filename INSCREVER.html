@@ -370,7 +370,7 @@
                 return;
             }
 
-            // ✅ ASSIM QUE CLICA, MOSTRA A MENSAGEM DE ENVIANDO
+            // Mensagem de enviando
             msg.className = 'resultado sucesso';
             msg.innerText = '⏳ ENVIANDO...';
             msg.style.display = 'block';
@@ -398,8 +398,8 @@
 
                     db.ref('inscricoes').set(inscricoes)
                     .then(() => {
-                        // ✅ TROCA PARA A MENSAGEM DE SUCESSO DEPOIS DE ENVIADO
-                        msg.innerText = '🎉 INSCRIÇÃO CONFIRMADA COM SUCESSO! ENVIADO AO PAINEL ✅';
+                        // Mensagem de sucesso do jeito que você pediu
+                        msg.innerText = '🎉 INSCRIÇÃO CONFIRMADA COM SUCESSO! ✅';
                         setTimeout(() => { msg.style.display = 'none'; }, 3000);
                         
                         document.getElementById('ver_nome').value = '';
