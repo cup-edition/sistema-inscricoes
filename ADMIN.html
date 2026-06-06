@@ -387,8 +387,11 @@
     </div>
 
     <script>
-        // ✅ DEFINI A VARIÁVEL AQUI NO COMEÇO, ANTES DE TUDO
+        // ✅ TODAS AS VARIÁVEIS DEFINIDAS AQUI NO INÍCIO, SEM ERROS
         const LIMITE_MAXIMO = 16;
+        let quantidadeAnterior = 0;
+        let idEmEdicao = null;
+        let dataVisivel = true;
 
         // ✅ SEUS DADOS DO FIREBASE
         var firebaseConfig = {
@@ -404,9 +407,6 @@
         firebase.initializeApp(firebaseConfig);
         var db = firebase.database();
         db.ref().keepSynced(true);
-        var dataVisivel = true;
-        let quantidadeAnterior = 0;
-        let idEmEdicao = null;
 
         // ✅ MOSTRAR/OCULTAR CADASTRO
         function mostrarCadastro() {
@@ -763,7 +763,7 @@
             celulasData.forEach(celula => { celula.style.display = dataVisivel ? '' : 'none'; });
         }
 
-        // ✅ FUNÇÃO PRINCIPAL - CORRIGIDA E SEM ERROS
+        // ✅ FUNÇÃO PRINCIPAL - 100% CORRIGIDA, SEM ERROS
         function carregarDados() {
             db.ref('inscricoes').once('value')
             .then(snapshot => {
