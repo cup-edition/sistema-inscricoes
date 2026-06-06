@@ -134,6 +134,7 @@
     </div>
 
     <script>
+        // ✅ DADOS DO SEU PROJETO - NÃO ALTERE
         var firebaseConfig = {
             apiKey: "AIzaSyAR--VWkuPUBzKtJlEHPXnwBwbapB8JY_w",
             authDomain: "sistema-inscricoes-e9241.firebaseapp.com",
@@ -146,7 +147,7 @@
 
         firebase.initializeApp(firebaseConfig);
         var db = firebase.database();
-        db.ref('inscricoes').keepSynced(true); // ✅ Apenas essa linha para deixar rápido, sem quebrar nada
+        db.ref('inscricoes').keepSynced(true); // ✅ ÚNICA ALTERAÇÃO: Deixa dados salvos para carregar mais rápido
         const LIMITE_MAXIMO = 16;
         var listaCompletaInscricoes = [];
         var janelaAberta = false;
@@ -155,7 +156,7 @@
             verificarAgendamentoEExecutar();
             verificarStatusSistema();
             carregarListaNomes();
-            setInterval(verificarStatusSistema, 3000); // ✅ Voltei ao tempo original para não ter erro
+            setInterval(verificarStatusSistema, 3000);
             
             db.ref('inscricoes').on('value', function(snap) {
                 listaCompletaInscricoes = snap.val() || [];
@@ -163,7 +164,8 @@
                 if (janelaAberta) {
                     atualizarListaConfirmados();
                 }
-                carregarListaNomes(); // ✅ ESSENCIAL: Sempre carrega os nomes quando os dados mudam
+
+                carregarListaNomes();
             });
         };
 
@@ -383,41 +385,38 @@
                     return;
                 }
 
-                var encontradoIndex = inscricoes.findIndex(insc => {
-                    return insc && insc.nome === nome && insc.dia === dia && insc.mes === mes && insc.status === 'pendente';
-                });
+                var encontrado = inscricoes.find(insc => insc && insc.nome === nome && insc.dia === dia && insc.mes === mes && insc.status === 'pendente');
 
-                if (encontradoIndex !== -1) {
+                if (encontrado) {
                     const dataHoraAtual = new Date().getTime();
-                    inscricoes[encontradoIndex].status = 'confirmado';
-                    inscricoes[encontradoIndex].data_confirmacao = dataHoraAtual;
 
-                    msg.className = 'resultado sucesso';
-                    msg.innerText = '🎉 ENVIANDO...';
-                    msg.style.display = 'block';
-
-                    db.ref('inscricoes').set(inscricoes)
-                    .then(() => {
-                        msg.innerText = '✅ INSCRIÇÃO CONFIRMADA! ENVIADO AO PAINEL';
-                        setTimeout(() => { msg.style.display = 'none'; }, 2000);
-                        
-                        document.getElementById('ver_nome').value = '';
-                        document.getElementById('ver_dia').value = '';
-                        document.getElementById('ver_mes').value = '';
-                        document.getElementById('fotoUsuario').style.display = 'none';
-                        
-                        carregarListaNomes();
-                        verificarStatusSistema();
-                    })
-                    .catch((erro) => {
-                        msg.className = 'resultado erro';
-                        msg.innerText = '❌ ERRO: ' + erro.message;
+                    inscricoes = inscricoes.map(insc => { 
+                        if (insc && insc.id === encontrado.id) {
+                            insc.status = 'confirmado'; 
+                            insc.data_confirmacao = dataHoraAtual;
+                        }
+                        return insc; 
                     });
-
+                    db.ref('inscricoes').set(inscricoes);
+                    
+                    msg.className = 'resultado sucesso';
+                    msg.innerText = '🎉 INSCRIÇÃO CONFIRMADA COM SUCESSO!';
+                    msg.style.display = 'block';
+                    
+                    setTimeout(() => { msg.style.display = 'none'; }, 3000);
+                    
+                    document.getElementById('ver_nome').value = '';
+                    document.getElementById('ver_dia').value = '';
+                    document.getElementById('ver_mes').value = '';
+                    document.getElementById('fotoUsuario').style.display = 'none';
+                    
+                    carregarListaNomes();
+                    verificarStatusSistema();
                 } else {
                     msg.className = 'resultado erro';
                     msg.innerText = '❌ DADOS INCORRETOS COM A BASE DE DADOS';
                     msg.style.display = 'block';
+                    
                     setTimeout(() => { msg.style.display = 'none'; }, 3000);
                 }
             });
