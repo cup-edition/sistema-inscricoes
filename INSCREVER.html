@@ -9,6 +9,28 @@
         * {margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif;}
         body {background-color: #343a40; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; position: relative;}
         
+        /* ✅ NOVA MENSAGEM DE AVISO - IGUAL A FOTO */
+        .aviso-limite-atingido {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            padding: 15px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 16px;
+            text-align: center;
+            width: 100%;
+            max-width: 450px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        .aviso-limite-atingido span {
+            display: block;
+            font-size: 14px;
+            font-weight: normal;
+            margin-top: 5px;
+        }
+
         .aviso-topo {
             background-color: #fff3cd;
             color: #856404;
@@ -157,6 +179,12 @@
     </style>
 </head>
 <body>
+
+    <!-- ✅ NOVA MENSAGEM QUE APARECE POR 3 SEGUNDOS -->
+    <div id="avisoLimiteAtingido" class="aviso-limite-atingido">
+        ❌ LIMITE DE 16 CONFIRMADOS ATINGIDO!
+        <span>Inscrições encerradas.</span>
+    </div>
 
     <div id="avisoLimite" class="aviso-topo">
         ⚠️ ATENÇÃO: Restam poucas vagas. Ao atingir 16 confirmados, o sistema será bloqueado automaticamente.
@@ -430,12 +458,19 @@
                     var qtdConfirmados = lista.filter(i => i && i.status === 'confirmado').length;
 
                     if (!aberto || qtdConfirmados >= LIMITE_MAXIMO) {
-                        // ✅ AGORA ESPERA 3 SEGUNDOS (IGUAL AS OUTRAS MENSAGENS) PARA MOSTRAR ENCERRADO
+                        // ✅ MOSTRA A MENSAGEM NOVA POR 3 SEGUNDOS
+                        const aviso = document.getElementById('avisoLimiteAtingido');
+                        aviso.style.display = 'block';
+                        setTimeout(() => {
+                            aviso.style.display = 'none';
+                        }, 3000);
+
+                        // ✅ DEPOIS DE 3 SEGUNDOS MOSTRA A TELA DE ENCERRADO
                         setTimeout(() => {
                             document.getElementById('telaEncerrado').style.display = 'block';
                             document.getElementById('telaNormal').style.display = 'none';
                             document.getElementById('avisoLimite').style.display = 'none';
-                        }, 3000); // 3000 milissegundos = 3 segundos
+                        }, 3000);
                     } else {
                         document.getElementById('telaEncerrado').style.display = 'none';
                         document.getElementById('telaNormal').style.display = 'block';
@@ -477,6 +512,7 @@
                     msg.className = 'resultado erro';
                     msg.innerText = '❌ LIMITE DE 16 CONFIRMADOS ATINGIDO! Inscrições encerradas.';
                     msg.style.display = 'block';
+                    setTimeout(() => { msg.style.display = 'none'; }, 3000);
                     verificarStatusSistema();
                     return;
                 }
@@ -493,7 +529,6 @@
                     db.ref('inscricoes').set(inscricoes)
                     .then(() => {
                         msg.innerText = '🎉 INSCRIÇÃO CONFIRMADA COM SUCESSO! ✅';
-                        // ✅ MENSAGEM DE SUCESSO TAMBÉM 3 SEGUNDOS
                         setTimeout(() => { msg.style.display = 'none'; }, 3000);
                         
                         document.getElementById('ver_nome').value = '';
