@@ -146,6 +146,7 @@
 
         firebase.initializeApp(firebaseConfig);
         var db = firebase.database();
+        db.ref().keepSynced(true); // ✅ MANTÉM DADOS SALVOS PARA RESPOSTA RÁPIDA
         const LIMITE_MAXIMO = 16;
         var listaCompletaInscricoes = [];
         var janelaAberta = false;
@@ -154,7 +155,7 @@
             verificarAgendamentoEExecutar();
             verificarStatusSistema();
             carregarListaNomes();
-            setInterval(verificarStatusSistema, 3000);
+            setInterval(verificarStatusSistema, 5000); // ✅ AUMENTEI O TEMPO PARA PESQUISAR MENOS E FICAR MAIS RÁPIDO
             
             db.ref('inscricoes').on('value', function(snap) {
                 listaCompletaInscricoes = snap.val() || [];
@@ -355,7 +356,6 @@
             });
         }
 
-        // ✅ ESSA É A FUNÇÃO PRINCIPAL CORRIGIDA - AGORA ENVIA CERTO PARA O PAINEL
         function confirmarInscricao() {
             var nome = document.getElementById('ver_nome').value.trim();
             var dia = parseInt(document.getElementById('ver_dia').value);
@@ -371,60 +371,53 @@
                 return;
             }
 
-            db.ref('inscricoes').once('value').then(snap => {
-                var inscricoes = snap.val() || [];
+            // ✅ JÁ PEGA OS DADOS DA MEMÓRIA, NÃO ESPERAR O SERVIDOR PARA VERIFICAR → MAIS RÁPIDO
+            var inscricoes = listaCompletaInscricoes;
                 
-                var qtdAtual = inscricoes.filter(i => i && i.status === 'confirmado').length;
-                if (qtdAtual >= LIMITE_MAXIMO) {
-                    msg.className = 'resultado erro';
-                    msg.innerText = '❌ LIMITE DE 16 CONFIRMADOS ATINGIDO! Inscrições encerradas.';
-                    msg.style.display = 'block';
-                    verificarStatusSistema();
-                    return;
-                }
+            var qtdAtual = inscricoes.filter(i => i && i.status === 'confirmado').length;
+            if (qtdAtual >= LIMITE_MAXIMO) {
+                msg.className = 'resultado erro';
+                msg.innerText = '❌ LIMITE DE 16 CONFIRMADOS ATINGIDO! Inscrições encerradas.';
+                msg.style.display = 'block';
+                verificarStatusSistema();
+                return;
+            }
 
-                // ✅ PROCURA EXATAMENTE O CADASTRO PENDENTE COM OS DADOS CORRETOS
-                var encontradoIndex = inscricoes.findIndex(insc => {
-                    return insc && insc.nome === nome && insc.dia === dia && insc.mes === mes && insc.status === 'pendente';
+            var encontradoIndex = inscricoes.findIndex(insc => {
+                return insc && insc.nome === nome && insc.dia === dia && insc.mes === mes && insc.status === 'pendente';
+            });
+
+            if (encontradoIndex !== -1) {
+                const dataHoraAtual = new Date().getTime();
+                inscricoes[encontradoIndex].status = 'confirmado';
+                inscricoes[encontradoIndex].data_confirmacao = dataHoraAtual;
+
+                // ✅ MENSAGEM APARECE ANTES DE ENVIAR, PARA NÃO DAR SENSAÇÃO DE DEMORA
+                msg.className = 'resultado sucesso';
+                msg.innerText = '🎉 ENVIANDO... AGUARDE UM INSTANTE!';
+                msg.style.display = 'block';
+
+                db.ref('inscricoes').set(inscricoes)
+                .then(() => {
+                    msg.innerText = '✅ INSCRIÇÃO CONFIRMADA! ENVIADO AO PAINEL';
+                    setTimeout(() => { msg.style.display = 'none'; }, 2000);
+                    
+                    document.getElementById('ver_nome').value = '';
+                    document.getElementById('ver_dia').value = '';
+                    document.getElementById('ver_mes').value = '';
+                    document.getElementById('fotoUsuario').style.display = 'none';
+                })
+                .catch((erro) => {
+                    msg.className = 'resultado erro';
+                    msg.innerText = '❌ ERRO: ' + erro.message;
                 });
 
-                if (encontradoIndex !== -1) {
-                    // ✅ ALTERA APENAS O STATUS E A DATA, MANTENDO TODOS OS OUTROS DADOS
-                    const dataHoraAtual = new Date().getTime();
-                    inscricoes[encontradoIndex].status = 'confirmado';
-                    inscricoes[encontradoIndex].data_confirmacao = dataHoraAtual;
-
-                    // ✅ SALVA NO BANCO DE FORMA GARANTIDA
-                    db.ref('inscricoes').set(inscricoes)
-                    .then(() => {
-                        msg.className = 'resultado sucesso';
-                        msg.innerText = '🎉 INSCRIÇÃO CONFIRMADA COM SUCESSO! ENVIADO AO PAINEL ✅';
-                        msg.style.display = 'block';
-                        
-                        setTimeout(() => { msg.style.display = 'none'; }, 3000);
-                        
-                        // Limpa os campos
-                        document.getElementById('ver_nome').value = '';
-                        document.getElementById('ver_dia').value = '';
-                        document.getElementById('ver_mes').value = '';
-                        document.getElementById('fotoUsuario').style.display = 'none';
-                        
-                        carregarListaNomes();
-                        verificarStatusSistema();
-                    })
-                    .catch((erro) => {
-                        msg.className = 'resultado erro';
-                        msg.innerText = '❌ ERRO AO ENVIAR: ' + erro.message;
-                        msg.style.display = 'block';
-                    });
-
-                } else {
-                    msg.className = 'resultado erro';
-                    msg.innerText = '❌ DADOS INCORRETOS COM A BASE DE DADOS';
-                    msg.style.display = 'block';
-                    setTimeout(() => { msg.style.display = 'none'; }, 3000);
-                }
-            });
+            } else {
+                msg.className = 'resultado erro';
+                msg.innerText = '❌ DADOS INCORRETOS COM A BASE DE DADOS';
+                msg.style.display = 'block';
+                setTimeout(() => { msg.style.display = 'none'; }, 3000);
+            }
         }
     </script>
 
