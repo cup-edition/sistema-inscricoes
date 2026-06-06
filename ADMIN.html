@@ -507,7 +507,7 @@
             lerFotoComoTexto(arquivoFoto, function(textoDaFoto) {
                 db.ref('inscricoes').once('value').then(snap => {
                     var inscricoes = snap.val() || [];
-                    var novoId = inscricoes.length > 0 ? Math.max(...inscricoes.map(i => i.id)) + 1 : 1;
+                    var novoId = inscricoes.length > 0 ? Math.max(...inscricoes.filter(Boolean).map(i => i.id)) + 1 : 1;
                     
                     inscricoes.push({
                         id: novoId,
@@ -739,9 +739,13 @@
             celulasData.forEach(celula => { celula.style.display = dataVisivel ? '' : 'none'; });
         }
 
-        // ✅ NOVO: SÓ ATUALIZA SE DADOS FOREM DIFERENTES
-        function atualizarLista(dados) {
-            let inscricoes = dados ? dados.val() || [] : [];
+        // ✅ CORRIGIDO: AGORA CARREGA TUDO DIREITO
+        function atualizarLista(snapshot) {
+            let inscricoes = snapshot.val() || [];
+            // Se for objeto antigo, converte para array
+            if (!Array.isArray(inscricoes)) {
+                inscricoes = Object.values(inscricoes);
+            }
             // Compara com cache, se igual não faz nada
             if(JSON.stringify(inscricoes) === JSON.stringify(dadosEmCache)) return;
             dadosEmCache = inscricoes;
@@ -751,7 +755,7 @@
         function processarLista(inscricoes) {
             var tabela = document.getElementById('lista_inscricoes');
 
-            if (inscricoes.length === 0 || !inscricoes[0]) {
+            if (inscricoes.length === 0 || !inscricoes.some(Boolean)) {
                 tabela.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #888;">NENHUMA INSCRIÇÃO CADASTRADA AINDA.</td></tr>';
                 document.getElementById('contadorConfirmados').innerText = `✅ 0 CONFIRMADOS | RESTAM 16 VAGAS (LIMITE: 16)`;
                 verificarLimiteConfirmados(0);
@@ -814,7 +818,7 @@
         }
 
         function iniciarAtualizacaoAutomatica() {
-            // ✅ NOVO: SÓ OUVE MUDANÇAS, NÃO BAIXA TUDO TODA HORA
+            // ✅ CORRIGIDO: AGORA CARREGA E ATUALIZA SEMPRE
             db.ref('inscricoes').on('value', atualizarLista);
             // ✅ NOVO: PARA DE OUVIR QUANDO A PÁGINA NÃO ESTÁ VISÍVEL
             document.addEventListener('visibilitychange', function() {
