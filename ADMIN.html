@@ -405,7 +405,6 @@
         const LIMITE_MAXIMO = 16;
         let quantidadeAnterior = 0;
         let idEmEdicao = null;
-        let dadosEmCache = [];
 
         // ✅ MOSTRAR/OCULTAR CADASTRO
         function mostrarCadastro() {
@@ -431,7 +430,7 @@
             if (usuario === "campim" && senha === "4262") {
                 document.getElementById('telaLogin').style.display = 'none';
                 document.getElementById('conteudoPrincipal').style.display = 'block';
-                iniciarAtualizacaoAutomatica();
+                carregarDados(); // ✅ CHAMA DIRETO
             } else {
                 mensagemErro.style.display = 'block';
                 document.getElementById('senhaLogin').value = '';
@@ -500,15 +499,14 @@
                 db.ref('inscricoes').once('value').then(snap => {
                     var dadosBrutos = snap.val() || {};
                     var inscricoes = [];
-                    if (Array.isArray(dadosBrutos)) {
-                        inscricoes = dadosBrutos.filter(Boolean);
-                    } else {
-                        Object.keys(dadosBrutos).forEach(chave => {
-                            if (dadosBrutos[chave] && typeof dadosBrutos[chave] === 'object') {
-                                inscricoes.push(dadosBrutos[chave]);
-                            }
-                        });
-                    }
+                    
+                    // ✅ PEGA TUDO, SEM COMPLICAÇÃO
+                    Object.keys(dadosBrutos).forEach(chave => {
+                        if (dadosBrutos[chave] && dadosBrutos[chave].nome) {
+                            inscricoes.push(dadosBrutos[chave]);
+                        }
+                    });
+                    
                     var novoId = inscricoes.length > 0 ? Math.max(...inscricoes.map(i => i.id || 0)) + 1 : 1;
                     
                     inscricoes.push({
@@ -530,6 +528,7 @@
                         document.getElementById('cad_mes').value = '';
                         document.getElementById('cad_foto').value = '';
                         setTimeout(() => msg.style.display = 'none', 4000);
+                        carregarDados(); // ✅ ATUALIZA NA HORA
                     });
                 });
             });
@@ -541,8 +540,9 @@
             db.ref('inscricoes').once('value').then(snap => {
                 var dadosBrutos = snap.val() || {};
                 var lista = [];
-                if (Array.isArray(dadosBrutos)) lista = dadosBrutos.filter(Boolean);
-                else lista = Object.values(dadosBrutos).filter(Boolean);
+                Object.keys(dadosBrutos).forEach(chave => {
+                    if (dadosBrutos[chave] && dadosBrutos[chave].nome) lista.push(dadosBrutos[chave]);
+                });
                 
                 var item = lista.find(i => i.id === id);
                 if(item){
@@ -579,8 +579,9 @@
                 db.ref('inscricoes').once('value').then(snap => {
                     var dadosBrutos = snap.val() || {};
                     var lista = [];
-                    if (Array.isArray(dadosBrutos)) lista = dadosBrutos.filter(Boolean);
-                    else lista = Object.values(dadosBrutos).filter(Boolean);
+                    Object.keys(dadosBrutos).forEach(chave => {
+                        if (dadosBrutos[chave] && dadosBrutos[chave].nome) lista.push(dadosBrutos[chave]);
+                    });
                     
                     lista = lista.map(item => {
                         if(item.id === idEmEdicao){
@@ -594,6 +595,7 @@
 
                     db.ref('inscricoes').set(lista).then(() => {
                         fecharEdicao();
+                        carregarDados();
                     });
                 });
             });
@@ -605,11 +607,15 @@
                 db.ref('inscricoes').once('value').then(snap => {
                     var dadosBrutos = snap.val() || {};
                     var lista = [];
-                    if (Array.isArray(dadosBrutos)) lista = dadosBrutos.filter(Boolean);
-                    else lista = Object.values(dadosBrutos).filter(Boolean);
+                    Object.keys(dadosBrutos).forEach(chave => {
+                        if (dadosBrutos[chave] && dadosBrutos[chave].nome) lista.push(dadosBrutos[chave]);
+                    });
                     
                     var novaLista = lista.filter(insc => insc.id !== idEmEdicao);
-                    db.ref('inscricoes').set(novaLista).then(() => fecharEdicao());
+                    db.ref('inscricoes').set(novaLista).then(() => {
+                        fecharEdicao();
+                        carregarDados();
+                    });
                 });
             }
         }
@@ -619,8 +625,9 @@
             db.ref('inscricoes').once('value').then(snap => {
                 var dadosBrutos = snap.val() || {};
                 var lista = [];
-                if (Array.isArray(dadosBrutos)) lista = dadosBrutos.filter(Boolean);
-                else lista = Object.values(dadosBrutos).filter(Boolean);
+                Object.keys(dadosBrutos).forEach(chave => {
+                    if (dadosBrutos[chave] && dadosBrutos[chave].nome) lista.push(dadosBrutos[chave]);
+                });
                 
                 lista = lista.map(insc => {
                     if(insc.id === id) {
@@ -629,7 +636,7 @@
                     }
                     return insc;
                 });
-                db.ref('inscricoes').set(lista);
+                db.ref('inscricoes').set(lista).then(() => carregarDados());
             });
         }
 
@@ -638,6 +645,7 @@
             if (confirm('⚠️ TEM CERTEZA?')) {
                 db.ref('inscricoes').remove();
                 alert('TODOS APAGADOS!');
+                carregarDados();
             }
         }
 
@@ -647,8 +655,9 @@
                 db.ref('inscricoes').once('value').then(snap => {
                     var dadosBrutos = snap.val() || {};
                     var lista = [];
-                    if (Array.isArray(dadosBrutos)) lista = dadosBrutos.filter(Boolean);
-                    else lista = Object.values(dadosBrutos).filter(Boolean);
+                    Object.keys(dadosBrutos).forEach(chave => {
+                        if (dadosBrutos[chave] && dadosBrutos[chave].nome) lista.push(dadosBrutos[chave]);
+                    });
                     
                     lista = lista.map(insc => { 
                         if(insc) {
@@ -660,6 +669,7 @@
                     db.ref('inscricoes').set(lista);
                     db.ref('configuracao').set({inscricoes_abertas: true, ultimo_reinicio: Date.now()});
                     alert('✅ TODOS VOLTARAM!');
+                    carregarDados();
                 });
             }
         }
@@ -751,26 +761,25 @@
             celulasData.forEach(celula => { celula.style.display = dataVisivel ? '' : 'none'; });
         }
 
-        // ✅ FUNÇÃO PRINCIPAL DE CARREGAMENTO - ADAPTADA 100% PARA SEUS DADOS
-        function atualizarLista(snapshot) {
-            const dadosBrutos = snapshot.val();
-            let inscricoes = [];
+        // ✅ FUNÇÃO PRINCIPAL - IGUAL AO TESTE QUE DEU CERTO
+        function carregarDados() {
+            db.ref('inscricoes').once('value')
+            .then(snapshot => {
+                const dadosBrutos = snapshot.val();
+                let inscricoes = [];
 
-            // ✅ AGORA LÊ EXATAMENTE COMO ESTÁ NO SEU BANCO DE DADOS
-            if (!dadosBrutos) {
-                inscricoes = [];
-            } else {
-                // ✅ PEGA TODOS OS OBJETOS, INDEPENDENTE DO FORMATO
-                inscricoes = Object.values(dadosBrutos).filter(item => {
-                    return item && typeof item === 'object' && item.nome; // só pega itens que tem nome
-                });
-            }
+                if (!dadosBrutos) {
+                    inscricoes = [];
+                } else {
+                    // ✅ PEGA EXATAMENTE COMO NO TESTE QUE FUNCIONOU
+                    inscricoes = Object.values(dadosBrutos).filter(item => item && item.nome);
+                }
 
-            // SE NÃO MUDOU, NÃO FAZ NADA
-            if(JSON.stringify(inscricoes) === JSON.stringify(dadosEmCache)) return;
-            dadosEmCache = inscricoes;
-
-            processarLista(inscricoes);
+                processarLista(inscricoes);
+            })
+            .catch(erro => {
+                document.getElementById('lista_inscricoes').innerHTML = `<tr><td colspan="6" style="color:red">ERRO: ${erro.message}</td></tr>`;
+            });
         }
 
         function processarLista(inscricoes) {
@@ -804,7 +813,6 @@
 
             tabela.innerHTML = '';
             listaOrdenada.forEach((insc, index) => {
-                // ✅ GARANTE QUE TEM ID, SE NÃO TIVER, CRIA UM
                 if (!insc.id) insc.id = index + 1;
 
                 let dataHora = '';
@@ -842,14 +850,8 @@
             setTimeout(() => { aviso.style.display = 'none'; }, 4000);
         }
 
-        // ✅ INICIAR CARREGAMENTO - GARANTIDO
-        function iniciarAtualizacaoAutomatica() {
-            db.ref('inscricoes').on('value', atualizarLista);
-            document.addEventListener('visibilitychange', function() {
-                if(document.hidden) db.ref('inscricoes').off('value', atualizarLista);
-                else db.ref('inscricoes').on('value', atualizarLista);
-            });
-        }
+        // ✅ ATUALIZA AUTOMÁTICAMENTE
+        db.ref('inscricoes').on('value', carregarDados);
 
         // ✅ FECHAR COM ESC
         document.addEventListener('keydown', function(event) {
