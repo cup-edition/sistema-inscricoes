@@ -208,8 +208,7 @@
             border-radius: 4px;
             background: #f8f9fa;
             margin-bottom: 15px;
-            text-transform: none;
-            font-weight: normal;
+            text-transform: none; font-weight: normal;
         }
         #btnOcultarCadastro {
             background-color: #28a745;
@@ -487,7 +486,7 @@
         // ✅ CADASTRAR NOVA PESSOA
         function cadastrarPessoa() {
             var nome = document.getElementById('cad_nome').value.trim();
-            var dia = parseInt(document.getElementById('cad_dia').value);
+            var dia = parseInt(document.getElementById('('cad_dia').value);
             var mes = parseInt(document.getElementById('cad_mes').value);
             var arquivoFoto = document.getElementById('cad_foto').files[0];
             var msg = document.getElementById('msg_cadastro');
@@ -820,6 +819,32 @@
                 fecharAgendamento();
             }
         });
+
+        // ✅ EXECUTAR AGENDAMENTO AUTOMÁTICO
+        db.ref('agendamento_reinicio').on('value', snap => {
+            const agendado = snap.val();
+            if(agendado && !agendado.executado) {
+                const agora = Date.now();
+                if(agendado.timestamp <= agora) {
+                    // 🚀 AÇÃO QUE SERÁ EXECUTADA NO HORÁRIO MARCADO
+                    db.ref('inscricoes').once('value').then(snap => {
+                        const lista = snap.val() || [];
+                        const novaLista = lista.map(insc => {
+                            if(insc) {
+                                insc.status = 'pendente';
+                                insc.data_confirmacao = null;
+                            }
+                            return insc;
+                        });
+                        db.ref('inscricoes').set(novaLista);
+                        db.ref('configuracao').set({inscricoes_abertas: true, ultimo_reinicio: Date.now()});
+                        db.ref('agendamento_reinicio/executado').set(true);
+                        alert('✅ Reinício automático realizado com sucesso!');
+                    });
+                }
+            }
+        });
+
     </script>
 
 </body>
