@@ -6,21 +6,23 @@
     <title>Inscreva-se - Sistema de Inscrições</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase.js"></script>
     
-    <!-- ✅ BLOQUEADOR DE ANÚNCIOS - SÓ OS INDESEJADOS, SEM QUEBRAR NADA -->
+    <!-- ✅ BLOQUEADOR - AGORA BLOQUEIA OS ELEMENTOS DA IMAGEM TAMBÉM -->
     <script>
-        // Lista APENAS dos textos e domínios que apareceram e devem ser bloqueados
+        // Lista com TUDO o que apareceu e deve ser bloqueado
         const bloquear = [
             'seus dados seguros', 'defesas de ia', 'google workspace', 'comece a usar',
-            'workspace', 'googleads', 'googlesyndication', 'adservice', 'ad.'
+            'workspace', 'googleads', 'googlesyndication', 'adservice', 'ad.',
+            'pdf', 'documento', 'imagem', 'pasta', 'arquivo', 'lista', 'planilha', 'símbolo verde',
+            'icone pdf', 'icone imagem', 'icone pasta', 'icone lista', 'icone verde'
         ];
 
-        // 1. Bloqueia requisições de anúncios, mas deixa todo o resto passar
+        // 1. Bloqueia requisições de anúncios e conteúdos indesejados
         const originalFetch = window.fetch;
         window.fetch = function(input, init) {
             let url = typeof input === 'string' ? input : input.url;
             const urlLower = url.toLowerCase();
             if (bloquear.some(palavra => urlLower.includes(palavra))) {
-                return new Promise(() => {}); // Bloqueia só o que é anúncio
+                return new Promise(() => {});
             }
             return originalFetch.apply(this, arguments);
         };
@@ -36,44 +38,76 @@
             return xhr;
         };
 
-        // 2. CSS: Esconde SÓ os elementos com esses textos, não mexe no resto
+        // 2. CSS: Esconde os elementos que aparecem na imagem e os textos anteriores
         const estilo = document.createElement('style');
         estilo.textContent = `
-            /* Bloqueia só os anúncios que apareceram */
+            /* Bloqueia os textos que apareceram antes */
             div:has-text("Seus dados seguros"),
             div:has-text("Google Workspace"),
             div:has-text("Comece a usar"),
             div:has-text("defesas de IA"),
+            
+            /* 🆕 BLOQUEIA ESSES ÍCONES/ELEMENTOS DA IMAGEM */
+            [src*="pdf"], [alt*="pdf"], [title*="pdf"],
+            [src*="documento"], [alt*="documento"], [title*="documento"],
+            [src*="imagem"], [alt*="imagem"], [title*="imagem"],
+            [src*="pasta"], [alt*="pasta"], [title*="pasta"],
+            [src*="arquivo"], [alt*="arquivo"], [title*="arquivo"],
+            [src*="lista"], [alt*="lista"], [title*="lista"],
+            [src*="planilha"], [alt*="planilha"], [title*="planilha"],
+            [src*="verde"], [alt*="verde"], [title*="verde"],
+            [class*="icone"], [id*="icone"],
+            [class*="arquivo"], [id*="arquivo"],
+            [class*="documento"], [id*="documento"],
+            [class*="ferramenta"], [id*="ferramenta"],
+            [class*="anuncio"], [id*="anuncio"],
             [class*="ad-"], [id*="ad-"],
-            [href*="workspace"], [src*="googleads"] {
+            [href*="workspace"], [src*="googleads"],
+
+            /* Bloqueia qualquer linha/barra com esses ícones */
+            div:has(img[src*="pdf"]),
+            div:has(img[src*="imagem"]),
+            div:has(img[src*="pasta"]),
+            div:has(img[src*="lista"]),
+            div:has(img[src*="verde"]),
+            .barra-ferramentas, .barra-anuncios, .lista-arquivos {
                 display: none !important;
                 visibility: hidden !important;
                 height: 0 !important;
+                width: 0 !important;
                 overflow: hidden !important;
                 position: absolute !important;
                 z-index: -9999 !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                border: none !important;
             }
         `;
         document.head.appendChild(estilo);
 
-        // 3. Remove só os anúncios, sem apagar o resto da página
+        // 3. Remove elementos indesejados, SEM apagar nada do seu sistema
         function removerAnuncios() {
-            const todos = document.querySelectorAll('div, span, a, ins');
+            const todos = document.querySelectorAll('div, span, a, img, ins, ul, li');
             todos.forEach(el => {
                 const texto = (el.textContent || '').toLowerCase().trim();
-                if (bloquear.some(palavra => texto.includes(palavra))) {
-                    // Confirma que NÃO é parte do seu sistema antes de remover
-                    if (!texto.includes('inscrição') && !texto.includes('cup edition') && !texto.includes('temporadas')) {
-                        el.remove();
-                    }
+                const atributos = (el.outerHTML || '').toLowerCase();
+                
+                // Verifica se é algo para bloquear
+                const deveBloquear = bloquear.some(palavra => texto.includes(palavra) || atributos.includes(palavra));
+                
+                // SÓ remove se NÃO for parte do seu sistema
+                if (deveBloquear && !texto.includes('inscrição') && !texto.includes('cup edition') && !texto.includes('temporadas') && !texto.includes('confirmado')) {
+                    el.remove();
                 }
             });
         }
-        // Executa sem travar nada
+        // Verifica várias vezes para garantir que tudo seja bloqueado
         window.addEventListener('load', removerAnuncios);
-        setInterval(removerAnuncios, 300);
+        setInterval(removerAnuncios, 200);
+        setTimeout(removerAnuncios, 500);
+        setTimeout(removerAnuncios, 1000);
     </script>
-    <!-- ✅ FIM DO BLOQUEADOR SEGURO -->
+    <!-- ✅ BLOQUEADOR ATUALIZADO E CONFIRMADO -->
 
     <style>
         * {margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif;}
