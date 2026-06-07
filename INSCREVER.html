@@ -6,29 +6,39 @@
     <title>Inscreva-se - Sistema de Inscrições</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase.js"></script>
     
-    <!-- ✅ BLOQUEADOR + ENGANA DETECÇÃO DE ADBLOCK (MÉTODO DEFINITIVO) -->
+    <!-- ✅ BLOQUEADOR + MÉTODO DEFINITIVO PARA NÃO DETECTAR NADA -->
     <script>
-        // ⚡ PRIMEIRO: ENGANA O SITE ANTES MESMO DE ELE CARREGAR
-        // Faz o site achar que NÃO TEM bloqueador
+        // ⚡ FORÇA O NAVEGADOR A DIZER QUE NÃO TEM NENHUM BLOQUEADOR
+        // Sobrescreve TODAS as variáveis que o site procura
         window.adblock = false;
         window.adBlock = false;
+        window.AdBlock = false;
         window.adblockEnabled = false;
         window.canRunAds = true;
         window.isAdBlockActive = false;
-        window.google_ad_block = false;
-        window.onAdBlockDetected = null;
-        Object.defineProperty(window, 'adsbygoogle', { value: undefined, configurable: true });
-        Object.defineProperty(window, 'AdBlockPlus', { value: undefined, configurable: true });
-        Object.defineProperty(window, 'BlockAdBlock', { value: undefined, configurable: true });
+        window.google_ad_block = undefined;
+        window.onAdBlockDetected = undefined;
+        window.BlockAdBlock = undefined;
+        window.AdBlockPlus = undefined;
+        window.AdsBlock = undefined;
+        window.noAdblock = true;
+        window.__adblock = false;
+        window.__adblocker = false;
+
+        // Bloqueia a criação de objetos que detectam bloqueio
+        Object.defineProperty(window, 'adsbygoogle', { value: undefined, configurable: true, writable: true });
+        Object.defineProperty(window, 'AdBlockDetector', { value: undefined, configurable: true });
+        Object.defineProperty(window, 'ABDetect', { value: undefined, configurable: true });
 
         // Lista de domínios e padrões de anúncios para bloquear
         const bloquear = [
             'ads.', 'ad.', 'anuncio', 'banner', 'popup', 'track', 'analytics', 
             'doubleclick', 'googlesyndication', 'adserver', 'advert', 'pixel',
-            'monetization', 'adservice', 'click', 'promo', 'sponsor', 'pagead2', 'adsbygoogle'
+            'monetization', 'adservice', 'click', 'promo', 'sponsor', 'pagead2', 'adsbygoogle',
+            'adblock', 'detect', 'blockad', 'ad-check'
         ];
 
-        // Intercepta requisições para bloquear anúncios - de forma mais discreta
+        // Intercepta requisições
         const originalFetch = window.fetch;
         window.fetch = function(input, init) {
             let url = typeof input === 'string' ? input : input.url;
@@ -38,7 +48,7 @@
             return originalFetch.apply(this, arguments);
         };
 
-        // Bloqueia também requisições de imagens, scripts e iframes
+        // Intercepta carregamento de recursos
         const originalCreateElement = document.createElement;
         document.createElement = function(tag) {
             const el = originalCreateElement.call(this, tag);
@@ -84,17 +94,16 @@
 
         .container {background: #ffffff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); width: 100%; max-width: 450px; text-align: center;}
         
-        /* ✅ TÍTULO ALINHADO CORRETAMENTE PARA CELULAR E COMPUTADOR */
         .titulo-container {
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 12px; /* Espaçamento entre troféu e texto */
+            gap: 12px;
             margin-bottom: 5px;
-            flex-wrap: nowrap; /* Não quebra linha */
+            flex-wrap: nowrap;
         }
         .titulo-trofeu {
-            font-size: 36px; /* Tamanho do troféu igual ao texto */
+            font-size: 36px;
             line-height: 1;
         }
         .titulo-texto {
@@ -105,21 +114,19 @@
             line-height: 1;
         }
         
-        /* ✅ SUBTÍTULO: DIMINUÍ E CENTRALIZEI AQUI */
         .subtitulo-principal {
             color: #2c3e50;
-            font-size: 19px; /* Antes era 22px, agora menor */
+            font-size: 19px;
             font-weight: 600;
             margin-bottom: 15px;
             letter-spacing: 1px;
-            text-align: center; /* Garante centralização total */
+            text-align: center;
             width: 100%;
             display: block;
         }
         
         p.descricao {color: #666; margin-bottom: 25px; font-size: 15px;}
         
-        /* ✅ MENSAGEM ENCERRADO - ESTILO IGUAL A FOTO */
         .encerrado {
             background-color: #f8d7da;
             color: #721c24;
@@ -151,7 +158,6 @@
         .foto-container {display: flex; align-items: center; justify-content: space-between; gap: 12px;}
         .foto-preview {width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 2px solid #ddd; display: none; box-shadow: 0 2px 6px rgba(0,0,0,0.15);}
 
-        /* ✅ BOTÕES FLUTUANTES - AGORA DOIS BOTÕES */
         .botoes-flutuantes {position: fixed; bottom: 20px; right: 20px; display: flex; flex-direction: column; gap: 10px; z-index: 99;}
         .botao-lista, .botao-temporadas {background-color: #6c757d; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; width: auto; font-weight: normal; box-shadow: 0 2px 5px rgba(0,0,0,0.2);}
         .botao-lista:hover, .botao-temporadas:hover {background-color: #495057;}
@@ -173,12 +179,11 @@
         
         .fundo-escuro {display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 999;}
 
-        /* ✅ AJUSTE ESPECIAL PARA TELAS PEQUENAS (CELULAR) */
         @media (max-width: 480px) {
             .titulo-texto { font-size: 32px; }
             .titulo-trofeu { font-size: 32px; }
             .titulo-container { gap: 8px; }
-            .subtitulo-principal { font-size: 17px; } /* Ainda menor no celular */
+            .subtitulo-principal { font-size: 17px; }
         }
     </style>
 </head>
@@ -188,12 +193,10 @@
         ⚠️ ATENÇÃO: Restam poucas vagas. Ao atingir 16 confirmados, o sistema será bloqueado automaticamente.
     </div>
 
-    <!-- ✅ AVISO DO PRÓXIMO REINÍCIO -->
     <div id="avisoReinicioAgendado" class="aviso-reinicio-agendado">
         ⏳ PRÓXIMO REINÍCIO: <span id="dataReinicioTexto">Carregando...</span>
     </div>
 
-    <!-- ✅ BOTÕES AGRUPADOS -->
     <div class="botoes-flutuantes">
         <button class="botao-lista" onclick="abrirJanelaLista()">✅LISTA DE INSCRITOS✅</button>
         <button class="botao-temporadas" onclick="abrirJanelaTemporadas()">🏆 TEMPORADAS 🏆</button>
@@ -201,7 +204,6 @@
 
     <div id="fundoEscuro" class="fundo-escuro" onclick="fecharJanela()"></div>
 
-    <!-- ✅ JANELA 1: LISTA DE INSCRITOS -->
     <div id="janelaLista" class="janela-flutuante">
         <div class="cabecalho-janela">
             <span id="tituloJanela">✅ 0 INSCRITOS CONFIRMADOS ✅</span>
@@ -212,14 +214,15 @@
         </div>
     </div>
 
-    <!-- ✅ JANELA 2: TEMPORADAS (SEM AVISO DE ADBLOCK MAIS!) -->
+    <!-- ✅ JANELA TEMPORADAS - AGORA COM LINK PROTEGIDO QUE NÃO DETECTA NADA -->
     <div id="janelaTemporadas" class="janela-flutuante">
         <div class="cabecalho-janela">
             <span>🏆 TEMPORADAS 🏆</span>
             <button class="fechar-janela" onclick="fecharJanela()">&times;</button>
         </div>
         <div class="conteudo-janela">
-            <iframe id="iframeTemporadas" src="https://challenge.place/l/698577e0232f90c18a24c32b" allowfullscreen></iframe>
+            <!-- ✅ LINK ALTERADO: CARREGA O SITE ATRAVÉS DE UM SERVIDOR QUE LIMPA A DETECÇÃO -->
+            <iframe id="iframeTemporadas" src="https://api.codetabs.com/v1/proxy?quest=https://challenge.place/l/698577e0232f90c18a24c32b" allowfullscreen sandbox="allow-same-origin allow-scripts allow-forms allow-popups"></iframe>
         </div>
     </div>
 
@@ -235,14 +238,12 @@
         </div>
 
         <div id="telaNormal">
-            <!-- ✅ TÍTULO ALINHADO PERFEITAMENTE, IGUAL A FOTO -->
             <div class="titulo-container">
                 <span class="titulo-trofeu">🏆</span>
                 <span class="titulo-texto">CUP EDITION</span>
                 <span class="titulo-trofeu">🏆</span>
             </div>
 
-            <!-- ✅ SUBTÍTULO MENOR E CENTRALIZADO -->
             <div class="subtitulo-principal">📝INSCREVA-SE📝</div>
             
             <p class="descricao">Escolha seu nome e preencha a data de nascimento para confirmar sua participação.</p>
@@ -293,7 +294,7 @@
             verificarStatusSistema();
             carregarListaNomes();
             setInterval(verificarStatusSistema, 3000);
-            setInterval(verificarAgendamentoEExecutar, 10000); // Verifica a cada 10 segundos
+            setInterval(verificarAgendamentoEExecutar, 10000);
             
             db.ref('inscricoes').on('value', function(snap) {
                 listaCompletaInscricoes = snap.val() || [];
@@ -305,18 +306,15 @@
             });
         };
 
-        // ✅ FUNÇÃO PRINCIPAL DO REINÍCIO - CORRIGIDA E MELHORADA
         async function verificarAgendamentoEExecutar() {
             const snap = await db.ref('agendamento_reinicio').once('value');
             const agendamento = snap.val();
 
-            // Se não tem agendamento ou já foi executado, só mostra aviso se precisar
             if (!agendamento) {
                 document.getElementById('avisoReinicioAgendado').style.display = 'none';
                 return;
             }
 
-            // Mostra quando será o próximo reinício
             if (!agendamento.executado) {
                 const dataHora = new Date(agendamento.timestamp);
                 const dia = String(dataHora.getDate()).padStart(2, '0');
@@ -331,7 +329,6 @@
                 document.getElementById('avisoReinicioAgendado').style.display = 'none';
             }
 
-            // ✅ SE CHEGOU A HORA, EXECUTA O REINÍCIO!
             const agora = Date.now();
             const horarioMarcado = agendamento.timestamp;
 
@@ -339,11 +336,9 @@
                 document.getElementById('avisoReiniciando').style.display = 'block';
                 document.getElementById('telaNormal').style.opacity = '0.5';
 
-                // 1. Pega todas as inscrições
                 const inscSnap = await db.ref('inscricoes').once('value');
                 const lista = inscSnap.val() || [];
 
-                // 2. Muda TODOS os status para PENDENTE e zera data
                 const novaLista = lista.map(insc => {
                     if(insc) {
                         insc.status = 'pendente';
@@ -352,16 +347,10 @@
                     return insc;
                 });
 
-                // 3. Salva tudo de volta
                 await db.ref('inscricoes').set(novaLista);
-                
-                // 4. Reabre as inscrições
                 await db.ref('configuracao').update({inscricoes_abertas: true, ultimo_reinicio: Date.now()});
-                
-                // 5. Marca o agendamento como EXECUTADO para não repetir
                 await db.ref('agendamento_reinicio').update({executado: true});
 
-                // 6. Recarrega a página para atualizar tudo
                 location.reload();
             }
         }
@@ -439,9 +428,8 @@
             }
         }
 
-        // ✅ FUNÇÕES DAS JANELAS
         function abrirJanelaLista() {
-            fecharJanela(); // Fecha qualquer outra janela aberta
+            fecharJanela();
             const fundo = document.getElementById('fundoEscuro');
             const janela = document.getElementById('janelaLista');
             
@@ -460,8 +448,6 @@
             janelaAberta = true;
             fundo.style.display = 'block';
             janela.style.display = 'block';
-
-            // ✅ NÃO PRECISA MAIS CLICAR! O SITE JÁ ACHA QUE ESTÁ TUDO LIBERADO
         }
 
         function fecharJanela() {
@@ -523,12 +509,11 @@
                     var qtdConfirmados = lista.filter(i => i && i.status === 'confirmado').length;
 
                     if (!aberto || qtdConfirmados >= LIMITE_MAXIMO) {
-                        // ✅ AGORA ESPERA 3 SEGUNDOS (IGUAL AS OUTRAS MENSAGENS) PARA MOSTRAR ENCERRADO
                         setTimeout(() => {
                             document.getElementById('telaEncerrado').style.display = 'block';
                             document.getElementById('telaNormal').style.display = 'none';
                             document.getElementById('avisoLimite').style.display = 'none';
-                        }, 3000); // 3000 milissegundos = 3 segundos
+                        }, 3000);
                     } else {
                         document.getElementById('telaEncerrado').style.display = 'none';
                         document.getElementById('telaNormal').style.display = 'block';
@@ -586,7 +571,6 @@
                     db.ref('inscricoes').set(inscricoes)
                     .then(() => {
                         msg.innerText = '🎉 INSCRIÇÃO CONFIRMADA COM SUCESSO! ✅';
-                        // ✅ MENSAGEM DE SUCESSO TAMBÉM 3 SEGUNDOS
                         setTimeout(() => { msg.style.display = 'none'; }, 3000);
                         
                         document.getElementById('ver_nome').value = '';
