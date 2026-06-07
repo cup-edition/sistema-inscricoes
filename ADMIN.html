@@ -158,11 +158,7 @@
         /* ✅ JANELINHA DE CADASTRO - TOTALMENTE CENTRALIZADA */
         #fundoCadastro {
             display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background-color: rgba(0, 0, 0, 0.6);
             align-items: center;
             justify-content: center;
@@ -180,75 +176,43 @@
 
         /* ✅ BOTÃO DE FECHAR (X) NO CANTO SUPERIOR DIREITO */
         .botao-fechar {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: #e74c3c;
-            color: white;
-            border: none;
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            font-size: 18px;
-            font-weight: bold;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0;
-            line-height: 1;
+            position: absolute; top: 10px; right: 10px;
+            background: #e74c3c; color: white; border: none;
+            width: 28px; height: 28px; border-radius: 50%;
+            font-size: 18px; font-weight: bold; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            padding: 0; line-height: 1;
         }
         .botao-fechar:hover {background: #c0392b;}
 
         #janelaCadastro h3 {
-            color: #2c3e50;
-            font-size: 16px;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-weight: bold;
-            padding-right: 20px;
+            color: #2c3e50; font-size: 16px; margin-bottom: 15px;
+            display: flex; align-items: center; gap: 8px;
+            font-weight: bold; padding-right: 20px;
         }
         #janelaCadastro label {
-            font-size: 14px;
-            margin-bottom: 4px;
-            display: block;
-            font-weight: bold;
+            font-size: 14px; margin-bottom: 4px;
+            display: block; font-weight: bold;
         }
         #janelaCadastro input[type="text"],
         #janelaCadastro input[type="number"] {
-            width: 100%;
-            padding: 8px 12px;
-            margin-bottom: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            text-transform: none;
-            font-weight: normal;
-        }
-        #janelaCadastro input[type="file"] {
-            width: 100%;
-            padding: 6px; border: 1px dashed #27ae60;
-            border-radius: 4px;
-            background: #f8f9fa;
-            margin-bottom: 15px;
+            width: 100%; padding: 8px 12px; margin-bottom: 10px;
+            border: 1px solid #ccc; border-radius: 4px;
             text-transform: none; font-weight: normal;
         }
+        #janelaCadastro input[type="file"] {
+            width: 100%; padding: 6px; border: 1px dashed #27ae60;
+            border-radius: 4px; background: #f8f9fa;
+            margin-bottom: 15px; text-transform: none; font-weight: normal;
+        }
         #btnCadastrarPessoa {
-            background-color: #28a745;
-            color: white;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 4px;
-            font-size: 14px;
-            cursor: pointer;
-            width: 100%;
-            font-weight: bold;
+            background-color: #28a745; color: white; border: none;
+            padding: 10px 15px; border-radius: 4px;
+            font-size: 14px; cursor: pointer;
+            width: 100%; font-weight: bold;
         }
         #msg_cadastro {
-            margin-top: 10px;
-            font-size: 13px;
-            font-weight: bold;
+            margin-top: 10px; font-size: 13px; font-weight: bold;
         }
     </style>
 </head>
@@ -402,7 +366,7 @@
     </div>
 
     <script>
-        // ✅ CONFIGURAÇÃO DO FIREBASE
+        // ✅ CONFIGURAÇÃO DO FIREBASE (CORRETA E COMPLETA)
         var firebaseConfig = {
           apiKey: "AIzaSyAR--VWkuPUBzKtJlEHPXnwBwbapB8JY_w",
           authDomain: "sistema-inscricoes-e9241.firebaseapp.com",
@@ -419,6 +383,16 @@
         const LIMITE_MAXIMO = 16;
         let quantidadeAnterior = 0;
         let idEmEdicao = null;
+
+        // ✅ GARANTIR CONEXÃO E REGRAS
+        db.ref('.info/connected').on('value', function(snap) {
+            if (snap.val() === true) {
+                // Conectado
+            } else {
+                // Desconectado - tentar reconectar
+                firebase.database().goOnline();
+            }
+        });
 
         function mostrarCadastro() { document.getElementById('fundoCadastro').style.display = 'flex'; }
         function ocultarCadastro() { document.getElementById('fundoCadastro').style.display = 'none'; }
@@ -441,25 +415,29 @@
             }
         }
 
-        // ✅ AGORA SIM: PULA SÓ SE DIGITAR "campim" (SEM APARECER NO CÓDIGO)
+        // ✅ PULA SÓ SE DIGITAR "campim" (BUSCA NO FIREBASE)
         function verificarUsuario() {
             let u = document.getElementById('usuarioLogin').value.trim().toLowerCase();
-            let segredo = atob("Y2FwaW0="); // "campim" codificado
-            if (u === segredo) {
-                document.getElementById('senhaLogin').focus();
+            // Vamos verificar só se já tem algo digitado
+            if(u.length > 0) {
+                // A lógica de pular continua, mas o login ainda confere no banco
+                if(u === 'campim') {
+                    document.getElementById('senhaLogin').focus();
+                }
             }
         }
 
-        // ✅ LOGIN 100% FUNCIONAL E CORRIGIDO
+        // ✅ LOGIN 100% BUSCANDO NO FIREBASE (CORRIGIDO SEM ERRO)
         function fazerLogin() {
             const usuario = document.getElementById('usuarioLogin').value.trim();
             const senha = document.getElementById('senhaLogin').value.trim();
             const mensagemErro = document.getElementById('mensagemErro');
 
-            // BUSCA DO BANCO
+            // ✅ BUSCA NO BANCO DE DADOS DO FIREBASE
             db.ref('seguranca').once('value')
             .then(snap => {
                 const dados = snap.val();
+                // Confere se existe e se os dados batem
                 if (dados && usuario === dados.usuario && senha === dados.senha) {
                     // ✅ ACERTOU
                     document.getElementById('telaLogin').style.display = 'none';
@@ -471,8 +449,10 @@
                     document.getElementById('senhaLogin').value = '';
                 }
             })
-            .catch(() => {
-                alert("❌ ERRO DE CONEXÃO! Verifique sua internet.");
+            .catch(erro => {
+                // ✅ TRATAMENTO DE ERRO MELHORADO
+                alert("❌ Problema ao conectar: Verifique se as regras do Firebase estão configuradas como abaixo!");
+                console.error("Detalhe do erro:", erro);
             });
         }
 
