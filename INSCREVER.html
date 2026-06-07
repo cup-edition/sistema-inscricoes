@@ -5,6 +5,51 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inscreva-se - Sistema de Inscrições</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase.js"></script>
+    
+    <!-- ✅ BLOQUEADOR DE ANÚNCIOS E RASTREADORES -->
+    <script>
+        // Lista de domínios e padrões de anúncios para bloquear
+        const bloquear = [
+            'ads.', 'ad.', 'anuncio', 'banner', 'popup', 'track', 'analytics', 
+            'doubleclick', 'googlesyndication', 'adserver', 'advert', 'pixel',
+            'monetization', 'adservice', 'click', 'promo', 'sponsor'
+        ];
+
+        // Intercepta requisições para bloquear anúncios
+        const originalFetch = window.fetch;
+        window.fetch = function(input, init) {
+            let url = typeof input === 'string' ? input : input.url;
+            if (bloquear.some(palavra => url.toLowerCase().includes(palavra))) {
+                return new Promise(() => {}); // Bloqueia a requisição
+            }
+            return originalFetch.apply(this, arguments);
+        };
+
+        // Bloqueia também requisições de imagens, scripts e iframes
+        const originalCreateElement = document.createElement;
+        document.createElement = function(tag) {
+            const el = originalCreateElement.call(this, tag);
+            if (['script', 'img', 'iframe'].includes(tag)) {
+                const originalSet = Object.getOwnPropertyDescriptor(HTMLImageElement.prototype, 'src').set;
+                Object.defineProperty(el, 'src', {
+                    set: function(url) {
+                        if (url && bloquear.some(palavra => url.toLowerCase().includes(palavra))) {
+                            return; // Bloqueia carregamento
+                        }
+                        originalSet.call(this, url);
+                    }
+                });
+            }
+            return el;
+        };
+
+        // Bloqueia também dentro do iframe incorporado
+        window.addEventListener('message', function(e) {
+            if (e.data && e.data.type === 'ad') e.stopPropagation();
+        }, true);
+    </script>
+    <!-- ✅ FIM DO BLOQUEADOR -->
+
     <style>
         * {margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif;}
         body {background-color: #343a40; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; position: relative;}
@@ -72,24 +117,10 @@
             font-size: 18px;
         }
         .encerrado h3 {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            margin-bottom: 15px;
-            font-size: 18px;
-            text-transform: uppercase;
+            display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 15px; font-size: 18px; text-transform: uppercase;
         }
-        .encerrado p {
-            margin-bottom: 8px;
-            font-weight: normal;
-            font-size: 16px;
-        }
-        .encerrado .limite-texto {
-            font-size: 14px;
-            margin-top: 10px;
-            display: block;
-        }
+        .encerrado p {margin-bottom: 8px; font-weight: normal; font-size: 16px;}
+        .encerrado .limite-texto {font-size: 14px; margin-top: 10px; display: block;}
         
         .aviso-reiniciando {background-color: #f39c12; color: #fff; border: 1px solid #e67e22; padding: 12px; border-radius: 6px; font-weight: bold; font-size: 15px; margin-bottom: 15px; display: none;}
         .aviso-reinicio-agendado {background-color: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; padding: 10px; border-radius: 6px; font-weight: bold; font-size: 14px; margin-bottom: 15px; display: none;}
@@ -104,48 +135,29 @@
         .sucesso {background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb;}
         .erro {background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb;}
         
-        .foto-container {
-            display: flex; align-items: center; justify-content: space-between;
-            gap: 12px;
-        }
-        .foto-preview {
-            width: 100px; height: 100px;
-            border-radius: 50%; object-fit: cover; border: 2px solid #ddd; display: none;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-        }
+        .foto-container {display: flex; align-items: center; justify-content: space-between; gap: 12px;}
+        .foto-preview {width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 2px solid #ddd; display: none; box-shadow: 0 2px 6px rgba(0,0,0,0.15);}
 
-        .botao-lista {
-            position: fixed; bottom: 20px; right: 20px;
-            background-color: #6c757d; color: white; border: none;
-            padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; width: auto;
-            font-weight: normal; z-index: 99;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-        }
-        .botao-lista:hover {background-color: #495057;}
+        /* ✅ BOTÕES FLUTUANTES - AGORA DOIS BOTÕES */
+        .botoes-flutuantes {position: fixed; bottom: 20px; right: 20px; display: flex; flex-direction: column; gap: 10px; z-index: 99;}
+        .botao-lista, .botao-temporadas {background-color: #6c757d; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; width: auto; font-weight: normal; box-shadow: 0 2px 5px rgba(0,0,0,0.2);}
+        .botao-lista:hover, .botao-temporadas:hover {background-color: #495057;}
+        .botao-temporadas {background-color: #9b59b6;}
+        .botao-temporadas:hover {background-color: #8e44ad;}
 
-        .janela-flutuante {
-            display: none; position: fixed;
-            top: 50%; left: 50%; transform: translate(-50%, -50%);
-            background: #ffffff; width: 90%; max-width: 400px; max-height: 80vh;
-            border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-            z-index: 1000; overflow: hidden;
-        }
-        .cabecalho-janela {
-            background-color: #2c3e50; color: white; padding: 12px;
-            font-weight: bold; font-size: 16px;
-            display: flex; justify-content: space-between; align-items: center;
-        }
-        .fechar-janela {
-            background: none; border: none; color: white;
-            font-size: 20px; cursor: pointer;
-            width: auto; padding: 0; margin: 0;
-        }
-        .conteudo-janela {padding: 15px; overflow-y: auto; max-height: 65vh;}
+        .janela-flutuante {display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #ffffff; width: 90%; max-width: 700px; max-height: 85vh; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); z-index: 1000; overflow: hidden;}
+        .cabecalho-janela {background-color: #2c3e50; color: white; padding: 12px; font-weight: bold; font-size: 16px; display: flex; justify-content: space-between; align-items: center;}
+        .fechar-janela {background: none; border: none; color: white; font-size: 20px; cursor: pointer; width: auto; padding: 0; margin: 0;}
+        .conteudo-janela {padding: 0; overflow: hidden; max-height: 75vh;}
+        .conteudo-janela iframe {width: 100%; height: 75vh; border: none;}
+
+        .lista-conteudo {padding: 15px; overflow-y: auto; max-height: 75vh;}
         .item-inscrito {display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid #eee;}
         .foto-inscrito {width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 1px solid #ddd;}
         .dados-inscrito {flex: 1; text-align: left;}
         .nome-inscrito {font-weight: 600; color: #333; font-size: 15px;}
         .data-hora-inscrito {font-size: 12px; color: #666; margin-top: 2px;}
+        
         .fundo-escuro {display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 999;}
 
         /* ✅ AJUSTE ESPECIAL PARA TELAS PEQUENAS (CELULAR) */
@@ -168,17 +180,33 @@
         ⏳ PRÓXIMO REINÍCIO: <span id="dataReinicioTexto">Carregando...</span>
     </div>
 
-    <button class="botao-lista" onclick="abrirJanelaLista()">✅LISTA DE INSCRITOS✅</button>
+    <!-- ✅ BOTÕES AGRUPADOS -->
+    <div class="botoes-flutuantes">
+        <button class="botao-lista" onclick="abrirJanelaLista()">✅LISTA DE INSCRITOS✅</button>
+        <button class="botao-temporadas" onclick="abrirJanelaTemporadas()">🏆 TEMPORADAS 🏆</button>
+    </div>
 
     <div id="fundoEscuro" class="fundo-escuro" onclick="fecharJanela()"></div>
 
+    <!-- ✅ JANELA 1: LISTA DE INSCRITOS -->
     <div id="janelaLista" class="janela-flutuante">
         <div class="cabecalho-janela">
             <span id="tituloJanela">✅ 0 INSCRITOS CONFIRMADOS ✅</span>
             <button class="fechar-janela" onclick="fecharJanela()">&times;</button>
         </div>
-        <div class="conteudo-janela" id="listaConfirmados">
+        <div class="conteudo-janela lista-conteudo" id="listaConfirmados">
             <p style="text-align:center; color:#666;">Carregando...</p>
+        </div>
+    </div>
+
+    <!-- ✅ JANELA 2: TEMPORADAS (COM O LINK INCORPORADO) -->
+    <div id="janelaTemporadas" class="janela-flutuante">
+        <div class="cabecalho-janela">
+            <span>🏆 TEMPORADAS 🏆</span>
+            <button class="fechar-janela" onclick="fecharJanela()">&times;</button>
+        </div>
+        <div class="conteudo-janela">
+            <iframe src="https://challenge.place/l/698577e0232f90c18a24c32b" allowfullscreen></iframe>
         </div>
     </div>
 
@@ -398,7 +426,9 @@
             }
         }
 
+        // ✅ FUNÇÕES DAS JANELAS
         function abrirJanelaLista() {
+            fecharJanela(); // Fecha qualquer outra janela aberta
             const fundo = document.getElementById('fundoEscuro');
             const janela = document.getElementById('janelaLista');
             
@@ -409,9 +439,20 @@
             janela.style.display = 'block';
         }
 
+        function abrirJanelaTemporadas() {
+            fecharJanela();
+            const fundo = document.getElementById('fundoEscuro');
+            const janela = document.getElementById('janelaTemporadas');
+            
+            janelaAberta = true;
+            fundo.style.display = 'block';
+            janela.style.display = 'block';
+        }
+
         function fecharJanela() {
             document.getElementById('fundoEscuro').style.display = 'none';
             document.getElementById('janelaLista').style.display = 'none';
+            document.getElementById('janelaTemporadas').style.display = 'none';
             janelaAberta = false;
         }
 
