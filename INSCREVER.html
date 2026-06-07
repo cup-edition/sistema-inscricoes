@@ -6,7 +6,7 @@
     <title>Inscreva-se - Sistema de Inscrições</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase.js"></script>
     
-    <!-- ✅ BLOQUEADOR DE ANÚNCIOS E RASTREADORES -->
+    <!-- ✅ BLOQUEADOR DE ANÚNCIOS E RASTREADORES (MANTIDO) -->
     <script>
         // Lista de domínios e padrões de anúncios para bloquear
         const bloquear = [
@@ -47,8 +47,30 @@
         window.addEventListener('message', function(e) {
             if (e.data && e.data.type === 'ad') e.stopPropagation();
         }, true);
+
+        // ✅ CÓDIGO NOVO: ENGANA A DETECÇÃO DE ADBLOCK
+        // Faz o site achar que NÃO tem bloqueador instalado
+        window.canRunAds = true;
+        window.isAdBlockEnabled = false;
+        window.adblock = false;
+        window._adblock = false;
+        document.addEventListener('DOMContentLoaded', () => {
+            // Remove elementos que detectam bloqueador
+            const style = document.createElement('style');
+            style.textContent = `
+                .adblock-detected, .ad-notice, .adblock-message, 
+                .blocker-detected, .anti-adblock, .ad-popup {
+                    display: none !important;
+                    visibility: hidden !important;
+                    opacity: 0 !important;
+                    height: 0 !important;
+                    overflow: hidden !important;
+                }
+            `;
+            document.head.appendChild(style);
+        });
     </script>
-    <!-- ✅ FIM DO BLOQUEADOR -->
+    <!-- ✅ FIM DO BLOQUEADOR + ENGANA DETECÇÃO -->
 
     <style>
         * {margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif;}
