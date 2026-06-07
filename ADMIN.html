@@ -178,6 +178,28 @@
             position: relative;
         }
 
+        /* ✅ BOTÃO DE FECHAR (X) NO CANTO SUPERIOR DIREITO */
+        .botao-fechar {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            line-height: 1;
+        }
+        .botao-fechar:hover {background: #c0392b;}
+
         #janelaCadastro h3 {
             color: #2c3e50;
             font-size: 16px;
@@ -186,6 +208,7 @@
             align-items: center;
             gap: 8px;
             font-weight: bold;
+            padding-right: 20px;
         }
         #janelaCadastro label {
             font-size: 14px;
@@ -196,7 +219,7 @@
         #janelaCadastro input[type="text"],
         #janelaCadastro input[type="number"] {
             width: 100%;
-            padding: 8px;
+            padding: 8px 12px;
             margin-bottom: 10px;
             border: 1px solid #ccc;
             border-radius: 4px;
@@ -210,20 +233,6 @@
             background: #f8f9fa;
             margin-bottom: 15px;
             text-transform: none; font-weight: normal;
-        }
-        #btnOcultarCadastro {
-            background-color: #28a745;
-            color: white;
-            border: none;
-            padding: 8px 12px;
-            border-radius: 4px;
-            font-size: 13px;
-            cursor: pointer;
-            margin-bottom: 15px;
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-            font-weight: bold;
         }
         #btnCadastrarPessoa {
             background-color: #28a745;
@@ -366,21 +375,25 @@
 
     <div id="fundoCadastro">
         <div id="janelaCadastro">
-            <button id="btnOcultarCadastro" onclick="ocultarCadastro()">✅ OCULTAR CADASTRO</button>
+            <!-- ✅ BOTÃO X DE FECHAR NO LADO DIREITO -->
+            <button class="botao-fechar" onclick="ocultarCadastro()">&times;</button>
             
             <h3>📋 CADASTRAR NOVA PESSOA</h3>
             
-            <label>NOME COMPLETO:</label>
-            <input type="text" id="cad_nome" placeholder="DIGITE O NOME">
+            <!-- ✅ TEXTO ALTERADO: NOME / APELIDO -->
+            <label>NOME / APELIDO:</label>
+            <input type="text" id="cad_nome" placeholder="DIGITE O NOME OU APELIDO" onkeydown="pularCampo(event, 'cad_dia')">
 
             <label>DIA DE NASCIMENTO:</label>
-            <input type="number" id="cad_dia" min="1" max="31" placeholder="DIA">
+            <!-- ✅ LIMITE DE 2 DÍGITOS + PULAR COM ENTER -->
+            <input type="number" id="cad_dia" min="1" max="31" placeholder="DIA" maxlength="2" oninput="limitarDoisDigitos(this)" onkeydown="pularCampo(event, 'cad_mes')">
 
             <label>MÊS DE NASCIMENTO:</label>
-            <input type="number" id="cad_mes" min="1" max="12" placeholder="MÊS">
+            <!-- ✅ LIMITE DE 2 DÍGITOS + PULAR COM ENTER -->
+            <input type="number" id="cad_mes" min="1" max="12" placeholder="MÊS" maxlength="2" oninput="limitarDoisDigitos(this)" onkeydown="pularCampo(event, 'cad_foto')">
 
             <label>📸 FOTO DE PERFIL (OPCIONAL):</label>
-            <input type="file" id="cad_foto" accept="image/*">
+            <input type="file" id="cad_foto" accept="image/*" onkeydown="pularCampo(event, 'btnCadastrarPessoa')">
 
             <button id="btnCadastrarPessoa" onclick="cadastrarPessoa()">CADASTRAR</button>
             
@@ -409,6 +422,24 @@
 
         function mostrarCadastro() { document.getElementById('fundoCadastro').style.display = 'flex'; }
         function ocultarCadastro() { document.getElementById('fundoCadastro').style.display = 'none'; }
+
+        // ✅ FUNÇÃO: Limitar campo para só 2 dígitos
+        function limitarDoisDigitos(campo) {
+            if (campo.value.length > 2) {
+                campo.value = campo.value.slice(0, 2);
+            }
+        }
+
+        // ✅ FUNÇÃO: Pular para o próximo campo ao apertar ENTER
+        function pularCampo(event, proximoId) {
+            if (event.key === 'Enter') {
+                event.preventDefault(); // Evita enviar formulário
+                const proximoCampo = document.getElementById(proximoId);
+                if (proximoCampo) {
+                    proximoCampo.focus(); // Vai para o próximo
+                }
+            }
+        }
 
         function verificarUsuario() {
             const usuario = document.getElementById('usuarioLogin').value.trim();
