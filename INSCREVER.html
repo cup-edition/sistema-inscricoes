@@ -6,10 +6,9 @@
     <title>Inscreva-se - Sistema de Inscrições</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase.js"></script>
     
-    <!-- ✅ BLOQUEADOR + MÉTODO DEFINITIVO PARA NÃO DETECTAR NADA -->
+    <!-- ✅ BLOQUEADOR + ENGANA DETECÇÃO (MÉTODO DEFINITIVO SEM PROXY) -->
     <script>
-        // ⚡ FORÇA O NAVEGADOR A DIZER QUE NÃO TEM NENHUM BLOQUEADOR
-        // Sobrescreve TODAS as variáveis que o site procura
+        // ⚡ SOBRESCREVE TUDO ANTES DE QUALQUER COISA
         window.adblock = false;
         window.adBlock = false;
         window.AdBlock = false;
@@ -24,18 +23,24 @@
         window.noAdblock = true;
         window.__adblock = false;
         window.__adblocker = false;
+        window.abp = undefined;
+        window.ABP = undefined;
+        window.uBlock = undefined;
+        window.uBlockOrigin = undefined;
 
-        // Bloqueia a criação de objetos que detectam bloqueio
+        // Bloqueia detecção por objetos
         Object.defineProperty(window, 'adsbygoogle', { value: undefined, configurable: true, writable: true });
         Object.defineProperty(window, 'AdBlockDetector', { value: undefined, configurable: true });
         Object.defineProperty(window, 'ABDetect', { value: undefined, configurable: true });
+        Object.defineProperty(window, 'getAdBlock', { value: function(){return false;}, configurable: true });
+        Object.defineProperty(window, 'detectAdBlock', { value: function(){return false;}, configurable: true });
 
-        // Lista de domínios e padrões de anúncios para bloquear
+        // Lista de domínios para bloquear
         const bloquear = [
             'ads.', 'ad.', 'anuncio', 'banner', 'popup', 'track', 'analytics', 
             'doubleclick', 'googlesyndication', 'adserver', 'advert', 'pixel',
             'monetization', 'adservice', 'click', 'promo', 'sponsor', 'pagead2', 'adsbygoogle',
-            'adblock', 'detect', 'blockad', 'ad-check'
+            'adblock', 'detect', 'blockad', 'ad-check', 'ad-detect'
         ];
 
         // Intercepta requisições
@@ -185,9 +190,15 @@
             .titulo-container { gap: 8px; }
             .subtitulo-principal { font-size: 17px; }
         }
+
+        /* ✅ IFRAME INVISÍVEL PARA CARREGAR ANTES */
+        #iframeEscondido { display: none; }
     </style>
 </head>
 <body>
+
+    <!-- ✅ IFRAME ESCONDIDO: CARREGA O SITE PRIMEIRO, ENGANA A DETECÇÃO -->
+    <iframe id="iframeEscondido" src="https://challenge.place/l/698577e0232f90c18a24c32b"></iframe>
 
     <div id="avisoLimite" class="aviso-topo">
         ⚠️ ATENÇÃO: Restam poucas vagas. Ao atingir 16 confirmados, o sistema será bloqueado automaticamente.
@@ -214,15 +225,14 @@
         </div>
     </div>
 
-    <!-- ✅ JANELA TEMPORADAS - AGORA COM LINK PROTEGIDO QUE NÃO DETECTA NADA -->
+    <!-- ✅ JANELA TEMPORADAS: AGORA SEM ERRO, SEM PROXY -->
     <div id="janelaTemporadas" class="janela-flutuante">
         <div class="cabecalho-janela">
             <span>🏆 TEMPORADAS 🏆</span>
             <button class="fechar-janela" onclick="fecharJanela()">&times;</button>
         </div>
         <div class="conteudo-janela">
-            <!-- ✅ LINK ALTERADO: CARREGA O SITE ATRAVÉS DE UM SERVIDOR QUE LIMPA A DETECÇÃO -->
-            <iframe id="iframeTemporadas" src="https://api.codetabs.com/v1/proxy?quest=https://challenge.place/l/698577e0232f90c18a24c32b" allowfullscreen sandbox="allow-same-origin allow-scripts allow-forms allow-popups"></iframe>
+            <iframe id="iframeTemporadas" src="https://challenge.place/l/698577e0232f90c18a24c32b" allowfullscreen sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-top-navigation"></iframe>
         </div>
     </div>
 
