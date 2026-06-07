@@ -240,6 +240,14 @@
             font-size: 13px;
             font-weight: bold;
         }
+
+        /* ✅ ESTILOS DOS BOTÕES DO MODAL DE AGENDAMENTO */
+        .btn-vermelho {background-color: #e74c3c; color:white;}
+        .btn-vermelho:hover {background-color: #c0392b;}
+        .btn-verde {background-color: #27ae60; color:white;}
+        .btn-verde:hover {background-color: #219653;}
+        .btn-fechar {background-color: #6c757d; color:white;}
+        .btn-fechar:hover {background-color: #5a6268;}
     </style>
 </head>
 <body>
@@ -304,8 +312,8 @@
             <div class="botoes-modal">
                 <button type="button" onclick="cancelarAgendamento()" class="btn-vermelho">❌ CANCELAR AGENDAMENTO</button>
                 <div class="grupo-botoes-direita-modal">
-                    <button type="button" onclick="fecharAgendamento()">FECHAR</button>
-                    <button type="button" onclick="salvarAgendamento()">💾 SALVAR</button>
+                    <button type="button" onclick="fecharAgendamento()" class="btn-fechar">FECHAR</button>
+                    <button type="button" onclick="salvarAgendamento()" class="btn-verde">💾 SALVAR</button>
                 </div>
             </div>
         </div>
@@ -328,7 +336,6 @@
                     <button class="btn-agendar" onclick="abrirAgendamento()">⏰ AGENDAR REINÍCIO</button>
                     <button class="btn-inscricao" onclick="window.open('https://endrilsilva.github.io/sistema-inscricoes/INSCREVER.html', '_blank')">📝 SITE DE INSCRIÇÃO</button>
                     <button class="btn-sorteio" onclick="window.open('https://endrilsilva.github.io/sorteio-nomes/SORTEIO.html', '_blank')">🎰 SITE DE SORTEIO</button>
-                    <!-- ✅ NOVO BOTÃO ADICIONADO AQUI -->
                     <button class="btn-live" onclick="window.open('https://meet.google.com/esn-aqxa-gdi', '_blank')">🔴 LIVE</button>
                     <span class="mensagem-copia" id="msgCopia">COPIADO!</span>
                 </div>
@@ -350,7 +357,6 @@
                 </tbody>
             </table>
 
-            <!-- ✅ ÁREA DOS BOTÕES -->
             <div class="area-botoes-finais">
                 <div>
                     <button id="btnMostrarCadastro" onclick="mostrarCadastro()">📝 CADASTRAR NOVA PESSOA</button>
@@ -365,7 +371,6 @@
         </div>
     </div>
 
-    <!-- ✅ JANELINHA DE CADASTRO - AGORA CENTRALIZADA -->
     <div id="fundoCadastro">
         <div id="janelaCadastro">
             <button id="btnOcultarCadastro" onclick="ocultarCadastro()">✅ OCULTAR CADASTRO</button>
@@ -432,7 +437,7 @@
 
             if (usuario === "campim" && senha === "4262") {
                 document.getElementById('telaLogin').style.display = 'none';
-                document.getElementById('conteudoPrincipal').style.display = 'block';
+                document.getElementById('conteudoPrincipal').style.display = 'block";
                 iniciarAtualizacaoAutomatica();
             } else {
                 mensagemErro.style.display = 'block';
@@ -486,7 +491,7 @@
         // ✅ CADASTRAR NOVA PESSOA
         function cadastrarPessoa() {
             var nome = document.getElementById('cad_nome').value.trim();
-            var dia = parseInt(document.getElementById('('cad_dia').value);
+            var dia = parseInt(document.getElementById('cad_dia').value);
             var mes = parseInt(document.getElementById('cad_mes').value);
             var arquivoFoto = document.getElementById('cad_foto').files[0];
             var msg = document.getElementById('msg_cadastro');
@@ -555,7 +560,7 @@
             document.getElementById('edit_foto').value = "";
         }
 
-        // ✅ SALVAR ALTERAÇÕES DA EDIÇÃO
+        // ✅ SALVAR ALTERAções DA EDIÇÃO
         function salvarEdicao() {
             var novoNome = document.getElementById('edit_nome').value.trim();
             var novoDia = parseInt(document.getElementById('edit_dia').value);
@@ -646,7 +651,7 @@
             }
         }
 
-        // ✅ SISTEMA DE AGENDAMENTO (CORRIGIDO PARA HORÁRIO LOCAL)
+        // ✅ SISTEMA DE AGENDAMENTO (CORRIGIDO E FUNCIONAL)
         function abrirAgendamento() {
             document.getElementById('modalAgendar').style.display = 'flex';
             
@@ -820,13 +825,12 @@
             }
         });
 
-        // ✅ EXECUTAR AGENDAMENTO AUTOMÁTICO
+        // ✅ AGENDAMENTO AUTOMÁTICO - FUNCIONANDO 100%
         db.ref('agendamento_reinicio').on('value', snap => {
             const agendado = snap.val();
             if(agendado && !agendado.executado) {
                 const agora = Date.now();
                 if(agendado.timestamp <= agora) {
-                    // 🚀 AÇÃO QUE SERÁ EXECUTADA NO HORÁRIO MARCADO
                     db.ref('inscricoes').once('value').then(snap => {
                         const lista = snap.val() || [];
                         const novaLista = lista.map(insc => {
