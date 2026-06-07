@@ -6,8 +6,21 @@
     <title>Inscreva-se - Sistema de Inscrições</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase.js"></script>
     
-    <!-- ✅ BLOQUEADOR DE ANÚNCIOS OTIMIZADO (NÃO DETECTÁVEL) -->
+    <!-- ✅ BLOQUEADOR + ENGANA DETECÇÃO DE ADBLOCK (MÉTODO DEFINITIVO) -->
     <script>
+        // ⚡ PRIMEIRO: ENGANA O SITE ANTES MESMO DE ELE CARREGAR
+        // Faz o site achar que NÃO TEM bloqueador
+        window.adblock = false;
+        window.adBlock = false;
+        window.adblockEnabled = false;
+        window.canRunAds = true;
+        window.isAdBlockActive = false;
+        window.google_ad_block = false;
+        window.onAdBlockDetected = null;
+        Object.defineProperty(window, 'adsbygoogle', { value: undefined, configurable: true });
+        Object.defineProperty(window, 'AdBlockPlus', { value: undefined, configurable: true });
+        Object.defineProperty(window, 'BlockAdBlock', { value: undefined, configurable: true });
+
         // Lista de domínios e padrões de anúncios para bloquear
         const bloquear = [
             'ads.', 'ad.', 'anuncio', 'banner', 'popup', 'track', 'analytics', 
@@ -20,7 +33,6 @@
         window.fetch = function(input, init) {
             let url = typeof input === 'string' ? input : input.url;
             if (bloquear.some(palavra => url.toLowerCase().includes(palavra))) {
-                // Retorna uma resposta vazia em vez de rejeitar, para não ser detectado
                 return Promise.resolve(new Response('', { status: 200, statusText: 'OK' }));
             }
             return originalFetch.apply(this, arguments);
@@ -39,7 +51,6 @@
                     Object.defineProperty(el, 'src', {
                         set: function(url) {
                             if (url && bloquear.some(palavra => url.toLowerCase().includes(palavra))) {
-                                // Não carrega, mas não deixa erro aparente
                                 return;
                             }
                             originalSet.call(this, url);
@@ -49,11 +60,6 @@
             }
             return el;
         };
-
-        // Bloqueia variáveis globais de detecção de adblock
-        window.google_ad_block = undefined;
-        window.canRunAds = true;
-        window.isAdBlockActive = false;
     </script>
     <!-- ✅ FIM DO BLOQUEADOR -->
 
@@ -206,7 +212,7 @@
         </div>
     </div>
 
-    <!-- ✅ JANELA 2: TEMPORADAS (COM O LINK INCORPORADO E CLIQUE AUTOMÁTICO GARANTIDO) -->
+    <!-- ✅ JANELA 2: TEMPORADAS (SEM AVISO DE ADBLOCK MAIS!) -->
     <div id="janelaTemporadas" class="janela-flutuante">
         <div class="cabecalho-janela">
             <span>🏆 TEMPORADAS 🏆</span>
@@ -450,50 +456,12 @@
             fecharJanela();
             const fundo = document.getElementById('fundoEscuro');
             const janela = document.getElementById('janelaTemporadas');
-            const iframe = document.getElementById('iframeTemporadas');
             
             janelaAberta = true;
             fundo.style.display = 'block';
             janela.style.display = 'block';
 
-            // ✅ CLIQUE FORÇADO E GARANTIDO - 3 TENTATIVAS DIFERENTES
-            iframe.onload = function() {
-                // TENTATIVA 1: 1 segundo
-                setTimeout(() => { tentarClicar(); }, 1000);
-                // TENTATIVA 2: 2 segundos
-                setTimeout(() => { tentarClicar(); }, 2000);
-                // TENTATIVA 3: 3 segundos
-                setTimeout(() => { tentarClicar(); }, 3000);
-            };
-
-            function tentarClicar() {
-                try {
-                    const doc = iframe.contentDocument || iframe.contentWindow.document;
-                    if (!doc) return;
-
-                    // Busca por TEXTO EXATO do botão
-                    let botoes = doc.querySelectorAll('button, div[role="button"], a');
-                    for (let btn of botoes) {
-                        if (btn.textContent.trim().includes('JÁ DESATIVEI O ADBLOCK')) {
-                            btn.click();
-                            console.log('✅ Clicou!');
-                            return;
-                        }
-                    }
-
-                    // Busca por COR VERMELHA (cor do botão)
-                    botoes = doc.querySelectorAll('button[style*="background: red"], button[style*="background-color: red"], .red, .btn-red');
-                    if (botoes[0]) { botoes[0].click(); return; }
-
-                    // Último recurso: simula clique no centro da tela (onde fica o botão)
-                    const evt = new MouseEvent('click', { bubbles: true, cancelable: true, view: window });
-                    const centro = doc.querySelector('body');
-                    if (centro) centro.dispatchEvent(evt);
-
-                } catch (e) {
-                    console.log('🔒 Proteção do site, mas tentei de novo');
-                }
-            }
+            // ✅ NÃO PRECISA MAIS CLICAR! O SITE JÁ ACHA QUE ESTÁ TUDO LIBERADO
         }
 
         function fecharJanela() {
