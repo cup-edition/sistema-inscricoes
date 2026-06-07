@@ -6,49 +6,129 @@
     <title>Inscreva-se - Sistema de Inscrições</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase.js"></script>
     
-    <!-- ✅ BLOQUEADOR DE ANÚNCIOS E RASTREADORES -->
+    <!-- ✅ BLOQUEADOR DE ANÚNCIOS AVANÇADO (MELHORADO) -->
     <script>
-        // Lista de domínios e padrões de anúncios para bloquear
+        // Lista completa de palavras, domínios e padrões para bloquear
         const bloquear = [
-            'ads.', 'ad.', 'anuncio', 'banner', 'popup', 'track', 'analytics', 
-            'doubleclick', 'googlesyndication', 'adserver', 'advert', 'pixel',
-            'monetization', 'adservice', 'click', 'promo', 'sponsor'
+            'ads.', 'ad.', 'anuncio', 'banner', 'popup', 'track', 'analytics', 'doubleclick', 
+            'googlesyndication', 'adserver', 'advert', 'pixel', 'monetization', 'adservice', 
+            'click', 'promo', 'sponsor', 'googleads', 'googletagmanager', 'googletagservices',
+            'workspace', 'comece-a-usar', 'defesas de ia', 'dados seguros', 'cloud.google',
+            'gstatic.com/ads', 'pagead', 'afs.', 'ampproject', 'display', 'pubmatic', 
+            'rubiconproject', 'criteo', 'zedo', 'openx', 'adroll', 'taboola', 'outbrain'
         ];
 
-        // Intercepta requisições para bloquear anúncios
+        // 1. Bloqueia todas as requisições de rede (fetch, XHR, imagens, scripts, iframes)
         const originalFetch = window.fetch;
         window.fetch = function(input, init) {
             let url = typeof input === 'string' ? input : input.url;
             if (bloquear.some(palavra => url.toLowerCase().includes(palavra))) {
-                return new Promise(() => {}); // Bloqueia a requisição
+                return new Promise(() => {}); // Cancela a requisição
             }
             return originalFetch.apply(this, arguments);
         };
 
-        // Bloqueia também requisições de imagens, scripts e iframes
+        const originalXHR = window.XMLHttpRequest;
+        window.XMLHttpRequest = function() {
+            const xhr = new originalXHR();
+            const originalOpen = xhr.open;
+            xhr.open = function(method, url) {
+                if (bloquear.some(palavra => url.toLowerCase().includes(palavra))) {
+                    return;
+                }
+                return originalOpen.apply(this, arguments);
+            };
+            return xhr;
+        };
+
+        // Bloqueia criação de elementos de anúncio
         const originalCreateElement = document.createElement;
         document.createElement = function(tag) {
             const el = originalCreateElement.call(this, tag);
-            if (['script', 'img', 'iframe'].includes(tag)) {
-                const originalSet = Object.getOwnPropertyDescriptor(HTMLImageElement.prototype, 'src').set;
-                Object.defineProperty(el, 'src', {
-                    set: function(url) {
-                        if (url && bloquear.some(palavra => url.toLowerCase().includes(palavra))) {
-                            return; // Bloqueia carregamento
-                        }
-                        originalSet.call(this, url);
+            if (['script', 'img', 'iframe', 'div', 'a', 'ins'].includes(tag)) {
+                // Bloqueia por atributos
+                const verificar = () => {
+                    const attrs = ['src', 'href', 'data-src', 'id', 'class', 'alt', 'title'];
+                    return attrs.some(attr => {
+                        const val = el.getAttribute(attr) || '';
+                        return bloquear.some(palavra => val.toLowerCase().includes(palavra));
+                    });
+                };
+
+                // Intercepta definição de atributos
+                ['src', 'href', 'id', 'class', 'alt', 'title'].forEach(attr => {
+                    const desc = Object.getOwnPropertyDescriptor(HTMLElement.prototype, attr) || 
+                                 Object.getOwnPropertyDescriptor(HTMLImageElement.prototype, attr) ||
+                                 Object.getOwnPropertyDescriptor(HTMLIFrameElement.prototype, attr);
+                    if (desc && desc.set) {
+                        Object.defineProperty(el, attr, {
+                            set: function(val) {
+                                if (val && bloquear.some(palavra => String(val).toLowerCase().includes(palavra))) {
+                                    return; // Bloqueia
+                                }
+                                desc.set.call(this, val);
+                            },
+                            get: desc.get
+                        });
                     }
                 });
+
+                // Remove elementos que já forem detectados
+                setTimeout(() => { if (verificar()) el.remove(); }, 0);
             }
             return el;
         };
 
-        // Bloqueia também dentro do iframe incorporado
+        // 2. CSS: Oculta e remove elementos que parecem anúncios
+        const estiloBloqueio = document.createElement('style');
+        estiloBloqueio.textContent = `
+            [id*="ad"], [id*="ads"], [id*="anuncio"], [id*="banner"], [id*="popup"], [id*="promo"],
+            [class*="ad"], [class*="ads"], [class*="anuncio"], [class*="banner"], [class*="popup"], [class*="promo"],
+            [src*="ad."], [src*="ads."], [src*="googlesyndication"], [src*="googleads"],
+            [href*="ad."], [href*="ads."], [href*="workspace"], [href*="google.com/ads"],
+            div:has-text("dados seguros"), div:has-text("defesas de IA"), div:has-text("Google Workspace"),
+            div:has-text("Comece a usar"), ins, .adsbygoogle, .ad-container, .advertisement, .sponsored {
+                display: none !important;
+                visibility: hidden !important;
+                height: 0 !important;
+                overflow: hidden !important;
+                position: absolute !important;
+                z-index: -9999 !important;
+                pointer-events: none !important;
+            }
+        `;
+        document.head.appendChild(estiloBloqueio);
+
+        // 3. Verifica continuamente e remove anúncios que aparecem depois
+        function removerAnuncios() {
+            const todos = document.querySelectorAll('*');
+            todos.forEach(el => {
+                const texto = (el.textContent || '').toLowerCase();
+                const html = (el.outerHTML || '').toLowerCase();
+                if (
+                    bloquear.some(p => texto.includes(p)) ||
+                    bloquear.some(p => html.includes(p)) ||
+                    /seus dados seguros|defesas de ia|google workspace|comece a usar/i.test(texto)
+                ) {
+                    el.remove();
+                }
+            });
+        }
+        // Executa várias vezes para pegar tudo
+        removerAnuncios();
+        setInterval(removerAnuncios, 200); // Verifica a cada 200ms
+        window.addEventListener('load', removerAnuncios);
+        document.addEventListener('DOMContentLoaded', removerAnuncios);
+
+        // 4. Bloqueia também dentro do iframe incorporado
         window.addEventListener('message', function(e) {
-            if (e.data && e.data.type === 'ad') e.stopPropagation();
+            if (e.data && typeof e.data === 'string' && bloquear.some(p => e.data.toLowerCase().includes(p))) {
+                e.stopPropagation();
+                e.preventDefault();
+            }
         }, true);
     </script>
-    <!-- ✅ FIM DO BLOQUEADOR -->
+    <!-- ✅ FIM DO BLOQUEADOR SUPER REFORÇADO -->
 
     <style>
         * {margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif;}
@@ -206,7 +286,7 @@
             <button class="fechar-janela" onclick="fecharJanela()">&times;</button>
         </div>
         <div class="conteudo-janela">
-            <iframe src="https://challenge.place/l/698577e0232f90c18a24c32b" allowfullscreen></iframe>
+            <iframe src="https://challenge.place/l/698577e0232f90c18a24c32b" allowfullscreen sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox"></iframe>
         </div>
     </div>
 
