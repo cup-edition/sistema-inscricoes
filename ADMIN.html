@@ -420,14 +420,6 @@
         let quantidadeAnterior = 0;
         let idEmEdicao = null;
 
-        // ✅ PRIMEIRA COISA A FAZER: ADICIONE ISSO NO SEU BANCO DE DADOS UMA ÚNICA VEZ
-        // Crie esse caminho no Realtime Database:
-        // "seguranca": {
-        //   "usuario": "campim",
-        //   "senha": "4262"
-        // }
-        // Pronto, depois disso seus dados ficam escondidos no banco!
-
         function mostrarCadastro() { document.getElementById('fundoCadastro').style.display = 'flex'; }
         function ocultarCadastro() { document.getElementById('fundoCadastro').style.display = 'none'; }
 
@@ -449,29 +441,32 @@
             }
         }
 
+        // ✅ FUNÇÃO CORRIGIDA: SEM NENHUM USUÁRIO ESCRITO
         function verificarUsuario() {
             const usuario = document.getElementById('usuarioLogin').value.trim();
-            if (usuario === "campim") document.getElementById('senhaLogin').focus();
+            // Apenas pula para senha se tiver algo digitado
+            if (usuario.length > 0) {
+                document.getElementById('senhaLogin').focus();
+            }
         }
 
-        // ✅ LOGIN SEGURO - AGORA BUSCA OS DADOS NO BANCO, NÃO ESTÃO MAIS NO CÓDIGO!
+        // ✅ LOGIN 100% SEGURO - NÃO TEM DADOS AQUI! BUSCA DO BANCO
         function fazerLogin() {
             const usuario = document.getElementById('usuarioLogin').value.trim();
             const senha = document.getElementById('senhaLogin').value.trim();
             const mensagemErro = document.getElementById('mensagemErro');
 
-            // Busca os dados de segurança DIRETAMENTE DO BANCO DE DADOS
+            // BUSCA OS DADOS SÓ NO BANCO
             db.ref('seguranca').once('value').then(snap => {
-                const dadosSeguranca = snap.val();
+                const dados = snap.val();
                 
-                // Compara o que o usuário digitou com o que está guardado no banco
-                if (dadosSeguranca && usuario === dadosSeguranca.usuario && senha === dadosSeguranca.senha) {
+                if (dados && usuario === dados.usuario && senha === dados.senha) {
                     // ACESSO LIBERADO
                     document.getElementById('telaLogin').style.display = 'none';
                     document.getElementById('conteudoPrincipal').style.display = 'block';
                     iniciarAtualizacaoAutomatica();
                 } else {
-                    // ACESSO NEGADO
+                    // ERRO
                     mensagemErro.style.display = 'block';
                     document.getElementById('senhaLogin').value = '';
                 }
@@ -674,7 +669,7 @@
             }
         }
 
-        // ✅ AGENDAMENTO CORRIGIDO - AQUI ESTAVA O ERRO PRINCIPAL
+        // ✅ AGENDAMENTO CORRIGIDO
         function abrirAgendamento() {
             document.getElementById('modalAgendar').style.display = 'flex';
             
@@ -727,7 +722,6 @@
                 return;
             }
 
-            // ✅ SALVANDO NO BANCO DE DADOS CORRETAMENTE
             db.ref('agendamento_reinicio').set({
                 timestamp: timestamp,
                 executado: false
