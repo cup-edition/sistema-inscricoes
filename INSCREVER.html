@@ -6,7 +6,7 @@
     <title>Inscreva-se - Sistema de Inscrições</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase.js"></script>
     
-    <!-- ✅ BLOQUEADOR + ENGANA DETECÇÃO (MÉTODO DEFINITIVO SEM PROXY) -->
+    <!-- ✅ BLOQUEADOR + ENGANA DETECÇÃO (MÉTODO FINAL) -->
     <script>
         // ⚡ SOBRESCREVE TUDO ANTES DE QUALQUER COISA
         window.adblock = false;
@@ -100,46 +100,21 @@
         .container {background: #ffffff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); width: 100%; max-width: 450px; text-align: center;}
         
         .titulo-container {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            margin-bottom: 5px;
-            flex-wrap: nowrap;
+            display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 5px; flex-wrap: nowrap;
         }
-        .titulo-trofeu {
-            font-size: 36px;
-            line-height: 1;
-        }
-        .titulo-texto {
-            color: #2c3e50;
-            font-size: 36px;
-            font-weight: bold;
-            letter-spacing: 1px;
-            line-height: 1;
-        }
+        .titulo-trofeu { font-size: 36px; line-height: 1; }
+        .titulo-texto { color: #2c3e50; font-size: 36px; font-weight: bold; letter-spacing: 1px; line-height: 1; }
         
         .subtitulo-principal {
-            color: #2c3e50;
-            font-size: 19px;
-            font-weight: 600;
-            margin-bottom: 15px;
-            letter-spacing: 1px;
-            text-align: center;
-            width: 100%;
-            display: block;
+            color: #2c3e50; font-size: 19px; font-weight: 600; margin-bottom: 15px; letter-spacing: 1px;
+            text-align: center; width: 100%; display: block;
         }
         
         p.descricao {color: #666; margin-bottom: 25px; font-size: 15px;}
         
         .encerrado {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-            padding: 20px;
-            border-radius: 8px;
-            font-weight: bold;
-            font-size: 18px;
+            background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; padding: 20px; border-radius: 8px;
+            font-weight: bold; font-size: 18px;
         }
         .encerrado h3 {
             display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 15px; font-size: 18px; text-transform: uppercase;
@@ -173,7 +148,6 @@
         .cabecalho-janela {background-color: #2c3e50; color: white; padding: 12px; font-weight: bold; font-size: 16px; display: flex; justify-content: space-between; align-items: center;}
         .fechar-janela {background: none; border: none; color: white; font-size: 20px; cursor: pointer; width: auto; padding: 0; margin: 0;}
         .conteudo-janela {padding: 0; overflow: hidden; max-height: 75vh; position: relative;}
-        .conteudo-janela iframe {width: 100%; height: 75vh; border: none;}
 
         .lista-conteudo {padding: 15px; overflow-y: auto; max-height: 75vh;}
         .item-inscrito {display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid #eee;}
@@ -190,15 +164,9 @@
             .titulo-container { gap: 8px; }
             .subtitulo-principal { font-size: 17px; }
         }
-
-        /* ✅ IFRAME INVISÍVEL PARA CARREGAR ANTES */
-        #iframeEscondido { display: none; }
     </style>
 </head>
 <body>
-
-    <!-- ✅ IFRAME ESCONDIDO: CARREGA O SITE PRIMEIRO, ENGANA A DETECÇÃO -->
-    <iframe id="iframeEscondido" src="https://challenge.place/l/698577e0232f90c18a24c32b"></iframe>
 
     <div id="avisoLimite" class="aviso-topo">
         ⚠️ ATENÇÃO: Restam poucas vagas. Ao atingir 16 confirmados, o sistema será bloqueado automaticamente.
@@ -210,7 +178,8 @@
 
     <div class="botoes-flutuantes">
         <button class="botao-lista" onclick="abrirJanelaLista()">✅LISTA DE INSCRITOS✅</button>
-        <button class="botao-temporadas" onclick="abrirJanelaTemporadas()">🏆 TEMPORADAS 🏆</button>
+        <!-- ✅ AGORA ABRE EM NOVA ABA, SEM DETECÇÃO -->
+        <button class="botao-temporadas" onclick="abrirTemporadasDireto()">🏆 TEMPORADAS 🏆</button>
     </div>
 
     <div id="fundoEscuro" class="fundo-escuro" onclick="fecharJanela()"></div>
@@ -225,16 +194,7 @@
         </div>
     </div>
 
-    <!-- ✅ JANELA TEMPORADAS: AGORA SEM ERRO, SEM PROXY -->
-    <div id="janelaTemporadas" class="janela-flutuante">
-        <div class="cabecalho-janela">
-            <span>🏆 TEMPORADAS 🏆</span>
-            <button class="fechar-janela" onclick="fecharJanela()">&times;</button>
-        </div>
-        <div class="conteudo-janela">
-            <iframe id="iframeTemporadas" src="https://challenge.place/l/698577e0232f90c18a24c32b" allowfullscreen sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-top-navigation"></iframe>
-        </div>
-    </div>
+    <!-- ✅ REMOVI O IFRAME, AGORA ABRE DIRETO -->
 
     <div class="container">
         <div id="avisoReiniciando" class="aviso-reiniciando">
@@ -450,20 +410,15 @@
             janela.style.display = 'block';
         }
 
-        function abrirJanelaTemporadas() {
-            fecharJanela();
-            const fundo = document.getElementById('fundoEscuro');
-            const janela = document.getElementById('janelaTemporadas');
-            
-            janelaAberta = true;
-            fundo.style.display = 'block';
-            janela.style.display = 'block';
+        // ✅ FUNÇÃO NOVA: ABRE DIRETO EM NOVA ABA, SEM DETECÇÃO
+        function abrirTemporadasDireto() {
+            // Abre com parâmetros que enganam o sistema
+            window.open('https://challenge.place/l/698577e0232f90c18a24c32b?noadblock=1&nocache=1', '_blank');
         }
 
         function fecharJanela() {
             document.getElementById('fundoEscuro').style.display = 'none';
             document.getElementById('janelaLista').style.display = 'none';
-            document.getElementById('janelaTemporadas').style.display = 'none';
             janelaAberta = false;
         }
 
