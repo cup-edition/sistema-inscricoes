@@ -5,79 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inscreva-se - Sistema de Inscrições</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase.js"></script>
-    
-    <!-- ✅ BLOQUEADOR + ENGANA DETECÇÃO (MÉTODO FINAL) -->
-    <script>
-        // ⚡ SOBRESCREVE TUDO ANTES DE QUALQUER COISA
-        window.adblock = false;
-        window.adBlock = false;
-        window.AdBlock = false;
-        window.adblockEnabled = false;
-        window.canRunAds = true;
-        window.isAdBlockActive = false;
-        window.google_ad_block = undefined;
-        window.onAdBlockDetected = undefined;
-        window.BlockAdBlock = undefined;
-        window.AdBlockPlus = undefined;
-        window.AdsBlock = undefined;
-        window.noAdblock = true;
-        window.__adblock = false;
-        window.__adblocker = false;
-        window.abp = undefined;
-        window.ABP = undefined;
-        window.uBlock = undefined;
-        window.uBlockOrigin = undefined;
-
-        // Bloqueia detecção por objetos
-        Object.defineProperty(window, 'adsbygoogle', { value: undefined, configurable: true, writable: true });
-        Object.defineProperty(window, 'AdBlockDetector', { value: undefined, configurable: true });
-        Object.defineProperty(window, 'ABDetect', { value: undefined, configurable: true });
-        Object.defineProperty(window, 'getAdBlock', { value: function(){return false;}, configurable: true });
-        Object.defineProperty(window, 'detectAdBlock', { value: function(){return false;}, configurable: true });
-
-        // Lista de domínios para bloquear
-        const bloquear = [
-            'ads.', 'ad.', 'anuncio', 'banner', 'popup', 'track', 'analytics', 
-            'doubleclick', 'googlesyndication', 'adserver', 'advert', 'pixel',
-            'monetization', 'adservice', 'click', 'promo', 'sponsor', 'pagead2', 'adsbygoogle',
-            'adblock', 'detect', 'blockad', 'ad-check', 'ad-detect'
-        ];
-
-        // Intercepta requisições
-        const originalFetch = window.fetch;
-        window.fetch = function(input, init) {
-            let url = typeof input === 'string' ? input : input.url;
-            if (bloquear.some(palavra => url.toLowerCase().includes(palavra))) {
-                return Promise.resolve(new Response('', { status: 200, statusText: 'OK' }));
-            }
-            return originalFetch.apply(this, arguments);
-        };
-
-        // Intercepta carregamento de recursos
-        const originalCreateElement = document.createElement;
-        document.createElement = function(tag) {
-            const el = originalCreateElement.call(this, tag);
-            if (['script', 'img', 'iframe'].includes(tag)) {
-                const originalSet = Object.getOwnPropertyDescriptor(HTMLImageElement.prototype, 'src')?.set || 
-                                   Object.getOwnPropertyDescriptor(HTMLScriptElement.prototype, 'src')?.set || 
-                                   Object.getOwnPropertyDescriptor(HTMLIFrameElement.prototype, 'src')?.set;
-                
-                if (originalSet) {
-                    Object.defineProperty(el, 'src', {
-                        set: function(url) {
-                            if (url && bloquear.some(palavra => url.toLowerCase().includes(palavra))) {
-                                return;
-                            }
-                            originalSet.call(this, url);
-                        }
-                    });
-                }
-            }
-            return el;
-        };
-    </script>
-    <!-- ✅ FIM DO BLOQUEADOR -->
-
     <style>
         * {margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif;}
         body {background-color: #343a40; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; position: relative;}
@@ -99,28 +26,70 @@
 
         .container {background: #ffffff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); width: 100%; max-width: 450px; text-align: center;}
         
+        /* ✅ TÍTULO ALINHADO CORRETAMENTE PARA CELULAR E COMPUTADOR */
         .titulo-container {
-            display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 5px; flex-wrap: nowrap;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px; /* Espaçamento entre troféu e texto */
+            margin-bottom: 5px;
+            flex-wrap: nowrap; /* Não quebra linha */
         }
-        .titulo-trofeu { font-size: 36px; line-height: 1; }
-        .titulo-texto { color: #2c3e50; font-size: 36px; font-weight: bold; letter-spacing: 1px; line-height: 1; }
+        .titulo-trofeu {
+            font-size: 36px; /* Tamanho do troféu igual ao texto */
+            line-height: 1;
+        }
+        .titulo-texto {
+            color: #2c3e50;
+            font-size: 36px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            line-height: 1;
+        }
         
+        /* ✅ SUBTÍTULO: DIMINUÍ E CENTRALIZEI AQUI */
         .subtitulo-principal {
-            color: #2c3e50; font-size: 19px; font-weight: 600; margin-bottom: 15px; letter-spacing: 1px;
-            text-align: center; width: 100%; display: block;
+            color: #2c3e50;
+            font-size: 19px; /* Antes era 22px, agora menor */
+            font-weight: 600;
+            margin-bottom: 15px;
+            letter-spacing: 1px;
+            text-align: center; /* Garante centralização total */
+            width: 100%;
+            display: block;
         }
         
         p.descricao {color: #666; margin-bottom: 25px; font-size: 15px;}
         
+        /* ✅ MENSAGEM ENCERRADO - ESTILO IGUAL A FOTO */
         .encerrado {
-            background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; padding: 20px; border-radius: 8px;
-            font-weight: bold; font-size: 18px;
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            padding: 20px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 18px;
         }
         .encerrado h3 {
-            display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 15px; font-size: 18px; text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 15px;
+            font-size: 18px;
+            text-transform: uppercase;
         }
-        .encerrado p {margin-bottom: 8px; font-weight: normal; font-size: 16px;}
-        .encerrado .limite-texto {font-size: 14px; margin-top: 10px; display: block;}
+        .encerrado p {
+            margin-bottom: 8px;
+            font-weight: normal;
+            font-size: 16px;
+        }
+        .encerrado .limite-texto {
+            font-size: 14px;
+            margin-top: 10px;
+            display: block;
+        }
         
         .aviso-reiniciando {background-color: #f39c12; color: #fff; border: 1px solid #e67e22; padding: 12px; border-radius: 6px; font-weight: bold; font-size: 15px; margin-bottom: 15px; display: none;}
         .aviso-reinicio-agendado {background-color: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; padding: 10px; border-radius: 6px; font-weight: bold; font-size: 14px; margin-bottom: 15px; display: none;}
@@ -135,34 +104,56 @@
         .sucesso {background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb;}
         .erro {background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb;}
         
-        .foto-container {display: flex; align-items: center; justify-content: space-between; gap: 12px;}
-        .foto-preview {width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 2px solid #ddd; display: none; box-shadow: 0 2px 6px rgba(0,0,0,0.15);}
+        .foto-container {
+            display: flex; align-items: center; justify-content: space-between;
+            gap: 12px;
+        }
+        .foto-preview {
+            width: 100px; height: 100px;
+            border-radius: 50%; object-fit: cover; border: 2px solid #ddd; display: none;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+        }
 
-        .botoes-flutuantes {position: fixed; bottom: 20px; right: 20px; display: flex; flex-direction: column; gap: 10px; z-index: 99;}
-        .botao-lista, .botao-temporadas {background-color: #6c757d; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; width: auto; font-weight: normal; box-shadow: 0 2px 5px rgba(0,0,0,0.2);}
-        .botao-lista:hover, .botao-temporadas:hover {background-color: #495057;}
-        .botao-temporadas {background-color: #9b59b6;}
-        .botao-temporadas:hover {background-color: #8e44ad;}
+        .botao-lista {
+            position: fixed; bottom: 20px; right: 20px;
+            background-color: #6c757d; color: white; border: none;
+            padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; width: auto;
+            font-weight: normal; z-index: 99;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        .botao-lista:hover {background-color: #495057;}
 
-        .janela-flutuante {display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #ffffff; width: 90%; max-width: 700px; max-height: 85vh; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); z-index: 1000; overflow: hidden;}
-        .cabecalho-janela {background-color: #2c3e50; color: white; padding: 12px; font-weight: bold; font-size: 16px; display: flex; justify-content: space-between; align-items: center;}
-        .fechar-janela {background: none; border: none; color: white; font-size: 20px; cursor: pointer; width: auto; padding: 0; margin: 0;}
-        .conteudo-janela {padding: 0; overflow: hidden; max-height: 75vh; position: relative;}
-
-        .lista-conteudo {padding: 15px; overflow-y: auto; max-height: 75vh;}
+        .janela-flutuante {
+            display: none; position: fixed;
+            top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: #ffffff; width: 90%; max-width: 400px; max-height: 80vh;
+            border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            z-index: 1000; overflow: hidden;
+        }
+        .cabecalho-janela {
+            background-color: #2c3e50; color: white; padding: 12px;
+            font-weight: bold; font-size: 16px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .fechar-janela {
+            background: none; border: none; color: white;
+            font-size: 20px; cursor: pointer;
+            width: auto; padding: 0; margin: 0;
+        }
+        .conteudo-janela {padding: 15px; overflow-y: auto; max-height: 65vh;}
         .item-inscrito {display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid #eee;}
         .foto-inscrito {width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 1px solid #ddd;}
         .dados-inscrito {flex: 1; text-align: left;}
         .nome-inscrito {font-weight: 600; color: #333; font-size: 15px;}
         .data-hora-inscrito {font-size: 12px; color: #666; margin-top: 2px;}
-        
         .fundo-escuro {display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 999;}
 
+        /* ✅ AJUSTE ESPECIAL PARA TELAS PEQUENAS (CELULAR) */
         @media (max-width: 480px) {
             .titulo-texto { font-size: 32px; }
             .titulo-trofeu { font-size: 32px; }
             .titulo-container { gap: 8px; }
-            .subtitulo-principal { font-size: 17px; }
+            .subtitulo-principal { font-size: 17px; } /* Ainda menor no celular */
         }
     </style>
 </head>
@@ -172,15 +163,12 @@
         ⚠️ ATENÇÃO: Restam poucas vagas. Ao atingir 16 confirmados, o sistema será bloqueado automaticamente.
     </div>
 
+    <!-- ✅ AVISO DO PRÓXIMO REINÍCIO -->
     <div id="avisoReinicioAgendado" class="aviso-reinicio-agendado">
         ⏳ PRÓXIMO REINÍCIO: <span id="dataReinicioTexto">Carregando...</span>
     </div>
 
-    <div class="botoes-flutuantes">
-        <button class="botao-lista" onclick="abrirJanelaLista()">✅LISTA DE INSCRITOS✅</button>
-        <!-- ✅ AGORA ABRE EM NOVA ABA, SEM DETECÇÃO -->
-        <button class="botao-temporadas" onclick="abrirTemporadasDireto()">🏆 TEMPORADAS 🏆</button>
-    </div>
+    <button class="botao-lista" onclick="abrirJanelaLista()">✅LISTA DE INSCRITOS✅</button>
 
     <div id="fundoEscuro" class="fundo-escuro" onclick="fecharJanela()"></div>
 
@@ -189,12 +177,10 @@
             <span id="tituloJanela">✅ 0 INSCRITOS CONFIRMADOS ✅</span>
             <button class="fechar-janela" onclick="fecharJanela()">&times;</button>
         </div>
-        <div class="conteudo-janela lista-conteudo" id="listaConfirmados">
+        <div class="conteudo-janela" id="listaConfirmados">
             <p style="text-align:center; color:#666;">Carregando...</p>
         </div>
     </div>
-
-    <!-- ✅ REMOVI O IFRAME, AGORA ABRE DIRETO -->
 
     <div class="container">
         <div id="avisoReiniciando" class="aviso-reiniciando">
@@ -208,12 +194,14 @@
         </div>
 
         <div id="telaNormal">
+            <!-- ✅ TÍTULO ALINHADO PERFEITAMENTE, IGUAL A FOTO -->
             <div class="titulo-container">
                 <span class="titulo-trofeu">🏆</span>
                 <span class="titulo-texto">CUP EDITION</span>
                 <span class="titulo-trofeu">🏆</span>
             </div>
 
+            <!-- ✅ SUBTÍTULO MENOR E CENTRALIZADO -->
             <div class="subtitulo-principal">📝INSCREVA-SE📝</div>
             
             <p class="descricao">Escolha seu nome e preencha a data de nascimento para confirmar sua participação.</p>
@@ -264,7 +252,7 @@
             verificarStatusSistema();
             carregarListaNomes();
             setInterval(verificarStatusSistema, 3000);
-            setInterval(verificarAgendamentoEExecutar, 10000);
+            setInterval(verificarAgendamentoEExecutar, 10000); // Verifica a cada 10 segundos
             
             db.ref('inscricoes').on('value', function(snap) {
                 listaCompletaInscricoes = snap.val() || [];
@@ -276,15 +264,18 @@
             });
         };
 
+        // ✅ FUNÇÃO PRINCIPAL DO REINÍCIO - CORRIGIDA E MELHORADA
         async function verificarAgendamentoEExecutar() {
             const snap = await db.ref('agendamento_reinicio').once('value');
             const agendamento = snap.val();
 
+            // Se não tem agendamento ou já foi executado, só mostra aviso se precisar
             if (!agendamento) {
                 document.getElementById('avisoReinicioAgendado').style.display = 'none';
                 return;
             }
 
+            // Mostra quando será o próximo reinício
             if (!agendamento.executado) {
                 const dataHora = new Date(agendamento.timestamp);
                 const dia = String(dataHora.getDate()).padStart(2, '0');
@@ -299,6 +290,7 @@
                 document.getElementById('avisoReinicioAgendado').style.display = 'none';
             }
 
+            // ✅ SE CHEGOU A HORA, EXECUTA O REINÍCIO!
             const agora = Date.now();
             const horarioMarcado = agendamento.timestamp;
 
@@ -306,9 +298,11 @@
                 document.getElementById('avisoReiniciando').style.display = 'block';
                 document.getElementById('telaNormal').style.opacity = '0.5';
 
+                // 1. Pega todas as inscrições
                 const inscSnap = await db.ref('inscricoes').once('value');
                 const lista = inscSnap.val() || [];
 
+                // 2. Muda TODOS os status para PENDENTE e zera data
                 const novaLista = lista.map(insc => {
                     if(insc) {
                         insc.status = 'pendente';
@@ -317,10 +311,16 @@
                     return insc;
                 });
 
+                // 3. Salva tudo de volta
                 await db.ref('inscricoes').set(novaLista);
+                
+                // 4. Reabre as inscrições
                 await db.ref('configuracao').update({inscricoes_abertas: true, ultimo_reinicio: Date.now()});
+                
+                // 5. Marca o agendamento como EXECUTADO para não repetir
                 await db.ref('agendamento_reinicio').update({executado: true});
 
+                // 6. Recarrega a página para atualizar tudo
                 location.reload();
             }
         }
@@ -399,7 +399,6 @@
         }
 
         function abrirJanelaLista() {
-            fecharJanela();
             const fundo = document.getElementById('fundoEscuro');
             const janela = document.getElementById('janelaLista');
             
@@ -408,12 +407,6 @@
 
             fundo.style.display = 'block';
             janela.style.display = 'block';
-        }
-
-        // ✅ FUNÇÃO NOVA: ABRE DIRETO EM NOVA ABA, SEM DETECÇÃO
-        function abrirTemporadasDireto() {
-            // Abre com parâmetros que enganam o sistema
-            window.open('https://challenge.place/l/698577e0232f90c18a24c32b?noadblock=1&nocache=1', '_blank');
         }
 
         function fecharJanela() {
@@ -474,11 +467,12 @@
                     var qtdConfirmados = lista.filter(i => i && i.status === 'confirmado').length;
 
                     if (!aberto || qtdConfirmados >= LIMITE_MAXIMO) {
+                        // ✅ AGORA ESPERA 3 SEGUNDOS (IGUAL AS OUTRAS MENSAGENS) PARA MOSTRAR ENCERRADO
                         setTimeout(() => {
                             document.getElementById('telaEncerrado').style.display = 'block';
                             document.getElementById('telaNormal').style.display = 'none';
                             document.getElementById('avisoLimite').style.display = 'none';
-                        }, 3000);
+                        }, 3000); // 3000 milissegundos = 3 segundos
                     } else {
                         document.getElementById('telaEncerrado').style.display = 'none';
                         document.getElementById('telaNormal').style.display = 'block';
@@ -536,6 +530,7 @@
                     db.ref('inscricoes').set(inscricoes)
                     .then(() => {
                         msg.innerText = '🎉 INSCRIÇÃO CONFIRMADA COM SUCESSO! ✅';
+                        // ✅ MENSAGEM DE SUCESSO TAMBÉM 3 SEGUNDOS
                         setTimeout(() => { msg.style.display = 'none'; }, 3000);
                         
                         document.getElementById('ver_nome').value = '';
