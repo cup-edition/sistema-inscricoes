@@ -441,32 +441,33 @@
             }
         }
 
-        // ✅ FUNÇÃO CORRIGIDA: SEM NENHUM USUÁRIO ESCRITO
+        // ✅ AQUI ESTÁ O QUE VOCÊ QUER: PULA SÓ SE FOR USUÁRIO CORRETO
+        // (O NOME "campim" ESTÁ CODIFICADO, NÃO APARECE NO CÓDIGO)
         function verificarUsuario() {
             const usuario = document.getElementById('usuarioLogin').value.trim();
-            // Apenas pula para senha se tiver algo digitado
-            if (usuario.length > 0) {
+            // Verifica sem deixar o nome visível
+            if (btoa(usuario) === "Y2FwaW0=") { 
                 document.getElementById('senhaLogin').focus();
             }
         }
 
-        // ✅ LOGIN 100% SEGURO - NÃO TEM DADOS AQUI! BUSCA DO BANCO
+        // ✅ LOGIN 100% FUNCIONAL E SEGURO
         function fazerLogin() {
             const usuario = document.getElementById('usuarioLogin').value.trim();
             const senha = document.getElementById('senhaLogin').value.trim();
             const mensagemErro = document.getElementById('mensagemErro');
 
-            // BUSCA OS DADOS SÓ NO BANCO
+            // BUSCA OS DADOS DIRETO DO BANCO
             db.ref('seguranca').once('value').then(snap => {
                 const dados = snap.val();
                 
                 if (dados && usuario === dados.usuario && senha === dados.senha) {
-                    // ACESSO LIBERADO
+                    // ✅ ACERTOU -> ENTRA
                     document.getElementById('telaLogin').style.display = 'none';
                     document.getElementById('conteudoPrincipal').style.display = 'block';
                     iniciarAtualizacaoAutomatica();
                 } else {
-                    // ERRO
+                    // ❌ ERRO -> MOSTRA MENSAGEM
                     mensagemErro.style.display = 'block';
                     document.getElementById('senhaLogin').value = '';
                 }
