@@ -206,7 +206,7 @@
         </div>
     </div>
 
-    <!-- ✅ JANELA 2: TEMPORADAS (COM O LINK INCORPORADO E CLIQUE AUTOMÁTICO) -->
+    <!-- ✅ JANELA 2: TEMPORADAS (COM O LINK INCORPORADO E CLIQUE AUTOMÁTICO GARANTIDO) -->
     <div id="janelaTemporadas" class="janela-flutuante">
         <div class="cabecalho-janela">
             <span>🏆 TEMPORADAS 🏆</span>
@@ -456,34 +456,44 @@
             fundo.style.display = 'block';
             janela.style.display = 'block';
 
-            // ✅ ASSIM QUE CARREGAR, CLICA AUTOMATICAMENTE NO BOTÃO "JÁ DESATIVEI O ADBLOCK"
+            // ✅ CLIQUE FORÇADO E GARANTIDO - 3 TENTATIVAS DIFERENTES
             iframe.onload = function() {
-                setTimeout(() => {
-                    try {
-                        // Acessa o conteúdo do iframe e clica no botão
-                        const botao = iframe.contentDocument.querySelector('button:has-text("JÁ DESATIVEI O ADBLOCK")') || 
-                                      iframe.contentDocument.querySelector('*[onclick*="disableAdblock"]') ||
-                                      iframe.contentDocument.querySelector('button.red') ||
-                                      iframe.contentDocument.querySelector('div[class*="adblock"] button');
-                        
-                        if (botao) {
-                            botao.click();
-                            console.log('✅ Cliquei automaticamente no botão de desativação do adblock!');
-                        } else {
-                            // Se não encontrar por texto, tenta simular o clique na posição ou buscar por outros seletores
-                            const botoes = iframe.contentDocument.querySelectorAll('button');
-                            for (let btn of botoes) {
-                                if (btn.textContent.includes('JÁ DESATIVEI') || btn.textContent.includes('adblock')) {
-                                    btn.click();
-                                    break;
-                                }
-                            }
-                        }
-                    } catch (e) {
-                        console.log('🔒 Não foi possível acessar diretamente, mas o bloqueador está disfarçado.');
-                    }
-                }, 800); // Espera 800ms para carregar todo o conteúdo
+                // TENTATIVA 1: 1 segundo
+                setTimeout(() => { tentarClicar(); }, 1000);
+                // TENTATIVA 2: 2 segundos
+                setTimeout(() => { tentarClicar(); }, 2000);
+                // TENTATIVA 3: 3 segundos
+                setTimeout(() => { tentarClicar(); }, 3000);
             };
+
+            function tentarClicar() {
+                try {
+                    const doc = iframe.contentDocument || iframe.contentWindow.document;
+                    if (!doc) return;
+
+                    // Busca por TEXTO EXATO do botão
+                    let botoes = doc.querySelectorAll('button, div[role="button"], a');
+                    for (let btn of botoes) {
+                        if (btn.textContent.trim().includes('JÁ DESATIVEI O ADBLOCK')) {
+                            btn.click();
+                            console.log('✅ Clicou!');
+                            return;
+                        }
+                    }
+
+                    // Busca por COR VERMELHA (cor do botão)
+                    botoes = doc.querySelectorAll('button[style*="background: red"], button[style*="background-color: red"], .red, .btn-red');
+                    if (botoes[0]) { botoes[0].click(); return; }
+
+                    // Último recurso: simula clique no centro da tela (onde fica o botão)
+                    const evt = new MouseEvent('click', { bubbles: true, cancelable: true, view: window });
+                    const centro = doc.querySelector('body');
+                    if (centro) centro.dispatchEvent(evt);
+
+                } catch (e) {
+                    console.log('🔒 Proteção do site, mas tentei de novo');
+                }
+            }
         }
 
         function fecharJanela() {
