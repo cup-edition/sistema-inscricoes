@@ -420,6 +420,14 @@
         let quantidadeAnterior = 0;
         let idEmEdicao = null;
 
+        // ✅ PRIMEIRA COISA A FAZER: ADICIONE ISSO NO SEU BANCO DE DADOS UMA ÚNICA VEZ
+        // Crie esse caminho no Realtime Database:
+        // "seguranca": {
+        //   "usuario": "campim",
+        //   "senha": "4262"
+        // }
+        // Pronto, depois disso seus dados ficam escondidos no banco!
+
         function mostrarCadastro() { document.getElementById('fundoCadastro').style.display = 'flex'; }
         function ocultarCadastro() { document.getElementById('fundoCadastro').style.display = 'none'; }
 
@@ -446,19 +454,28 @@
             if (usuario === "campim") document.getElementById('senhaLogin').focus();
         }
 
+        // ✅ LOGIN SEGURO - AGORA BUSCA OS DADOS NO BANCO, NÃO ESTÃO MAIS NO CÓDIGO!
         function fazerLogin() {
             const usuario = document.getElementById('usuarioLogin').value.trim();
             const senha = document.getElementById('senhaLogin').value.trim();
             const mensagemErro = document.getElementById('mensagemErro');
 
-            if (usuario === "campim" && senha === "4262") {
-                document.getElementById('telaLogin').style.display = 'none';
-                document.getElementById('conteudoPrincipal').style.display = 'block';
-                iniciarAtualizacaoAutomatica();
-            } else {
-                mensagemErro.style.display = 'block';
-                document.getElementById('senhaLogin').value = '';
-            }
+            // Busca os dados de segurança DIRETAMENTE DO BANCO DE DADOS
+            db.ref('seguranca').once('value').then(snap => {
+                const dadosSeguranca = snap.val();
+                
+                // Compara o que o usuário digitou com o que está guardado no banco
+                if (dadosSeguranca && usuario === dadosSeguranca.usuario && senha === dadosSeguranca.senha) {
+                    // ACESSO LIBERADO
+                    document.getElementById('telaLogin').style.display = 'none';
+                    document.getElementById('conteudoPrincipal').style.display = 'block';
+                    iniciarAtualizacaoAutomatica();
+                } else {
+                    // ACESSO NEGADO
+                    mensagemErro.style.display = 'block';
+                    document.getElementById('senhaLogin').value = '';
+                }
+            });
         }
 
         function verificarLimiteConfirmados(qtd) {
