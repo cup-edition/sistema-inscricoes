@@ -6,24 +6,21 @@
     <title>Inscreva-se - Sistema de Inscrições</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase.js"></script>
     
-    <!-- ✅ BLOQUEADOR DE ANÚNCIOS AVANÇADO (MELHORADO) -->
+    <!-- ✅ BLOQUEADOR DE ANÚNCIOS - SÓ OS INDESEJADOS, SEM QUEBRAR NADA -->
     <script>
-        // Lista completa de palavras, domínios e padrões para bloquear
+        // Lista APENAS dos textos e domínios que apareceram e devem ser bloqueados
         const bloquear = [
-            'ads.', 'ad.', 'anuncio', 'banner', 'popup', 'track', 'analytics', 'doubleclick', 
-            'googlesyndication', 'adserver', 'advert', 'pixel', 'monetization', 'adservice', 
-            'click', 'promo', 'sponsor', 'googleads', 'googletagmanager', 'googletagservices',
-            'workspace', 'comece-a-usar', 'defesas de ia', 'dados seguros', 'cloud.google',
-            'gstatic.com/ads', 'pagead', 'afs.', 'ampproject', 'display', 'pubmatic', 
-            'rubiconproject', 'criteo', 'zedo', 'openx', 'adroll', 'taboola', 'outbrain'
+            'seus dados seguros', 'defesas de ia', 'google workspace', 'comece a usar',
+            'workspace', 'googleads', 'googlesyndication', 'adservice', 'ad.'
         ];
 
-        // 1. Bloqueia todas as requisições de rede (fetch, XHR, imagens, scripts, iframes)
+        // 1. Bloqueia requisições de anúncios, mas deixa todo o resto passar
         const originalFetch = window.fetch;
         window.fetch = function(input, init) {
             let url = typeof input === 'string' ? input : input.url;
-            if (bloquear.some(palavra => url.toLowerCase().includes(palavra))) {
-                return new Promise(() => {}); // Cancela a requisição
+            const urlLower = url.toLowerCase();
+            if (bloquear.some(palavra => urlLower.includes(palavra))) {
+                return new Promise(() => {}); // Bloqueia só o que é anúncio
             }
             return originalFetch.apply(this, arguments);
         };
@@ -33,102 +30,50 @@
             const xhr = new originalXHR();
             const originalOpen = xhr.open;
             xhr.open = function(method, url) {
-                if (bloquear.some(palavra => url.toLowerCase().includes(palavra))) {
-                    return;
-                }
+                if (bloquear.some(p => url.toLowerCase().includes(p))) return;
                 return originalOpen.apply(this, arguments);
             };
             return xhr;
         };
 
-        // Bloqueia criação de elementos de anúncio
-        const originalCreateElement = document.createElement;
-        document.createElement = function(tag) {
-            const el = originalCreateElement.call(this, tag);
-            if (['script', 'img', 'iframe', 'div', 'a', 'ins'].includes(tag)) {
-                // Bloqueia por atributos
-                const verificar = () => {
-                    const attrs = ['src', 'href', 'data-src', 'id', 'class', 'alt', 'title'];
-                    return attrs.some(attr => {
-                        const val = el.getAttribute(attr) || '';
-                        return bloquear.some(palavra => val.toLowerCase().includes(palavra));
-                    });
-                };
-
-                // Intercepta definição de atributos
-                ['src', 'href', 'id', 'class', 'alt', 'title'].forEach(attr => {
-                    const desc = Object.getOwnPropertyDescriptor(HTMLElement.prototype, attr) || 
-                                 Object.getOwnPropertyDescriptor(HTMLImageElement.prototype, attr) ||
-                                 Object.getOwnPropertyDescriptor(HTMLIFrameElement.prototype, attr);
-                    if (desc && desc.set) {
-                        Object.defineProperty(el, attr, {
-                            set: function(val) {
-                                if (val && bloquear.some(palavra => String(val).toLowerCase().includes(palavra))) {
-                                    return; // Bloqueia
-                                }
-                                desc.set.call(this, val);
-                            },
-                            get: desc.get
-                        });
-                    }
-                });
-
-                // Remove elementos que já forem detectados
-                setTimeout(() => { if (verificar()) el.remove(); }, 0);
-            }
-            return el;
-        };
-
-        // 2. CSS: Oculta e remove elementos que parecem anúncios
-        const estiloBloqueio = document.createElement('style');
-        estiloBloqueio.textContent = `
-            [id*="ad"], [id*="ads"], [id*="anuncio"], [id*="banner"], [id*="popup"], [id*="promo"],
-            [class*="ad"], [class*="ads"], [class*="anuncio"], [class*="banner"], [class*="popup"], [class*="promo"],
-            [src*="ad."], [src*="ads."], [src*="googlesyndication"], [src*="googleads"],
-            [href*="ad."], [href*="ads."], [href*="workspace"], [href*="google.com/ads"],
-            div:has-text("dados seguros"), div:has-text("defesas de IA"), div:has-text("Google Workspace"),
-            div:has-text("Comece a usar"), ins, .adsbygoogle, .ad-container, .advertisement, .sponsored {
+        // 2. CSS: Esconde SÓ os elementos com esses textos, não mexe no resto
+        const estilo = document.createElement('style');
+        estilo.textContent = `
+            /* Bloqueia só os anúncios que apareceram */
+            div:has-text("Seus dados seguros"),
+            div:has-text("Google Workspace"),
+            div:has-text("Comece a usar"),
+            div:has-text("defesas de IA"),
+            [class*="ad-"], [id*="ad-"],
+            [href*="workspace"], [src*="googleads"] {
                 display: none !important;
                 visibility: hidden !important;
                 height: 0 !important;
                 overflow: hidden !important;
                 position: absolute !important;
                 z-index: -9999 !important;
-                pointer-events: none !important;
             }
         `;
-        document.head.appendChild(estiloBloqueio);
+        document.head.appendChild(estilo);
 
-        // 3. Verifica continuamente e remove anúncios que aparecem depois
+        // 3. Remove só os anúncios, sem apagar o resto da página
         function removerAnuncios() {
-            const todos = document.querySelectorAll('*');
+            const todos = document.querySelectorAll('div, span, a, ins');
             todos.forEach(el => {
-                const texto = (el.textContent || '').toLowerCase();
-                const html = (el.outerHTML || '').toLowerCase();
-                if (
-                    bloquear.some(p => texto.includes(p)) ||
-                    bloquear.some(p => html.includes(p)) ||
-                    /seus dados seguros|defesas de ia|google workspace|comece a usar/i.test(texto)
-                ) {
-                    el.remove();
+                const texto = (el.textContent || '').toLowerCase().trim();
+                if (bloquear.some(palavra => texto.includes(palavra))) {
+                    // Confirma que NÃO é parte do seu sistema antes de remover
+                    if (!texto.includes('inscrição') && !texto.includes('cup edition') && !texto.includes('temporadas')) {
+                        el.remove();
+                    }
                 }
             });
         }
-        // Executa várias vezes para pegar tudo
-        removerAnuncios();
-        setInterval(removerAnuncios, 200); // Verifica a cada 200ms
+        // Executa sem travar nada
         window.addEventListener('load', removerAnuncios);
-        document.addEventListener('DOMContentLoaded', removerAnuncios);
-
-        // 4. Bloqueia também dentro do iframe incorporado
-        window.addEventListener('message', function(e) {
-            if (e.data && typeof e.data === 'string' && bloquear.some(p => e.data.toLowerCase().includes(p))) {
-                e.stopPropagation();
-                e.preventDefault();
-            }
-        }, true);
+        setInterval(removerAnuncios, 300);
     </script>
-    <!-- ✅ FIM DO BLOQUEADOR SUPER REFORÇADO -->
+    <!-- ✅ FIM DO BLOQUEADOR SEGURO -->
 
     <style>
         * {margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif;}
@@ -151,17 +96,16 @@
 
         .container {background: #ffffff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); width: 100%; max-width: 450px; text-align: center;}
         
-        /* ✅ TÍTULO ALINHADO CORRETAMENTE PARA CELULAR E COMPUTADOR */
         .titulo-container {
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 12px; /* Espaçamento entre troféu e texto */
+            gap: 12px;
             margin-bottom: 5px;
-            flex-wrap: nowrap; /* Não quebra linha */
+            flex-wrap: nowrap;
         }
         .titulo-trofeu {
-            font-size: 36px; /* Tamanho do troféu igual ao texto */
+            font-size: 36px;
             line-height: 1;
         }
         .titulo-texto {
@@ -172,21 +116,19 @@
             line-height: 1;
         }
         
-        /* ✅ SUBTÍTULO: DIMINUÍ E CENTRALIZEI AQUI */
         .subtitulo-principal {
             color: #2c3e50;
-            font-size: 19px; /* Antes era 22px, agora menor */
+            font-size: 19px;
             font-weight: 600;
             margin-bottom: 15px;
             letter-spacing: 1px;
-            text-align: center; /* Garante centralização total */
+            text-align: center;
             width: 100%;
             display: block;
         }
         
         p.descricao {color: #666; margin-bottom: 25px; font-size: 15px;}
         
-        /* ✅ MENSAGEM ENCERRADO - ESTILO IGUAL A FOTO */
         .encerrado {
             background-color: #f8d7da;
             color: #721c24;
@@ -218,7 +160,6 @@
         .foto-container {display: flex; align-items: center; justify-content: space-between; gap: 12px;}
         .foto-preview {width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 2px solid #ddd; display: none; box-shadow: 0 2px 6px rgba(0,0,0,0.15);}
 
-        /* ✅ BOTÕES FLUTUANTES - AGORA DOIS BOTÕES */
         .botoes-flutuantes {position: fixed; bottom: 20px; right: 20px; display: flex; flex-direction: column; gap: 10px; z-index: 99;}
         .botao-lista, .botao-temporadas {background-color: #6c757d; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; width: auto; font-weight: normal; box-shadow: 0 2px 5px rgba(0,0,0,0.2);}
         .botao-lista:hover, .botao-temporadas:hover {background-color: #495057;}
@@ -240,12 +181,11 @@
         
         .fundo-escuro {display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 999;}
 
-        /* ✅ AJUSTE ESPECIAL PARA TELAS PEQUENAS (CELULAR) */
         @media (max-width: 480px) {
             .titulo-texto { font-size: 32px; }
             .titulo-trofeu { font-size: 32px; }
             .titulo-container { gap: 8px; }
-            .subtitulo-principal { font-size: 17px; } /* Ainda menor no celular */
+            .subtitulo-principal { font-size: 17px; }
         }
     </style>
 </head>
@@ -255,12 +195,10 @@
         ⚠️ ATENÇÃO: Restam poucas vagas. Ao atingir 16 confirmados, o sistema será bloqueado automaticamente.
     </div>
 
-    <!-- ✅ AVISO DO PRÓXIMO REINÍCIO -->
     <div id="avisoReinicioAgendado" class="aviso-reinicio-agendado">
         ⏳ PRÓXIMO REINÍCIO: <span id="dataReinicioTexto">Carregando...</span>
     </div>
 
-    <!-- ✅ BOTÕES AGRUPADOS -->
     <div class="botoes-flutuantes">
         <button class="botao-lista" onclick="abrirJanelaLista()">✅LISTA DE INSCRITOS✅</button>
         <button class="botao-temporadas" onclick="abrirJanelaTemporadas()">🏆 TEMPORADAS 🏆</button>
@@ -268,7 +206,6 @@
 
     <div id="fundoEscuro" class="fundo-escuro" onclick="fecharJanela()"></div>
 
-    <!-- ✅ JANELA 1: LISTA DE INSCRITOS -->
     <div id="janelaLista" class="janela-flutuante">
         <div class="cabecalho-janela">
             <span id="tituloJanela">✅ 0 INSCRITOS CONFIRMADOS ✅</span>
@@ -279,14 +216,13 @@
         </div>
     </div>
 
-    <!-- ✅ JANELA 2: TEMPORADAS (COM O LINK INCORPORADO) -->
     <div id="janelaTemporadas" class="janela-flutuante">
         <div class="cabecalho-janela">
             <span>🏆 TEMPORADAS 🏆</span>
             <button class="fechar-janela" onclick="fecharJanela()">&times;</button>
         </div>
         <div class="conteudo-janela">
-            <iframe src="https://challenge.place/l/698577e0232f90c18a24c32b" allowfullscreen sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox"></iframe>
+            <iframe src="https://challenge.place/l/698577e0232f90c18a24c32b" allowfullscreen></iframe>
         </div>
     </div>
 
@@ -302,14 +238,12 @@
         </div>
 
         <div id="telaNormal">
-            <!-- ✅ TÍTULO ALINHADO PERFEITAMENTE, IGUAL A FOTO -->
             <div class="titulo-container">
                 <span class="titulo-trofeu">🏆</span>
                 <span class="titulo-texto">CUP EDITION</span>
                 <span class="titulo-trofeu">🏆</span>
             </div>
 
-            <!-- ✅ SUBTÍTULO MENOR E CENTRALIZADO -->
             <div class="subtitulo-principal">📝INSCREVA-SE📝</div>
             
             <p class="descricao">Escolha seu nome e preencha a data de nascimento para confirmar sua participação.</p>
@@ -360,30 +294,22 @@
             verificarStatusSistema();
             carregarListaNomes();
             setInterval(verificarStatusSistema, 3000);
-            setInterval(verificarAgendamentoEExecutar, 10000); // Verifica a cada 10 segundos
+            setInterval(verificarAgendamentoEExecutar, 10000);
             
             db.ref('inscricoes').on('value', function(snap) {
                 listaCompletaInscricoes = snap.val() || [];
-                
-                if (janelaAberta) {
-                    atualizarListaConfirmados();
-                }
+                if (janelaAberta) atualizarListaConfirmados();
                 carregarListaNomes();
             });
         };
 
-        // ✅ FUNÇÃO PRINCIPAL DO REINÍCIO - CORRIGIDA E MELHORADA
         async function verificarAgendamentoEExecutar() {
             const snap = await db.ref('agendamento_reinicio').once('value');
             const agendamento = snap.val();
-
-            // Se não tem agendamento ou já foi executado, só mostra aviso se precisar
             if (!agendamento) {
                 document.getElementById('avisoReinicioAgendado').style.display = 'none';
                 return;
             }
-
-            // Mostra quando será o próximo reinício
             if (!agendamento.executado) {
                 const dataHora = new Date(agendamento.timestamp);
                 const dia = String(dataHora.getDate()).padStart(2, '0');
@@ -391,288 +317,132 @@
                 const ano = dataHora.getFullYear();
                 const hora = String(dataHora.getHours()).padStart(2, '0');
                 const min = String(dataHora.getMinutes()).padStart(2, '0');
-                
                 document.getElementById('dataReinicioTexto').innerText = `${dia}/${mes}/${ano} às ${hora}:${min}`;
                 document.getElementById('avisoReinicioAgendado').style.display = 'block';
             } else {
                 document.getElementById('avisoReinicioAgendado').style.display = 'none';
             }
-
-            // ✅ SE CHEGOU A HORA, EXECUTA O REINÍCIO!
             const agora = Date.now();
-            const horarioMarcado = agendamento.timestamp;
-
-            if (agendamento.executado === false && agora >= horarioMarcado) {
+            if (agendamento.executado === false && agora >= agendamento.timestamp) {
                 document.getElementById('avisoReiniciando').style.display = 'block';
                 document.getElementById('telaNormal').style.opacity = '0.5';
-
-                // 1. Pega todas as inscrições
                 const inscSnap = await db.ref('inscricoes').once('value');
                 const lista = inscSnap.val() || [];
-
-                // 2. Muda TODOS os status para PENDENTE e zera data
                 const novaLista = lista.map(insc => {
-                    if(insc) {
-                        insc.status = 'pendente';
-                        insc.data_confirmacao = null;
-                    }
+                    if(insc) { insc.status = 'pendente'; insc.data_confirmacao = null; }
                     return insc;
                 });
-
-                // 3. Salva tudo de volta
                 await db.ref('inscricoes').set(novaLista);
-                
-                // 4. Reabre as inscrições
                 await db.ref('configuracao').update({inscricoes_abertas: true, ultimo_reinicio: Date.now()});
-                
-                // 5. Marca o agendamento como EXECUTADO para não repetir
                 await db.ref('agendamento_reinicio').update({executado: true});
-
-                // 6. Recarrega a página para atualizar tudo
                 location.reload();
             }
         }
 
         function avancarCampo(event, proximoCampoId) {
-            if (event.key === 'Enter') {
-                event.preventDefault();
-                document.getElementById(proximoCampoId).focus();
-            }
+            if (event.key === 'Enter') { event.preventDefault(); document.getElementById(proximoCampoId).focus(); }
         }
 
-        function pularParaMes(campo) {
-            if (campo.value.length === 2) {
-                document.getElementById('ver_mes').focus();
-            }
-        }
+        function pularParaMes(campo) { if (campo.value.length === 2) document.getElementById('ver_mes').focus(); }
+        function pularParaBotao(campo) { if (campo.value.length === 2) document.getElementById('botaoConfirmar').focus(); }
 
-        function pularParaBotao(campo) {
-            if (campo.value.length === 2) {
-                document.getElementById('botaoConfirmar').focus();
-            }
-        }
-
-        function mudouNome() {
-            mostrarFotoSelecionado();
-            focarNoDia();
-        }
-
+        function mudouNome() { mostrarFotoSelecionado(); focarNoDia(); }
         function focarNoDia() {
-            const nomeEscolhido = document.getElementById('ver_nome').value;
-            if (nomeEscolhido !== "") {
-                setTimeout(() => {
-                    document.getElementById('ver_dia').focus();
-                }, 10);
-            }
+            const nome = document.getElementById('ver_nome').value;
+            if (nome) setTimeout(() => document.getElementById('ver_dia').focus(), 10);
         }
 
         function atualizarListaConfirmados() {
             const conteudo = document.getElementById('listaConfirmados');
-            const tituloJanela = document.getElementById('tituloJanela');
-            
-            const confirmados = listaCompletaInscricoes.filter(insc => insc && insc.status === 'confirmado')
-                                     .sort((a, b) => (b.data_confirmacao || 0) - (a.data_confirmacao || 0));
-
-            tituloJanela.innerText = `✅ ${confirmados.length} INSCRITOS CONFIRMADOS ✅`;
-
+            const titulo = document.getElementById('tituloJanela');
+            const confirmados = listaCompletaInscricoes.filter(i => i && i.status === 'confirmado').sort((a,b) => (b.data_confirmacao||0)-(a.data_confirmacao||0));
+            titulo.innerText = `✅ ${confirmados.length} INSCRITOS CONFIRMADOS ✅`;
             if (confirmados.length === 0) {
                 conteudo.innerHTML = '<p style="text-align:center; color:#666;">Nenhum inscrito confirmado ainda.</p>';
             } else {
                 let html = '';
                 confirmados.forEach(insc => {
                     const foto = insc.foto || 'https://via.placeholder.com/50?text=Sem+Foto';
-                    let dataHora = 'Data não registrada';
-                    if (insc.data_confirmacao) {
-                        const data = new Date(insc.data_confirmacao);
-                        dataHora = data.toLocaleString('pt-BR', {
-                            day: '2-digit',
-                            month: '2-digit',
-                            year: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit'
-                        });
-                    }
-                    html += `
-                        <div class="item-inscrito">
-                            <img src="${foto}" class="foto-inscrito" alt="Foto de ${insc.nome}">
-                            <div class="dados-inscrito">
-                                <div class="nome-inscrito">${insc.nome}</div>
-                                <div class="data-hora-inscrito">✅ Confirmado em: ${dataHora}</div>
-                            </div>
-                        </div>
-                    `;
+                    const dataHora = insc.data_confirmacao ? new Date(insc.data_confirmacao).toLocaleString('pt-BR', {day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}) : 'Data não registrada';
+                    html += `<div class="item-inscrito"><img src="${foto}" class="foto-inscrito"><div class="dados-inscrito"><div class="nome-inscrito">${insc.nome}</div><div class="data-hora-inscrito">✅ Confirmado em: ${dataHora}</div></div></div>`;
                 });
                 conteudo.innerHTML = html;
             }
         }
 
-        // ✅ FUNÇÕES DAS JANELAS
-        function abrirJanelaLista() {
-            fecharJanela(); // Fecha qualquer outra janela aberta
-            const fundo = document.getElementById('fundoEscuro');
-            const janela = document.getElementById('janelaLista');
-            
-            atualizarListaConfirmados();
-            janelaAberta = true;
+        function abrirJanelaLista() { fecharJanela(); janelaAberta = true; document.getElementById('fundoEscuro').style.display = 'block'; document.getElementById('janelaLista').style.display = 'block'; atualizarListaConfirmados(); }
+        function abrirJanelaTemporadas() { fecharJanela(); janelaAberta = true; document.getElementById('fundoEscuro').style.display = 'block'; document.getElementById('janelaTemporadas').style.display = 'block'; }
+        function fecharJanela() { document.getElementById('fundoEscuro').style.display = 'none'; document.getElementById('janelaLista').style.display = 'none'; document.getElementById('janelaTemporadas').style.display = 'none'; janelaAberta = false; }
 
-            fundo.style.display = 'block';
-            janela.style.display = 'block';
-        }
-
-        function abrirJanelaTemporadas() {
-            fecharJanela();
-            const fundo = document.getElementById('fundoEscuro');
-            const janela = document.getElementById('janelaTemporadas');
-            
-            janelaAberta = true;
-            fundo.style.display = 'block';
-            janela.style.display = 'block';
-        }
-
-        function fecharJanela() {
-            document.getElementById('fundoEscuro').style.display = 'none';
-            document.getElementById('janelaLista').style.display = 'none';
-            document.getElementById('janelaTemporadas').style.display = 'none';
-            janelaAberta = false;
-        }
-
-        function limitarDigitos(campo, maximo) {
-            if (campo.value.length > maximo) {
-                campo.value = campo.value.slice(0, maximo);
-            }
-        }
+        function limitarDigitos(campo, max) { if (campo.value.length > max) campo.value = campo.value.slice(0, max); }
 
         function carregarListaNomes() {
             db.ref('inscricoes').once('value').then(snap => {
                 listaCompletaInscricoes = snap.val() || [];
-                var selectNome = document.getElementById('ver_nome');
-                selectNome.innerHTML = '<option value="">-- Selecione seu nome --</option>';
-
-                var nomesPendentes = listaCompletaInscricoes.filter(insc => insc && insc.status === 'pendente').map(insc => insc.nome);
-                var nomesUnicos = [...new Set(nomesPendentes)].sort();
-
-                nomesUnicos.forEach(nome => {
-                    var opcao = document.createElement('option');
-                    opcao.value = nome;
-                    opcao.textContent = nome;
-                    selectNome.appendChild(opcao);
-                });
+                const select = document.getElementById('ver_nome');
+                select.innerHTML = '<option value="">-- Selecione seu nome --</option>';
+                const nomes = [...new Set(listaCompletaInscricoes.filter(i => i && i.status === 'pendente').map(i => i.nome))].sort();
+                nomes.forEach(nome => { const opt = document.createElement('option'); opt.value = nome; opt.textContent = nome; select.appendChild(opt); });
             });
         }
 
         function mostrarFotoSelecionado() {
-            const nomeEscolhido = document.getElementById('ver_nome').value;
-            const fotoElement = document.getElementById('fotoUsuario');
-
-            if (!nomeEscolhido) {
-                fotoElement.style.display = 'none';
-                return;
-            }
-
-            const usuario = listaCompletaInscricoes.find(insc => insc && insc.nome === nomeEscolhido);
-
-            if (usuario && usuario.foto) {
-                fotoElement.src = usuario.foto;
-                fotoElement.style.display = 'block';
-            } else {
-                fotoElement.style.display = 'none';
-            }
+            const nome = document.getElementById('ver_nome').value;
+            const foto = document.getElementById('fotoUsuario');
+            if (!nome) { foto.style.display = 'none'; return; }
+            const usuario = listaCompletaInscricoes.find(i => i && i.nome === nome);
+            if (usuario && usuario.foto) { foto.src = usuario.foto; foto.style.display = 'block'; } else { foto.style.display = 'none'; }
         }
 
         function verificarStatusSistema() {
             db.ref('configuracao/inscricoes_abertas').once('value').then(snap => {
-                var aberto = snap.val() !== null ? snap.val() : true;
-                
+                const aberto = snap.val() !== null ? snap.val() : true;
                 db.ref('inscricoes').once('value').then(snapIns => {
-                    var lista = snapIns.val() || [];
-                    var qtdConfirmados = lista.filter(i => i && i.status === 'confirmado').length;
-
-                    if (!aberto || qtdConfirmados >= LIMITE_MAXIMO) {
-                        // ✅ AGORA ESPERA 3 SEGUNDOS (IGUAL AS OUTRAS MENSAGENS) PARA MOSTRAR ENCERRADO
+                    const lista = snapIns.val() || [];
+                    const qtd = lista.filter(i => i && i.status === 'confirmado').length;
+                    if (!aberto || qtd >= LIMITE_MAXIMO) {
                         setTimeout(() => {
                             document.getElementById('telaEncerrado').style.display = 'block';
                             document.getElementById('telaNormal').style.display = 'none';
                             document.getElementById('avisoLimite').style.display = 'none';
-                        }, 3000); // 3000 milissegundos = 3 segundos
+                        }, 3000);
                     } else {
                         document.getElementById('telaEncerrado').style.display = 'none';
                         document.getElementById('telaNormal').style.display = 'block';
-                        
-                        if (qtdConfirmados >= 12) {
-                            document.getElementById('avisoLimite').style.display = 'block';
-                        } else {
-                            document.getElementById('avisoLimite').style.display = 'none';
-                        }
+                        document.getElementById('avisoLimite').style.display = qtd >= 12 ? 'block' : 'none';
                     }
                 });
             });
         }
 
         function confirmarInscricao() {
-            var nome = document.getElementById('ver_nome').value.trim();
-            var dia = parseInt(document.getElementById('ver_dia').value);
-            var mes = parseInt(document.getElementById('ver_mes').value);
-            var msg = document.getElementById('msg_verificacao');
+            const nome = document.getElementById('ver_nome').value.trim();
+            const dia = parseInt(document.getElementById('ver_dia').value);
+            const mes = parseInt(document.getElementById('ver_mes').value);
+            const msg = document.getElementById('msg_verificacao');
             msg.style.display = 'none';
-
             if (!nome || !dia || !mes) {
-                msg.className = 'resultado erro';
-                msg.innerText = '❌ Selecione o nome e preencha dia e mês corretamente!';
-                msg.style.display = 'block';
-                setTimeout(() => { msg.style.display = 'none'; }, 3000);
+                msg.className = 'resultado erro'; msg.innerText = '❌ Selecione o nome e preencha dia e mês corretamente!'; msg.style.display = 'block'; setTimeout(() => msg.style.display = 'none', 3000);
                 return;
             }
-
-            msg.className = 'resultado sucesso';
-            msg.innerText = '⏳ ENVIANDO...';
-            msg.style.display = 'block';
-
+            msg.className = 'resultado sucesso'; msg.innerText = '⏳ ENVIANDO...'; msg.style.display = 'block';
             db.ref('inscricoes').once('value').then(snap => {
-                var inscricoes = snap.val() || [];
-                
-                var qtdAtual = inscricoes.filter(i => i && i.status === 'confirmado').length;
-                if (qtdAtual >= LIMITE_MAXIMO) {
-                    msg.className = 'resultado erro';
-                    msg.innerText = '❌ LIMITE DE 16 CONFIRMADOS ATINGIDO! Inscrições encerradas.';
-                    msg.style.display = 'block';
-                    verificarStatusSistema();
+                const inscricoes = snap.val() || [];
+                const qtd = inscricoes.filter(i => i && i.status === 'confirmado').length;
+                if (qtd >= LIMITE_MAXIMO) {
+                    msg.className = 'resultado erro'; msg.innerText = '❌ LIMITE DE 16 CONFIRMADOS ATINGIDO!'; msg.style.display = 'block'; verificarStatusSistema();
                     return;
                 }
-
-                var encontradoIndex = inscricoes.findIndex(insc => {
-                    return insc && insc.nome === nome && insc.dia === dia && insc.mes === mes && insc.status === 'pendente';
-                });
-
-                if (encontradoIndex !== -1) {
-                    const dataHoraAtual = new Date().getTime();
-                    inscricoes[encontradoIndex].status = 'confirmado';
-                    inscricoes[encontradoIndex].data_confirmacao = dataHoraAtual;
-
-                    db.ref('inscricoes').set(inscricoes)
-                    .then(() => {
-                        msg.innerText = '🎉 INSCRIÇÃO CONFIRMADA COM SUCESSO! ✅';
-                        // ✅ MENSAGEM DE SUCESSO TAMBÉM 3 SEGUNDOS
-                        setTimeout(() => { msg.style.display = 'none'; }, 3000);
-                        
-                        document.getElementById('ver_nome').value = '';
-                        document.getElementById('ver_dia').value = '';
-                        document.getElementById('ver_mes').value = '';
-                        document.getElementById('fotoUsuario').style.display = 'none';
-                        
-                        carregarListaNomes();
-                        verificarStatusSistema();
-                    })
-                    .catch((erro) => {
-                        msg.className = 'resultado erro';
-                        msg.innerText = '❌ ERRO AO ENVIAR: ' + erro.message;
-                        msg.style.display = 'block';
-                    });
-
+                const idx = inscricoes.findIndex(i => i && i.nome === nome && i.dia === dia && i.mes === mes && i.status === 'pendente');
+                if (idx !== -1) {
+                    inscricoes[idx].status = 'confirmado'; inscricoes[idx].data_confirmacao = Date.now();
+                    db.ref('inscricoes').set(inscricoes).then(() => {
+                        msg.innerText = '🎉 INSCRIÇÃO CONFIRMADA COM SUCESSO! ✅'; setTimeout(() => msg.style.display = 'none', 3000);
+                        document.getElementById('ver_nome').value = ''; document.getElementById('ver_dia').value = ''; document.getElementById('ver_mes').value = ''; document.getElementById('fotoUsuario').style.display = 'none';
+                        carregarListaNomes(); verificarStatusSistema();
+                    }).catch(e => { msg.className = 'resultado erro'; msg.innerText = '❌ ERRO: ' + e.message; msg.style.display = 'block'; });
                 } else {
-                    msg.className = 'resultado erro';
-                    msg.innerText = '❌ DADOS INCORRETOS COM A BASE DE DADOS';
-                    msg.style.display = 'block';
-                    setTimeout(() => { msg.style.display = 'none'; }, 3000);
+                    msg.className = 'resultado erro'; msg.innerText = '❌ DADOS INCORRETOS COM A BASE DE DADOS'; msg.style.display = 'block'; setTimeout(() => msg.style.display = 'none', 3000);
                 }
             });
         }
