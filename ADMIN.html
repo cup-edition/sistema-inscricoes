@@ -135,6 +135,7 @@
         .status-agendamento {margin-top: 10px; padding: 8px; border-radius: 4px; font-size: 13px; text-align: center; display: none; font-weight: bold;}
         .agendado {background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba;}
         .ativo {background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb;}
+        .erro {background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb;}
 
         /* ✅ BOTÃO PRINCIPAL */
         #btnMostrarCadastro {
@@ -240,14 +241,6 @@
             font-size: 13px;
             font-weight: bold;
         }
-
-        /* ✅ ESTILOS DOS BOTÕES DO MODAL DE AGENDAMENTO */
-        .btn-vermelho {background-color: #e74c3c; color:white;}
-        .btn-vermelho:hover {background-color: #c0392b;}
-        .btn-verde {background-color: #27ae60; color:white;}
-        .btn-verde:hover {background-color: #219653;}
-        .btn-fechar {background-color: #6c757d; color:white;}
-        .btn-fechar:hover {background-color: #5a6268;}
     </style>
 </head>
 <body>
@@ -290,7 +283,7 @@
         </div>
     </div>
 
-    <!-- ✅ MODAL DE AGENDAMENTO -->
+    <!-- ✅ MODAL DE AGENDAMENTO (CORRIGIDO) -->
     <div id="modalAgendar">
         <div class="caixa-agendar">
             <h3>⏰ AGENDAR REINÍCIO AUTOMÁTICO</h3>
@@ -312,8 +305,8 @@
             <div class="botoes-modal">
                 <button type="button" onclick="cancelarAgendamento()" class="btn-vermelho">❌ CANCELAR AGENDAMENTO</button>
                 <div class="grupo-botoes-direita-modal">
-                    <button type="button" onclick="fecharAgendamento()" class="btn-fechar">FECHAR</button>
-                    <button type="button" onclick="salvarAgendamento()" class="btn-verde">💾 SALVAR</button>
+                    <button type="button" onclick="fecharAgendamento()">FECHAR</button>
+                    <button type="button" onclick="salvarAgendamento()">💾 SALVAR</button>
                 </div>
             </div>
         </div>
@@ -396,7 +389,7 @@
     </div>
 
     <script>
-        // ✅ SEUS DADOS DO FIREBASE
+        // ✅ CONFIGURAÇÃO DO FIREBASE
         var firebaseConfig = {
           apiKey: "AIzaSyAR--VWkuPUBzKtJlEHPXnwBwbapB8JY_w",
           authDomain: "sistema-inscricoes-e9241.firebaseapp.com",
@@ -414,20 +407,12 @@
         let quantidadeAnterior = 0;
         let idEmEdicao = null;
 
-        // ✅ FUNÇÕES PARA MOSTRAR/OCULTAR JANELINHA CENTRALIZADA
-        function mostrarCadastro() {
-            document.getElementById('fundoCadastro').style.display = 'flex';
-        }
-        function ocultarCadastro() {
-            document.getElementById('fundoCadastro').style.display = 'none';
-        }
+        function mostrarCadastro() { document.getElementById('fundoCadastro').style.display = 'flex'; }
+        function ocultarCadastro() { document.getElementById('fundoCadastro').style.display = 'none'; }
 
-        // ===== LOGIN =====
         function verificarUsuario() {
             const usuario = document.getElementById('usuarioLogin').value.trim();
-            if (usuario === "campim") {
-                document.getElementById('senhaLogin').focus();
-            }
+            if (usuario === "campim") document.getElementById('senhaLogin').focus();
         }
 
         function fazerLogin() {
@@ -437,7 +422,7 @@
 
             if (usuario === "campim" && senha === "4262") {
                 document.getElementById('telaLogin').style.display = 'none';
-                document.getElementById('conteudoPrincipal').style.display = 'block";
+                document.getElementById('conteudoPrincipal').style.display = 'block';
                 iniciarAtualizacaoAutomatica();
             } else {
                 mensagemErro.style.display = 'block';
@@ -445,7 +430,6 @@
             }
         }
 
-        // ✅ REGRA: SÓ BLOQUEIA QUANDO 0 VAGAS
         function verificarLimiteConfirmados(qtd) {
             const aviso = document.getElementById('avisoLimite');
             const vagasRestantes = LIMITE_MAXIMO - qtd;
@@ -459,7 +443,6 @@
             }
         }
 
-        // ✅ CONVERTER FOTO PARA TEXTO - AGORA COM ALTA QUALIDADE
         function lerFotoComoTexto(arquivo, callback) {
             if (!arquivo) { callback(null); return; }
             var leitor = new FileReader();
@@ -480,7 +463,6 @@
                     const yInicio = (img.height - tamanhoOriginal) / 2;
                     
                     ctx.drawImage(img, xInicio, yInicio, tamanhoOriginal, tamanhoOriginal, 0, 0, tamanho, tamanho);
-                    
                     callback(canvas.toDataURL('image/jpeg', 0.9));
                 };
                 img.src = e.target.result;
@@ -488,7 +470,6 @@
             leitor.readAsDataURL(arquivo);
         }
 
-        // ✅ CADASTRAR NOVA PESSOA
         function cadastrarPessoa() {
             var nome = document.getElementById('cad_nome').value.trim();
             var dia = parseInt(document.getElementById('cad_dia').value);
@@ -536,7 +517,6 @@
             });
         }
 
-        // ✅ ABRIR TELA DE EDIÇÃO
         function abrirEdicao(id) {
             idEmEdicao = id;
             db.ref('inscricoes').once('value').then(snap => {
@@ -553,14 +533,12 @@
             });
         }
 
-        // ✅ FECHAR EDIÇÃO
         function fecharEdicao() {
             document.getElementById('modalEditar').style.display = 'none';
             idEmEdicao = null;
             document.getElementById('edit_foto').value = "";
         }
 
-        // ✅ SALVAR ALTERAções DA EDIÇÃO
         function salvarEdicao() {
             var novoNome = document.getElementById('edit_nome').value.trim();
             var novoDia = parseInt(document.getElementById('edit_dia').value);
@@ -597,7 +575,6 @@
             });
         }
 
-        // ✅ EXCLUIR CADASTRO
         function excluirCadastro() {
             if (confirm('⚠️ TEM CERTEZA QUE DESEJA EXCLUIR ESTE CADASTRO? ESSA AÇÃO NÃO PODE SER DESFEITA!')) {
                 db.ref('inscricoes').once('value').then(snap => {
@@ -610,7 +587,6 @@
             }
         }
 
-        // ✅ BOTÃO INDIVIDUAL: VOLTAR APENAS UM PARA PENDENTE
         function voltarUmParaPendente(id) {
             db.ref('inscricoes').once('value').then(snap => {
                 var lista = snap.val() || [];
@@ -632,7 +608,6 @@
             }
         }
 
-        // ✅ BOTÃO GERAL: VOLTAR TODOS PARA PENDENTE
         function voltarTodosParaPendente() {
             if (confirm('⚠️ ISSO IRÁ MUDAR TODOS PARA PENDENTE E REABRIR AS INSCRIÇÕES. DESEJA CONTINUAR?')) {
                 db.ref('inscricoes').once('value').then(snap => {
@@ -651,7 +626,7 @@
             }
         }
 
-        // ✅ SISTEMA DE AGENDAMENTO (CORRIGIDO E FUNCIONAL)
+        // ✅ AGENDAMENTO CORRIGIDO - AQUI ESTAVA O ERRO PRINCIPAL
         function abrirAgendamento() {
             document.getElementById('modalAgendar').style.display = 'flex';
             
@@ -704,12 +679,17 @@
                 return;
             }
 
+            // ✅ SALVANDO NO BANCO DE DADOS CORRETAMENTE
             db.ref('agendamento_reinicio').set({
                 timestamp: timestamp,
                 executado: false
-            }).then(() => {
-                mostrarStatusAgendamento('✅ AGENDAMENTO SALVO! FUNCIONARÁ AUTOMATICAMENTE.', 'ativo');
+            })
+            .then(() => {
+                mostrarStatusAgendamento('✅ AGENDAMENTO SALVO COM SUCESSO!', 'ativo');
                 setTimeout(() => fecharAgendamento(), 2000);
+            })
+            .catch((erro) => {
+                mostrarStatusAgendamento('❌ ERRO AO SALVAR: ' + erro.message, 'erro');
             });
         }
 
@@ -816,7 +796,6 @@
             db.ref('inscricoes').on('value', function(dados) { atualizarLista(dados); });
         }
 
-        // ✅ FUNÇÃO PARA FECHAR TODAS AS JANELAS AO APERTAR "ESC"
         document.addEventListener('keydown', function(event) {
             if (event.key === 'Escape') {
                 ocultarCadastro();
@@ -825,7 +804,7 @@
             }
         });
 
-        // ✅ AGENDAMENTO AUTOMÁTICO - FUNCIONANDO 100%
+        // ✅ EXECUÇÃO AUTOMÁTICA DO AGENDAMENTO
         db.ref('agendamento_reinicio').on('value', snap => {
             const agendado = snap.val();
             if(agendado && !agendado.executado) {
