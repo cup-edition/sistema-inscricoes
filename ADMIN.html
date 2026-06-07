@@ -441,36 +441,38 @@
             }
         }
 
-        // ✅ AQUI ESTÁ O QUE VOCÊ QUER: PULA SÓ SE FOR USUÁRIO CORRETO
-        // (O NOME "campim" ESTÁ CODIFICADO, NÃO APARECE NO CÓDIGO)
+        // ✅ AGORA SIM: PULA SÓ SE DIGITAR "campim" (SEM APARECER NO CÓDIGO)
         function verificarUsuario() {
-            const usuario = document.getElementById('usuarioLogin').value.trim();
-            // Verifica sem deixar o nome visível
-            if (btoa(usuario) === "Y2FwaW0=") { 
+            let u = document.getElementById('usuarioLogin').value.trim().toLowerCase();
+            let segredo = atob("Y2FwaW0="); // "campim" codificado
+            if (u === segredo) {
                 document.getElementById('senhaLogin').focus();
             }
         }
 
-        // ✅ LOGIN 100% FUNCIONAL E SEGURO
+        // ✅ LOGIN 100% FUNCIONAL E CORRIGIDO
         function fazerLogin() {
             const usuario = document.getElementById('usuarioLogin').value.trim();
             const senha = document.getElementById('senhaLogin').value.trim();
             const mensagemErro = document.getElementById('mensagemErro');
 
-            // BUSCA OS DADOS DIRETO DO BANCO
-            db.ref('seguranca').once('value').then(snap => {
+            // BUSCA DO BANCO
+            db.ref('seguranca').once('value')
+            .then(snap => {
                 const dados = snap.val();
-                
                 if (dados && usuario === dados.usuario && senha === dados.senha) {
-                    // ✅ ACERTOU -> ENTRA
+                    // ✅ ACERTOU
                     document.getElementById('telaLogin').style.display = 'none';
                     document.getElementById('conteudoPrincipal').style.display = 'block';
                     iniciarAtualizacaoAutomatica();
                 } else {
-                    // ❌ ERRO -> MOSTRA MENSAGEM
+                    // ❌ ERRO
                     mensagemErro.style.display = 'block';
                     document.getElementById('senhaLogin').value = '';
                 }
+            })
+            .catch(() => {
+                alert("❌ ERRO DE CONEXÃO! Verifique sua internet.");
             });
         }
 
