@@ -123,6 +123,16 @@
         }
         .botao-lista:hover {background-color: #495057;}
 
+        /* ✅ ESTILO DO BOTÃO REGRAS */
+        .botao-regras {
+            position: fixed; bottom: 20px; left: 20px;
+            background-color: #17a2b8; color: white; border: none;
+            padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; width: auto;
+            font-weight: normal; z-index: 99;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        .botao-regras:hover {background-color: #138496;}
+
         .janela-flutuante {
             display: none; position: fixed;
             top: 50%; left: 50%; transform: translate(-50%, -50%);
@@ -154,6 +164,12 @@
             .titulo-trofeu { font-size: 32px; }
             .titulo-container { gap: 8px; }
             .subtitulo-principal { font-size: 17px; } /* Ainda menor no celular */
+            
+            /* Ajuste para não sobrepor os botões em telas pequenas */
+            .botao-regras, .botao-lista {
+                font-size: 11px;
+                padding: 6px 10px;
+            }
         }
     </style>
 </head>
@@ -168,10 +184,14 @@
         ⏳ PRÓXIMO REINÍCIO: <span id="dataReinicioTexto">Carregando...</span>
     </div>
 
+    <!-- ✅ BOTÃO REGRAS AGORA ABRE JANELA FLUTUANTE -->
+    <button class="botao-regras" onclick="abrirJanelaRegras()">📄 REGRAS</button>
+
     <button class="botao-lista" onclick="abrirJanelaLista()">✅LISTA DE INSCRITOS✅</button>
 
     <div id="fundoEscuro" class="fundo-escuro" onclick="fecharJanela()"></div>
 
+    <!-- ✅ JANELA FLUTUANTE DA LISTA DE INSCRITOS -->
     <div id="janelaLista" class="janela-flutuante">
         <div class="cabecalho-janela">
             <span id="tituloJanela">✅ 0 INSCRITOS CONFIRMADOS ✅</span>
@@ -179,6 +199,23 @@
         </div>
         <div class="conteudo-janela" id="listaConfirmados">
             <p style="text-align:center; color:#666;">Carregando...</p>
+        </div>
+    </div>
+
+    <!-- ✅ NOVA JANELA FLUTUANTE DAS REGRAS -->
+    <div id="janelaRegras" class="janela-flutuante">
+        <div class="cabecalho-janela">
+            <span>📄 REGRAS DA COMPETIÇÃO</span>
+            <button class="fechar-janela" onclick="fecharJanela()">&times;</button>
+        </div>
+        <div class="conteudo-janela">
+            <iframe 
+                src="https://drive.google.com/drive/folders/1NTvQXlL0qJZMVZH5kIL2CZWbz5IJg-ca?usp=sharing" 
+                width="100%" 
+                height="400" 
+                frameborder="0"
+                style="border: none;">
+            </iframe>
         </div>
     </div>
 
@@ -409,9 +446,20 @@
             janela.style.display = 'block';
         }
 
+        // ✅ NOVA FUNÇÃO PARA ABRIR JANELA DAS REGRAS
+        function abrirJanelaRegras() {
+            const fundo = document.getElementById('fundoEscuro');
+            const janela = document.getElementById('janelaRegras');
+            
+            fundo.style.display = 'block';
+            janela.style.display = 'block';
+            janelaAberta = true;
+        }
+
         function fecharJanela() {
             document.getElementById('fundoEscuro').style.display = 'none';
             document.getElementById('janelaLista').style.display = 'none';
+            document.getElementById('janelaRegras').style.display = 'none';
             janelaAberta = false;
         }
 
