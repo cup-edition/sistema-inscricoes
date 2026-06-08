@@ -26,17 +26,16 @@
 
         .container {background: #ffffff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); width: 100%; max-width: 450px; text-align: center;}
         
-        /* ✅ TÍTULO ALINHADO CORRETAMENTE PARA CELULAR E COMPUTADOR */
         .titulo-container {
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 12px; /* Espaçamento entre troféu e texto */
+            gap: 12px;
             margin-bottom: 5px;
-            flex-wrap: nowrap; /* Não quebra linha */
+            flex-wrap: nowrap;
         }
         .titulo-trofeu {
-            font-size: 36px; /* Tamanho do troféu igual ao texto */
+            font-size: 36px;
             line-height: 1;
         }
         .titulo-texto {
@@ -47,21 +46,19 @@
             line-height: 1;
         }
         
-        /* ✅ SUBTÍTULO: DIMINUÍ E CENTRALIZEI AQUI */
         .subtitulo-principal {
             color: #2c3e50;
-            font-size: 19px; /* Antes era 22px, agora menor */
+            font-size: 19px;
             font-weight: 600;
             margin-bottom: 15px;
             letter-spacing: 1px;
-            text-align: center; /* Garante centralização total */
+            text-align: center;
             width: 100%;
             display: block;
         }
         
         p.descricao {color: #666; margin-bottom: 25px; font-size: 15px;}
         
-        /* ✅ MENSAGEM ENCERRADO - ESTILO IGUAL A FOTO */
         .encerrado {
             background-color: #f8d7da;
             color: #721c24;
@@ -96,7 +93,6 @@
         .grupo-campo {margin-bottom: 15px; text-align: left;}
         label {display: block; margin-bottom: 6px; font-weight: bold; color: #555;}
         select, input {width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 16px; background-color: #fff;}
-        /* ✅ AJUSTE PARA OS SELECTS DE DIA E MÊS */
         .data-container {
             display: flex;
             gap: 4%;
@@ -130,7 +126,6 @@
         }
         .botao-lista:hover {background-color: #495057;}
 
-        /* ✅ ESTILO DO NOVO BOTÃO REGRAS */
         .botao-regras {
             position: fixed; bottom: 20px; left: 20px;
             background-color: #17a2b8; color: white; border: none;
@@ -166,14 +161,12 @@
         .data-hora-inscrito {font-size: 12px; color: #666; margin-top: 2px;}
         .fundo-escuro {display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 999;}
 
-        /* ✅ AJUSTE ESPECIAL PARA TELAS PEQUENAS (CELULAR) */
         @media (max-width: 480px) {
             .titulo-texto { font-size: 32px; }
             .titulo-trofeu { font-size: 32px; }
             .titulo-container { gap: 8px; }
-            .subtitulo-principal { font-size: 17px; } /* Ainda menor no celular */
+            .subtitulo-principal { font-size: 17px; }
             
-            /* Ajuste para não sobrepor os botões em telas pequenas */
             .botao-regras, .botao-lista {
                 font-size: 11px;
                 padding: 6px 10px;
@@ -187,12 +180,10 @@
         ⚠️ ATENÇÃO: Restam poucas vagas. Ao atingir 16 confirmados, o sistema será bloqueado automaticamente.
     </div>
 
-    <!-- ✅ AVISO DO PRÓXIMO REINÍCIO -->
     <div id="avisoReinicioAgendado" class="aviso-reinicio-agendado">
         ⏳ PRÓXIMO REINÍCIO: <span id="dataReinicioTexto">Carregando...</span>
     </div>
 
-    <!-- ✅ BOTÃO REGRAS ADICIONADO -->
     <a href="https://docs.google.com/document/d/e/2PACX-1vQ0gM70c4jnQ4q7elOVnWhytTEci6dKq5zUiX_7lAt_m1Wej9ZtubCUBIb0NLfJ0g/pub" target="_blank" class="botao-regras">📄 REGRAS</a>
 
     <button class="botao-lista" onclick="abrirJanelaLista()">✅LISTA DE INSCRITOS✅</button>
@@ -221,14 +212,12 @@
         </div>
 
         <div id="telaNormal">
-            <!-- ✅ TÍTULO ALINHADO PERFEITAMENTE, IGUAL A FOTO -->
             <div class="titulo-container">
                 <span class="titulo-trofeu">🏆</span>
                 <span class="titulo-texto">CUP EDITION</span>
                 <span class="titulo-trofeu">🏆</span>
             </div>
 
-            <!-- ✅ SUBTÍTULO MENOR E CENTRALIZADO -->
             <div class="subtitulo-principal">📝INSCREVA-SE📝</div>
             
             <p class="descricao">Escolha seu nome e preencha a data de nascimento para confirmar sua participação.</p>
@@ -244,7 +233,6 @@
                 <label>DATA DE NASCIMENTO:</label>
                 <div class="foto-container">
                     <div class="data-container">
-                        <!-- ✅ LISTA SUSPENSA DE DIA (01 a 31) COM FUNÇÃO DE PULAR PARA MÊS AO SELECIONAR -->
                         <select id="ver_dia" onkeydown="avancarCampo(event, 'ver_mes')" onchange="pularParaMes()">
                             <option value="">Dia</option>
                             <option value="01">01</option>
@@ -280,7 +268,6 @@
                             <option value="31">31</option>
                         </select>
 
-                        <!-- ✅ LISTA SUSPENSA DE MÊS (JANEIRO a DEZEMBRO) COM FUNÇÃO DE PULAR PARA BOTÃO CONFIRMAR -->
                         <select id="ver_mes" onkeydown="avancarCampo(event, 'botaoConfirmar')" onchange="pularParaBotao()">
                             <option value="">Mês</option>
                             <option value="01">JANEIRO</option>
@@ -329,7 +316,7 @@
             verificarStatusSistema();
             carregarListaNomes();
             setInterval(verificarStatusSistema, 3000);
-            setInterval(verificarAgendamentoEExecutar, 10000); // Verifica a cada 10 segundos
+            setInterval(verificarAgendamentoEExecutar, 10000);
             
             db.ref('inscricoes').on('value', function(snap) {
                 listaCompletaInscricoes = snap.val() || [];
@@ -341,18 +328,15 @@
             });
         };
 
-        // ✅ FUNÇÃO PRINCIPAL DO REINÍCIO - CORRIGIDA E MELHORADA
         async function verificarAgendamentoEExecutar() {
             const snap = await db.ref('agendamento_reinicio').once('value');
             const agendamento = snap.val();
 
-            // Se não tem agendamento ou já foi executado, só mostra aviso se precisar
             if (!agendamento) {
                 document.getElementById('avisoReinicioAgendado').style.display = 'none';
                 return;
             }
 
-            // Mostra quando será o próximo reinício
             if (!agendamento.executado) {
                 const dataHora = new Date(agendamento.timestamp);
                 const dia = String(dataHora.getDate()).padStart(2, '0');
@@ -367,7 +351,6 @@
                 document.getElementById('avisoReinicioAgendado').style.display = 'none';
             }
 
-            // ✅ SE CHEGOU A HORA, EXECUTA O REINÍCIO!
             const agora = Date.now();
             const horarioMarcado = agendamento.timestamp;
 
@@ -375,11 +358,9 @@
                 document.getElementById('avisoReiniciando').style.display = 'block';
                 document.getElementById('telaNormal').style.opacity = '0.5';
 
-                // 1. Pega todas as inscrições
                 const inscSnap = await db.ref('inscricoes').once('value');
                 const lista = inscSnap.val() || [];
 
-                // 2. Muda TODOS os status para PENDENTE e zera data
                 const novaLista = lista.map(insc => {
                     if(insc) {
                         insc.status = 'pendente';
@@ -388,16 +369,10 @@
                     return insc;
                 });
 
-                // 3. Salva tudo de volta
                 await db.ref('inscricoes').set(novaLista);
-                
-                // 4. Reabre as inscrições
                 await db.ref('configuracao').update({inscricoes_abertas: true, ultimo_reinicio: Date.now()});
-                
-                // 5. Marca o agendamento como EXECUTADO para não repetir
                 await db.ref('agendamento_reinicio').update({executado: true});
 
-                // 6. Recarrega a página para atualizar tudo
                 location.reload();
             }
         }
@@ -409,18 +384,16 @@
             }
         }
 
-        // ✅ FUNÇÃO PARA PULAR PARA O MÊS ASSIM QUE SELECIONAR O DIA
         function pularParaMes() {
             const diaSelecionado = document.getElementById('ver_dia').value;
-            if (diaSelecionado !== "") { // Só pula se tiver selecionado um dia válido
+            if (diaSelecionado !== "") {
                 document.getElementById('ver_mes').focus();
             }
         }
 
-        // ✅ FUNÇÃO PARA PULAR DIRETO PARA O BOTÃO CONFIRMAR ASSIM QUE SELECIONAR O MÊS
         function pularParaBotao() {
             const mesSelecionado = document.getElementById('ver_mes').value;
-            if (mesSelecionado !== "") { // Só pula se tiver selecionado um mês válido
+            if (mesSelecionado !== "") {
                 document.getElementById('botaoConfirmar').focus();
             }
         }
@@ -542,12 +515,11 @@
                     var qtdConfirmados = lista.filter(i => i && i.status === 'confirmado').length;
 
                     if (!aberto || qtdConfirmados >= LIMITE_MAXIMO) {
-                        // ✅ AGORA ESPERA 3 SEGUNDOS (IGUAL AS OUTRAS MENSAGENS) PARA MOSTRAR ENCERRADO
                         setTimeout(() => {
                             document.getElementById('telaEncerrado').style.display = 'block';
                             document.getElementById('telaNormal').style.display = 'none';
                             document.getElementById('avisoLimite').style.display = 'none';
-                        }, 3000); // 3000 milissegundos = 3 segundos
+                        }, 3000);
                     } else {
                         document.getElementById('telaEncerrado').style.display = 'none';
                         document.getElementById('telaNormal').style.display = 'block';
@@ -562,6 +534,7 @@
             });
         }
 
+        // ✅ FUNÇÃO CORRIGIDA PARA RECONHECER DATAS DO BANCO
         function confirmarInscricao() {
             var nome = document.getElementById('ver_nome').value.trim();
             var dia = document.getElementById('ver_dia').value;
@@ -593,8 +566,22 @@
                     return;
                 }
 
+                // ✅ AQUI É A PARTE PRINCIPAL CORRIGIDA: COMPARAÇÃO FLEXÍVEL
                 var encontradoIndex = inscricoes.findIndex(insc => {
-                    return insc && insc.nome === nome && insc.dia === dia && insc.mes === mes && insc.status === 'pendente';
+                    if (!insc || insc.status !== 'pendente') return false;
+
+                    // Normaliza os valores para comparar sem erro de formato
+                    const nomeBanco = (insc.nome || "").trim().toLowerCase();
+                    const nomeDigitado = nome.toLowerCase();
+                    
+                    const diaBanco = String(insc.dia || "").padStart(2, '0');
+                    const diaDigitado = dia;
+                    
+                    const mesBanco = String(insc.mes || "").padStart(2, '0');
+                    const mesDigitado = mes;
+
+                    // Verifica se bate tudo
+                    return nomeBanco === nomeDigitado && diaBanco === diaDigitado && mesBanco === mesDigitado;
                 });
 
                 if (encontradoIndex !== -1) {
@@ -605,7 +592,6 @@
                     db.ref('inscricoes').set(inscricoes)
                     .then(() => {
                         msg.innerText = '🎉 INSCRIÇÃO CONFIRMADA COM SUCESSO! ✅';
-                        // ✅ MENSAGEM DE SUCESSO TAMBÉM 3 SEGUNDOS
                         setTimeout(() => { msg.style.display = 'none'; }, 3000);
                         
                         document.getElementById('ver_nome').value = '';
@@ -623,10 +609,20 @@
                     });
 
                 } else {
+                    // ✅ MENSAGEM MELHORADA PARA SABER O QUE ESTÁ ERRANDO
                     msg.className = 'resultado erro';
-                    msg.innerText = '❌ DADOS INCORRETOS COM A BASE DE DADOS';
+                    
+                    // Verifica se o nome existe, mas a data está errada
+                    const nomeExiste = inscricoes.some(insc => insc && insc.nome.trim().toLowerCase() === nome.toLowerCase());
+                    
+                    if (nomeExiste) {
+                        msg.innerText = '❌ DATA DE NASCIMENTO INCORRETA PARA ESTE NOME!';
+                    } else {
+                        msg.innerText = '❌ NOME OU DATA NÃO ENCONTRADOS NA BASE!';
+                    }
+                    
                     msg.style.display = 'block';
-                    setTimeout(() => { msg.style.display = 'none'; }, 3000);
+                    setTimeout(() => { msg.style.display = 'none'; }, 4000);
                 }
             });
         }
