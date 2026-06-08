@@ -96,7 +96,14 @@
         .grupo-campo {margin-bottom: 15px; text-align: left;}
         label {display: block; margin-bottom: 6px; font-weight: bold; color: #555;}
         select, input {width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 16px; background-color: #fff;}
-        input[type="number"] {width: 48%; display: inline-block; margin-right: 2%;}
+        /* ✅ AJUSTE PARA OS SELECTS DE DIA E MÊS */
+        .data-container {
+            display: flex;
+            gap: 4%;
+        }
+        .data-container select {
+            width: 48%;
+        }
         button {background-color: #27ae60; color: white; border: none; padding: 14px; border-radius: 6px; cursor: pointer; font-size: 16px; width: 100%; margin-top: 10px; font-weight: bold; transition: background 0.3s;}
         button:hover {background-color: #219653;}
         button:disabled {background-color: #95a5a6; cursor: not-allowed;}
@@ -236,9 +243,59 @@
             <div class="grupo-campo">
                 <label>DATA DE NASCIMENTO:</label>
                 <div class="foto-container">
-                    <div style="flex: 1;">
-                        <input type="number" id="ver_dia" min="1" max="31" placeholder="Dia" maxlength="2" oninput="limitarDigitos(this, 2); pularParaMes(this)" onkeydown="avancarCampo(event, 'ver_mes')">
-                        <input type="number" id="ver_mes" min="1" max="12" placeholder="Mês" maxlength="2" oninput="limitarDigitos(this, 2); pularParaBotao(this)" onkeydown="avancarCampo(event, 'botaoConfirmar')">
+                    <div class="data-container">
+                        <!-- ✅ LISTA SUSPENSA DE DIA (01 a 31) COM FUNÇÃO DE PULAR PARA MÊS AO SELECIONAR -->
+                        <select id="ver_dia" onkeydown="avancarCampo(event, 'ver_mes')" onchange="pularParaMes()">
+                            <option value="">Dia</option>
+                            <option value="01">01</option>
+                            <option value="02">02</option>
+                            <option value="03">03</option>
+                            <option value="04">04</option>
+                            <option value="05">05</option>
+                            <option value="06">06</option>
+                            <option value="07">07</option>
+                            <option value="08">08</option>
+                            <option value="09">09</option>
+                            <option value="10">10</option>
+                            <option value="11">11</option>
+                            <option value="12">12</option>
+                            <option value="13">13</option>
+                            <option value="14">14</option>
+                            <option value="15">15</option>
+                            <option value="16">16</option>
+                            <option value="17">17</option>
+                            <option value="18">18</option>
+                            <option value="19">19</option>
+                            <option value="20">20</option>
+                            <option value="21">21</option>
+                            <option value="22">22</option>
+                            <option value="23">23</option>
+                            <option value="24">24</option>
+                            <option value="25">25</option>
+                            <option value="26">26</option>
+                            <option value="27">27</option>
+                            <option value="28">28</option>
+                            <option value="29">29</option>
+                            <option value="30">30</option>
+                            <option value="31">31</option>
+                        </select>
+
+                        <!-- ✅ LISTA SUSPENSA DE MÊS (JANEIRO a DEZEMBRO) COM FUNÇÃO DE PULAR PARA BOTÃO CONFIRMAR -->
+                        <select id="ver_mes" onkeydown="avancarCampo(event, 'botaoConfirmar')" onchange="pularParaBotao()">
+                            <option value="">Mês</option>
+                            <option value="01">JANEIRO</option>
+                            <option value="02">FEVEREIRO</option>
+                            <option value="03">MARÇO</option>
+                            <option value="04">ABRIL</option>
+                            <option value="05">MAIO</option>
+                            <option value="06">JUNHO</option>
+                            <option value="07">JULHO</option>
+                            <option value="08">AGOSTO</option>
+                            <option value="09">SETEMBRO</option>
+                            <option value="10">OUTUBRO</option>
+                            <option value="11">NOVEMBRO</option>
+                            <option value="12">DEZEMBRO</option>
+                        </select>
                     </div>
                     <img id="fotoUsuario" class="foto-preview" alt="Foto do usuário">
                 </div>
@@ -352,14 +409,18 @@
             }
         }
 
-        function pularParaMes(campo) {
-            if (campo.value.length === 2) {
+        // ✅ FUNÇÃO PARA PULAR PARA O MÊS ASSIM QUE SELECIONAR O DIA
+        function pularParaMes() {
+            const diaSelecionado = document.getElementById('ver_dia').value;
+            if (diaSelecionado !== "") { // Só pula se tiver selecionado um dia válido
                 document.getElementById('ver_mes').focus();
             }
         }
 
-        function pularParaBotao(campo) {
-            if (campo.value.length === 2) {
+        // ✅ FUNÇÃO PARA PULAR DIRETO PARA O BOTÃO CONFIRMAR ASSIM QUE SELECIONAR O MÊS
+        function pularParaBotao() {
+            const mesSelecionado = document.getElementById('ver_mes').value;
+            if (mesSelecionado !== "") { // Só pula se tiver selecionado um mês válido
                 document.getElementById('botaoConfirmar').focus();
             }
         }
@@ -435,12 +496,6 @@
             janelaAberta = false;
         }
 
-        function limitarDigitos(campo, maximo) {
-            if (campo.value.length > maximo) {
-                campo.value = campo.value.slice(0, maximo);
-            }
-        }
-
         function carregarListaNomes() {
             db.ref('inscricoes').once('value').then(snap => {
                 listaCompletaInscricoes = snap.val() || [];
@@ -509,14 +564,14 @@
 
         function confirmarInscricao() {
             var nome = document.getElementById('ver_nome').value.trim();
-            var dia = parseInt(document.getElementById('ver_dia').value);
-            var mes = parseInt(document.getElementById('ver_mes').value);
+            var dia = document.getElementById('ver_dia').value;
+            var mes = document.getElementById('ver_mes').value;
             var msg = document.getElementById('msg_verificacao');
             msg.style.display = 'none';
 
             if (!nome || !dia || !mes) {
                 msg.className = 'resultado erro';
-                msg.innerText = '❌ Selecione o nome e preencha dia e mês corretamente!';
+                msg.innerText = '❌ Selecione o nome, dia e mês corretamente!';
                 msg.style.display = 'block';
                 setTimeout(() => { msg.style.display = 'none'; }, 3000);
                 return;
