@@ -49,7 +49,16 @@
         }
         @keyframes avisoPiscar { from { opacity: 0.7; } to { opacity: 1; } }
 
-        .secao {background: #ffffff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.2); margin-bottom: 25px;}
+        /* ✅ SEÇÃO DO PAINEL PRINCIPAL COM BORDA VERMELHA */
+        .secao {
+            background: #ffffff; 
+            padding: 20px; 
+            border-radius: 8px; 
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2); 
+            margin-bottom: 25px;
+            border: 3px solid #e74c3c; /* Adicionada borda vermelha no painel */
+        }
+        
         h2 {color: #2c3e50; margin-bottom: 15px; font-size: 18px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;}
         .contador-confirmados {color: #27ae60; font-weight: bold; font-size: 14px; background: #e8f8f0; padding: 4px 8px; border-radius: 4px;}
         .aviso-limite {color: #e74c3c; font-weight: bold; font-size: 14px; background: #ffebee; padding: 4px 8px; border-radius: 4px; animation: piscar 1s infinite; display: none;}
@@ -59,7 +68,15 @@
         input {padding: 8px 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; text-transform: none; font-weight: normal;}
         input[type="number"] {width: 80px;}
         input[type="file"] {padding: 6px; font-size: 13px; border: 1px dashed #27ae60; background: #f8f9fa; text-transform: none; font-weight: normal;}
-        .foto-preview {width: 45px; height: 45px; border-radius: 50%; object-fit: cover; border: 2px solid #ddd;}
+        
+        /* ✅ FOTOS COM BORDA VERMELHA */
+        .foto-preview {
+            width: 45px; 
+            height: 45px; 
+            border-radius: 50%; 
+            object-fit: cover; 
+            border: 2px solid #e74c3c; /* Alterada a borda para vermelho */
+        }
         
         /* ===== ESTILOS GERAIS DOS BOTÕES ===== */
         button {background-color: #27ae60; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 13px; margin-top: 0; transition: background 0.2s; font-weight: bold;}
@@ -79,7 +96,7 @@
         .btn-pendente {background-color: #f39c12; padding: 4px 8px; font-size: 12px; font-weight: bold;}
         .btn-pendente:hover {background-color: #e67e22;}
         
-        /* ✅ GRUPO DE BOTÕES DO TOPO TOTALMENTE ALINHADOS */
+        /* ===== GRUPO DE BOTÕES DO TOPO ===== */
         .container-botoes-topo {
             display: flex;
             flex-direction: column;
@@ -100,7 +117,6 @@
             white-space: nowrap;
         }
 
-        /* AJUSTE PARA O BOTÃO COM CONTADOR RELATIVO */
         .btn-com-notificacao {
             position: relative;
         }
@@ -131,7 +147,7 @@
         .status-confirmado {color: #27ae60; font-weight: bold;}
         .acoes-tabela button {padding: 4px 6px; font-size: 11px; margin: 0 1px; font-weight: bold;}
         
-        /* ✅ BOTÕES DO RODAPÉ ALINHADOS */
+        /* ===== BOTÕES DO RODAPÉ ===== */
         .area-botoes-finais {
             display: flex;
             justify-content: space-between;
@@ -206,7 +222,6 @@
         .botoes-aprovacao {display: flex; gap: 10px; margin-top: 12px;}
         .botoes-aprovacao button {flex: 1; margin-top: 0; padding: 10px; font-size: 12px;}
 
-        /* ✅ BOTÃO CADASTRAR NOVA PESSOA */
         #btnMostrarCadastro {
             background-color: #27ae60;
             color: white;
@@ -745,7 +760,6 @@
             const badge = document.getElementById('badgePedidos');
             const ids = Object.keys(pedidos).filter(id => pedidos[id] && pedidos[id].status === 'pendente');
 
-            // ATUALIZA E EXIBE O CONTADOR NO BOTÃO DO TOPO
             if (ids.length > 0) {
                 badge.innerText = ids.length;
                 badge.style.display = 'block';
@@ -761,6 +775,7 @@
             let html = '';
             ids.forEach(id => {
                 const p = pedidos[id];
+                // Nota: A classe foto-preview abaixo aplicará automaticamente a nova borda vermelha
                 const imagemHtml = p.foto ? `<img src="${p.foto}" class="foto-preview" style="width:70px; height:70px; margin-bottom:10px;">` : `<div style="font-size:30px; margin-bottom:10px;">📄</div>`;
                 
                 html += `
@@ -904,8 +919,7 @@
             }
         });
 
-        /* ===== ✅ TRAVAMENTOS DE SEGURANÇA E ESCAPE ===== */
-        
+        /* ===== TRAVAMENTOS DE SEGURANÇA E ESCAPE ===== */
         document.addEventListener('contextmenu', function(event) {
             event.preventDefault();
             return false;
