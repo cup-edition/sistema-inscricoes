@@ -100,6 +100,26 @@
             white-space: nowrap;
         }
 
+        /* AJUSTE PARA O BOTÃO COM CONTADOR RELATIVO */
+        .btn-com-notificacao {
+            position: relative;
+        }
+        /* BALÃO DE NOTIFICAÇÃO DO BOTÃO PEDIDOS */
+        .badge-pedidos {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            background-color: #e74c3c;
+            color: white;
+            border: 2px solid white;
+            border-radius: 50%;
+            padding: 2px 6px;
+            font-size: 10px;
+            font-weight: bold;
+            display: none;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
         .mensagem-copia {font-size: 12px; color: #27ae60; font-weight: bold; margin-left: 10px; display: none;}
         .resultado {margin-top: 12px; padding: 10px; border-radius: 4px; font-weight: bold;}
         .sucesso {background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb;}
@@ -325,7 +345,10 @@
 
             <div class="container-botoes-topo">
                 <div class="linha-botoes">
-                    <button class="btn-amarelo" onclick="abrirAprovacao()">📋 PEDIDOS DE CADASTRO</button>
+                    <button class="btn-amarelo btn-com-notificacao" onclick="abrirAprovacao()">
+                        📋 PEDIDOS DE CADASTRO
+                        <span id="badgePedidos" class="badge-pedidos">0</span>
+                    </button>
                     <button class="btn-ocultar-coluna" onclick="alternarVisibilidadeData()">🙈 OCULTAR DATA NASC.</button>
                     <button class="btn-agendar" onclick="abrirAgendamento()">⏰ AGENDAR REINÍCIO</button>
                 </div>
@@ -374,7 +397,7 @@
             <h3>📋 CADASTRAR NOVA PESSOA</h3>
             
             <label>NOME / APELIDO:</label>
-            <input type="text" id="cad_nome" placeholder="DIGITE O NOME OU APELIDO" onkeydown="pularCampo(event, 'cad_dia')">
+            <input type="text" id="cad_nome" placeholder="DIGITE O NOME OR APELIDO" onkeydown="pularCampo(event, 'cad_dia')">
 
             <label>DIA DE NASCIMENTO:</label>
             <input type="number" id="cad_dia" min="1" max="31" placeholder="DIA" maxlength="2" oninput="limitarDoisDigitos(this)" onkeydown="pularCampo(event, 'cad_mes')">
@@ -432,7 +455,6 @@
             }
         }
 
-        /* ✅ RESTAURADO: Verifica o usuário digitado e joga o foco para a senha */
         function verificarUsuario() {
             let u = document.getElementById('usuarioLogin').value.trim().toLowerCase();
             if(u.length > 0) {
@@ -720,7 +742,16 @@
 
         function atualizarListaPedidos(pedidos) {
             const container = document.getElementById('listaPedidosAprovacao');
+            const badge = document.getElementById('badgePedidos');
             const ids = Object.keys(pedidos).filter(id => pedidos[id] && pedidos[id].status === 'pendente');
+
+            // ATUALIZA E EXIBE O CONTADOR NO BOTÃO DO TOPO
+            if (ids.length > 0) {
+                badge.innerText = ids.length;
+                badge.style.display = 'block';
+            } else {
+                badge.style.display = 'none';
+            }
 
             if (ids.length === 0) {
                 container.innerHTML = '<p style="text-align:center; color:#888; padding:20px;">NENHUM PEDIDO PENDENTE.</p>';
@@ -875,36 +906,28 @@
 
         /* ===== ✅ TRAVAMENTOS DE SEGURANÇA E ESCAPE ===== */
         
-        // 1. Bloqueia o clique com o botão direito em toda a página de forma robusta
         document.addEventListener('contextmenu', function(event) {
             event.preventDefault();
             return false;
         });
 
-        // 2. Bloqueia F12 e as combinações de teclas especificadas
         document.addEventListener('keydown', function(event) {
-            // Permite fechar os modais com a tecla 'Escape' normalmente
             if (event.key === 'Escape') {
                 ocultarCadastro(); fecharEdicao(); fecharAgendamento(); fecharAprovacao();
                 return;
             }
 
-            // Bloqueia a tecla F12
             if (event.key === 'F12') {
                 event.preventDefault();
                 return false;
             }
 
-            // Bloqueia combinações usando a tecla CTRL (Apenas se não for um campo de texto digitando normalmente letras)
             if (event.ctrlKey) {
-                // Atalhos com Shift (Ctrl+Shift+I e Ctrl+Shift+J)
                 if (event.shiftKey && (event.key === 'I' || event.key === 'i' || event.key === 'J' || event.key === 'j')) {
                     event.preventDefault();
                     return false;
                 }
                 
-                // Atalhos diretos: Ctrl+U, Ctrl+S, Ctrl+C, Ctrl+V
-                // Adicionamos a checagem se o usuário NÃO está digitando nos campos de texto para não quebrar a digitação nativa das letras.
                 const digitandoEmInput = (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA');
                 
                 if (!digitandoEmInput) {
@@ -916,7 +939,6 @@
                         return false;
                     }
                 } else {
-                    // Se estiver em um input, bloqueia especificamente a tentativa de CÓPIA e COLAGEM (Ctrl+C / Ctrl+V / Ctrl+U / Ctrl+S)
                     if (event.key === 'u' || event.key === 'U' || 
                         event.key === 's' || event.key === 'S' || 
                         event.key === 'c' || event.key === 'C' || 
@@ -930,5 +952,3 @@
     </script>
 </body>
 </html>
-
-```
