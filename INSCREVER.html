@@ -32,14 +32,21 @@
             background-color: #6c757d;
             color: white;
             border: none;
-            padding: 8px 12px;
+            padding: 10px 15px;
             border-radius: 4px;
             cursor: pointer;
-            font-size: 12px;
+            font-size: 14px;
             width: auto;
             font-weight: normal;
             z-index: 99;
             box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            /* NOVAS REGRAS PARA ALINHAR TEXTO */
+            white-space: nowrap;
+            text-align: center;
+            line-height: 1.4;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         .botao-cadastrar:hover {background-color: #495057;}
 
@@ -195,9 +202,17 @@
             .titulo-container { gap: 8px; }
             .subtitulo-principal { font-size: 17px; }
             
-            .botao-regras, .botao-lista, .botao-cadastrar {
+            .botao-regras, .botao-lista {
                 font-size: 11px;
                 padding: 6px 10px;
+            }
+
+            /* AJUSTE ESPECIAL PARA O BOTÃO NO CELULAR */
+            .botao-cadastrar {
+                font-size: 12px;
+                padding: 8px 12px;
+                width: auto;
+                max-width: 95%;
             }
         }
     </style>
@@ -238,7 +253,7 @@
         <div class="conteudo-janela">
             <div class="grupo-campo">
                 <label>NOME COMPLETO: *</label>
-                <!-- Adicionado oninput para transformar tudo em maiúsculo -->
+                <!-- Já está com o código para maiúsculo -->
                 <input type="text" id="novoNome" placeholder="Digite seu nome" oninput="this.value = this.value.toUpperCase()">
                 <div class="aviso-obrigatorio" id="avisoNome">Campo obrigatório</div>
             </div>
