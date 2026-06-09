@@ -15,7 +15,7 @@
             justify-content: flex-start; 
             min-height: 100vh;
             padding: 20px;
-            padding-top: 80px; /* ✅ ABAIXOU SÓ MAIS UM POUQUINHO (antes era 60) */
+            padding-top: 80px;
             position: relative;
         }
         
@@ -59,6 +59,21 @@
         }
         .botao-cadastrar:hover {background-color: #495057;}
 
+        .aviso-proxima-inscricao {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+            padding: 10px 15px;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 14px;
+            width: 100%;
+            max-width: 450px;
+            text-align: center;
+            margin: 30px 0 40px 0; /* ✅ AUMENTEI A MARGEM INFERIOR PARA ABAIXAR MAIS A CAIXA */
+            display: none;
+        }
+
         .container {
             background: #ffffff;
             padding: 30px;
@@ -67,7 +82,7 @@
             width: 100%;
             max-width: 450px;
             text-align: center;
-            margin-top: 80px; /* ✅ ABAIXOU SÓ MAIS UM POUQUINHO (antes era 60) */
+            margin-top: 0;
         }
         
         .titulo-container {
@@ -140,7 +155,6 @@
         }
         
         .aviso-reiniciando {background-color: #f39c12; color: #fff; border: 1px solid #e67e22; padding: 12px; border-radius: 6px; font-weight: bold; font-size: 15px; margin-bottom: 15px; display: none;}
-        .aviso-reinicio-agendado {background-color: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; padding: 10px; border-radius: 6px; font-weight: bold; font-size: 14px; margin-bottom: 15px; display: none;}
         .grupo-campo {margin-bottom: 15px; text-align: left;}
         label {display: block; margin-bottom: 6px; font-weight: bold; color: #555;}
         select, input {width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 16px; background-color: #fff;}
@@ -247,32 +261,27 @@
             }
 
             body {
-                padding-top: 60px; /* ✅ ABAIXOU SÓ MAIS UM POUQUINHO NO CELULAR (antes era 40) */
+                padding-top: 60px;
             }
 
-            .container {
-                margin-top: 70px; /* ✅ ABAIXOU SÓ MAIS UM POUQUINHO NO CELULAR (antes era 50) */
+            .aviso-proxima-inscricao {
+                margin: 25px 0 35px 0; /* ✅ AJUSTE PARA CELULAR TAMBÉM */
             }
         }
     </style>
 
-    <!-- BLOQUEIO DE ATALHOS E BOTÃO DIREITO -->
     <script>
-        // Bloqueia o botão direito do mouse
         document.addEventListener('contextmenu', function(e) {
             e.preventDefault();
             return false;
         });
 
-        // Bloqueia atalhos de teclado para ver código
         document.addEventListener('keydown', function(e) {
-            // F12
             if (e.key === 'F12' || e.keyCode === 123) {
                 e.preventDefault();
                 return false;
             }
 
-            // Ctrl+U, Ctrl+S, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+C, Ctrl+V
             if (e.ctrlKey && (
                 e.key === 'u' || e.key === 's' || e.key === 'c' || e.key === 'v' ||
                 (e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'i' || e.key === 'j'))
@@ -281,7 +290,6 @@
                 return false;
             }
 
-            // Ctrl+U (para outros navegadores)
             if (e.ctrlKey && e.keyCode === 85) {
                 e.preventDefault();
                 return false;
@@ -293,12 +301,12 @@
 
     <button class="botao-cadastrar" onclick="abrirJanelaCadastro()">SOU NOVO, QUERO ME CADASTRAR😎</button>
 
-    <div id="avisoLimite" class="aviso-topo">
-        ⚠️ ATENÇÃO: Restam poucas vagas. Ao atingir 16 confirmados, o sistema será bloqueado automaticamente.
+    <div id="avisoProximaInscricao" class="aviso-proxima-inscricao">
+        ⏳ PRÓXIMA INSCRIÇÃO EM: <span id="dataReinicioTexto">Carregando...</span>
     </div>
 
-    <div id="avisoReinicioAgendado" class="aviso-reinicio-agendado">
-        ⏳ PRÓXIMO REINÍCIO: <span id="dataReinicioTexto">Carregando...</span>
+    <div id="avisoLimite" class="aviso-topo">
+        ⚠️ ATENÇÃO: Restam poucas vagas. Ao atingir 16 confirmados, o sistema será bloqueado automaticamente.
     </div>
 
     <a href="https://docs.google.com/document/d/e/2PACX-1vQ0gM70c4jnQ4q7elOVnWhytTEci6dKq5zUiX_7lAt_m1Wej9ZtubCUBIb0NLfJ0g/pub" target="_blank" class="botao-regras">📄 REGRAS</a>
@@ -667,7 +675,7 @@
             const agendamento = snap.val();
 
             if (!agendamento) {
-                document.getElementById('avisoReinicioAgendado').style.display = 'none';
+                document.getElementById('avisoProximaInscricao').style.display = 'none';
                 return;
             }
 
@@ -680,9 +688,9 @@
                 const min = String(dataHora.getMinutes()).padStart(2, '0');
                 
                 document.getElementById('dataReinicioTexto').innerText = `${dia}/${mes}/${ano} às ${hora}:${min}`;
-                document.getElementById('avisoReinicioAgendado').style.display = 'block';
+                document.getElementById('avisoProximaInscricao').style.display = 'block';
             } else {
-                document.getElementById('avisoReinicioAgendado').style.display = 'none';
+                document.getElementById('avisoProximaInscricao').style.display = 'none';
             }
 
             const agora = Date.now();
