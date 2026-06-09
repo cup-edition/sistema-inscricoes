@@ -56,7 +56,9 @@
         input[type="number"] {width: 80px;}
         input[type="file"] {padding: 6px; font-size: 13px; border: 1px dashed #27ae60; background: #f8f9fa; text-transform: none; font-weight: normal;}
         .foto-preview {width: 45px; height: 45px; border-radius: 50%; object-fit: cover; border: 2px solid #ddd;}
-        button {background-color: #27ae60; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 13px; margin-top: 8px; margin-right: 8px; transition: background 0.2s; font-weight: bold;}
+        
+        /* ===== ESTILOS GERAIS DOS BOTÕES ===== */
+        button {background-color: #27ae60; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 13px; margin-top: 0; transition: background 0.2s; font-weight: bold;}
         button:hover {background-color: #219653;}
         .btn-vermelho {background-color: #e74c3c;}
         .btn-vermelho:hover {background-color: #c0392b;}
@@ -64,7 +66,7 @@
         .btn-amarelo:hover {background-color: #e67e22;}
         .btn-roxo {background-color: #9b59b6;}
         .btn-roxo:hover {background-color: #8e44ad;}
-        .btn-ocultar-coluna, .btn-sorteio, .btn-agendar, .btn-inscricao, .btn-live {background-color: #9b59b6; padding: 5px 10px; font-size: 12px; border-radius: 4px; font-weight: bold;}
+        .btn-ocultar-coluna, .btn-sorteio, .btn-agendar, .btn-inscricao, .btn-live {background-color: #9b59b6; padding: 6px 12px; font-size: 12px; border-radius: 4px; font-weight: bold;}
         .btn-ocultar-coluna:hover, .btn-sorteio:hover, .btn-agendar:hover, .btn-inscricao:hover, .btn-live:hover {background-color: #8e44ad;}
         .btn-live {background-color: #e74c3c;}
         .btn-live:hover {background-color: #c0392b;}
@@ -72,6 +74,28 @@
         .btn-editar:hover {background-color: #2980b9;}
         .btn-pendente {background-color: #f39c12; padding: 4px 8px; font-size: 12px; font-weight: bold;}
         .btn-pendente:hover {background-color: #e67e22;}
+        
+        /* ✅ GRUPO DE BOTÕES DO TOPO TOTALMENTE ALINHADOS */
+        .container-botoes-topo {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            width: 100%;
+            margin-top: 10px;
+        }
+        .linha-botoes {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            width: 100%;
+        }
+        .linha-botoes button {
+            flex: 1;
+            min-width: 140px;
+            text-align: center;
+            white-space: nowrap;
+        }
+
         .mensagem-copia {font-size: 12px; color: #27ae60; font-weight: bold; margin-left: 10px; display: none;}
         .resultado {margin-top: 12px; padding: 10px; border-radius: 4px; font-weight: bold;}
         .sucesso {background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb;}
@@ -83,18 +107,20 @@
         .status-confirmado {color: #27ae60; font-weight: bold;}
         .acoes-tabela button {padding: 4px 6px; font-size: 11px; margin: 0 1px; font-weight: bold;}
         
+        /* ✅ BOTÕES DO RODAPÉ ALINHADOS */
         .area-botoes-finais {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-top: 10px;
-            flex-wrap: nowrap;
-            gap: 8px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
             width: 100%;
         }
         .grupo-botoes-direita {
             display: flex;
             gap: 8px;
+            flex-wrap: wrap;
         }
 
         .carregando {color: #3498db; font-style: italic; font-weight: bold;}
@@ -137,44 +163,53 @@
         .ativo {background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb;}
         .erro {background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb;}
 
-        /* ✅ BOTÃO PRINCIPAL */
+        /* ===== MODAL DE PEDIDOS DE CADASTRO ===== */
+        #modalAprovacao {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: none; align-items: center; justify-content: center;
+            z-index: 99999;
+        }
+        .caixa-aprovacao {
+            background: white; padding: 25px; border-radius: 12px;
+            width: 100%; max-width: 450px; max-height: 85vh;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+            display: flex; flex-direction: column;
+        }
+        .caixa-aprovacao h3 {margin-bottom: 15px; color: #2c3e50; text-align: center; font-weight: bold;}
+        .conteudo-pedidos {overflow-y: auto; flex: 1; padding-right: 5px;}
+        .item-pedido {border: 1px solid #ddd; border-radius: 8px; padding: 15px; margin-bottom: 12px; background: #f9f9f9; text-align: center;}
+        .botoes-aprovacao {display: flex; gap: 10px; margin-top: 12px;}
+        .botoes-aprovacao button {flex: 1; margin-top: 0; padding: 10px; font-size: 12px;}
+
+        /* ✅ BOTÃO CADASTRAR NOVA PESSOA */
         #btnMostrarCadastro {
             background-color: #27ae60;
             color: white;
             border: none;
-            padding: 8px 12px;
+            padding: 8px 15px;
             border-radius: 4px;
             cursor: pointer;
             font-size: 13px;
             font-weight: bold;
             transition: background 0.2s;
-            margin: 0;
             white-space: nowrap;
         }
-        #btnMostrarCadastro:hover {
-            background-color: #219653;
-        }
+        #btnMostrarCadastro:hover {background-color: #219653;}
 
-        /* ✅ JANELINHA DE CADASTRO - TOTALMENTE CENTRALIZADA */
+        /* ===== JANELINHA DE CADASTRO ===== */
         #fundoCadastro {
             display: none;
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background-color: rgba(0, 0, 0, 0.6);
-            align-items: center;
-            justify-content: center;
+            align-items: center; justify-content: center;
             z-index: 9999;
         }
-
         #janelaCadastro {
-            background: #ffffff;
-            border-radius: 8px;
+            background: #ffffff; border-radius: 8px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-            padding: 20px;
-            width: 340px;
-            position: relative;
+            padding: 20px; width: 340px; position: relative;
         }
-
-        /* ✅ BOTÃO DE FECHAR (X) NO CANTO SUPERIOR DIREITO */
         .botao-fechar {
             position: absolute; top: 10px; right: 10px;
             background: #e74c3c; color: white; border: none;
@@ -184,36 +219,12 @@
             padding: 0; line-height: 1;
         }
         .botao-fechar:hover {background: #c0392b;}
-
-        #janelaCadastro h3 {
-            color: #2c3e50; font-size: 16px; margin-bottom: 15px;
-            display: flex; align-items: center; gap: 8px;
-            font-weight: bold; padding-right: 20px;
-        }
-        #janelaCadastro label {
-            font-size: 14px; margin-bottom: 4px;
-            display: block; font-weight: bold;
-        }
-        #janelaCadastro input[type="text"],
-        #janelaCadastro input[type="number"] {
-            width: 100%; padding: 8px 12px; margin-bottom: 10px;
-            border: 1px solid #ccc; border-radius: 4px;
-            text-transform: none; font-weight: normal;
-        }
-        #janelaCadastro input[type="file"] {
-            width: 100%; padding: 6px; border: 1px dashed #27ae60;
-            border-radius: 4px; background: #f8f9fa;
-            margin-bottom: 15px; text-transform: none; font-weight: normal;
-        }
-        #btnCadastrarPessoa {
-            background-color: #28a745; color: white; border: none;
-            padding: 10px 15px; border-radius: 4px;
-            font-size: 14px; cursor: pointer;
-            width: 100%; font-weight: bold;
-        }
-        #msg_cadastro {
-            margin-top: 10px; font-size: 13px; font-weight: bold;
-        }
+        #janelaCadastro h3 {color: #2c3e50; font-size: 16px; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; font-weight: bold; padding-right: 20px;}
+        #janelaCadastro label {font-size: 14px; margin-bottom: 4px; display: block; font-weight: bold;}
+        #janelaCadastro input[type="text"], #janelaCadastro input[type="number"] {width: 100%; padding: 8px 12px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 4px; text-transform: none; font-weight: normal;}
+        #janelaCadastro input[type="file"] {width: 100%; padding: 6px; border: 1px dashed #27ae60; border-radius: 4px; background: #f8f9fa; margin-bottom: 15px; text-transform: none; font-weight: normal;}
+        #btnCadastrarPessoa {background-color: #28a745; color: white; border: none; padding: 10px 15px; border-radius: 4px; font-size: 14px; cursor: pointer; width: 100%; font-weight: bold;}
+        #msg_cadastro {margin-top: 10px; font-size: 13px; font-weight: bold;}
     </style>
 </head>
 <body>
@@ -228,7 +239,6 @@
         </div>
     </div>
 
-    <!-- ✅ MODAL DE EDIÇÃO -->
     <div id="modalEditar">
         <div class="caixa-editar">
             <h3>📝 EDITAR CADASTRO <span id="editId"></span></h3>
@@ -256,7 +266,6 @@
         </div>
     </div>
 
-    <!-- ✅ MODAL DE AGENDAMENTO (CORRIGIDO) -->
     <div id="modalAgendar">
         <div class="caixa-agendar">
             <h3>⏰ AGENDAR REINÍCIO AUTOMÁTICO</h3>
@@ -285,10 +294,21 @@
         </div>
     </div>
 
+    <div id="modalAprovacao">
+        <div class="caixa-aprovacao">
+            <h3>📋 PEDIDOS DE CADASTRO PENDENTES</h3>
+            <div class="conteudo-pedidos" id="listaPedidosAprovacao">
+                <p style="text-align:center; color:#888; padding: 20px;">NENHUM PEDIDO PENDENTE.</p>
+            </div>
+            <div class="botoes-modal" style="margin-top: 15px; justify-content: flex-end;">
+                <button type="button" onclick="fecharAprovacao()">FECHAR</button>
+            </div>
+        </div>
+    </div>
+
     <div id="conteudoPrincipal">
         <h1>🔐 PAINEL ADMINISTRATIVO</h1>
-        <div class="aviso-link">
-        </div>
+        <div class="aviso-link"></div>
 
         <div id="avisoNovaConfirmacao">🎉 NOVA INSCRIÇÃO CONFIRMADA!</div>
 
@@ -297,15 +317,21 @@
                 📊 LISTA DE INSCRIÇÕES 
                 <span id="contadorConfirmados" class="contador-confirmados"></span>
                 <div id="avisoLimite" class="aviso-limite">⚠️ LIMITE DE 16 CONFIRMADOS ATINGIDO! INSCRIÇÕES ENCERRADAS AUTOMATICAMENTE.</div>
-                <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+            </h2>
+
+            <div class="container-botoes-topo">
+                <div class="linha-botoes">
+                    <button class="btn-amarelo" onclick="abrirAprovacao()">📋 PEDIDOS DE CADASTRO</button>
                     <button class="btn-ocultar-coluna" onclick="alternarVisibilidadeData()">🙈 OCULTAR DATA NASC.</button>
                     <button class="btn-agendar" onclick="abrirAgendamento()">⏰ AGENDAR REINÍCIO</button>
+                </div>
+                <div class="linha-botoes">
                     <button class="btn-inscricao" onclick="window.open('https://endrilsilva.github.io/sistema-inscricoes/INSCREVER.html', '_blank')">📝 SITE DE INSCRIÇÃO</button>
                     <button class="btn-sorteio" onclick="window.open('https://endrilsilva.github.io/sorteio-nomes/SORTEIO.html', '_blank')">🎰 SITE DE SORTEIO</button>
                     <button class="btn-live" onclick="window.open('https://meet.google.com/esn-aqxa-gdi', '_blank')">🔴 LIVE</button>
-                    <span class="mensagem-copia" id="msgCopia">COPIADO!</span>
                 </div>
-            </h2>
+                <span class="mensagem-copia" id="msgCopia">COPIADO!</span>
+            </div>
 
             <table id="tabelaInscritos">
                 <thead>
@@ -339,21 +365,17 @@
 
     <div id="fundoCadastro">
         <div id="janelaCadastro">
-            <!-- ✅ BOTÃO X DE FECHAR NO LADO DIREITO -->
             <button class="botao-fechar" onclick="ocultarCadastro()">&times;</button>
             
             <h3>📋 CADASTRAR NOVA PESSOA</h3>
             
-            <!-- ✅ TEXTO ALTERADO: NOME / APELIDO -->
             <label>NOME / APELIDO:</label>
             <input type="text" id="cad_nome" placeholder="DIGITE O NOME OU APELIDO" onkeydown="pularCampo(event, 'cad_dia')">
 
             <label>DIA DE NASCIMENTO:</label>
-            <!-- ✅ LIMITE DE 2 DÍGITOS + PULAR COM ENTER -->
             <input type="number" id="cad_dia" min="1" max="31" placeholder="DIA" maxlength="2" oninput="limitarDoisDigitos(this)" onkeydown="pularCampo(event, 'cad_mes')">
 
             <label>MÊS DE NASCIMENTO:</label>
-            <!-- ✅ LIMITE DE 2 DÍGITOS + PULAR COM ENTER -->
             <input type="number" id="cad_mes" min="1" max="12" placeholder="MÊS" maxlength="2" oninput="limitarDoisDigitos(this)" onkeydown="pularCampo(event, 'cad_foto')">
 
             <label>📸 FOTO DE PERFIL (OPCIONAL):</label>
@@ -366,7 +388,6 @@
     </div>
 
     <script>
-        // ✅ CONFIGURAÇÃO DO FIREBASE (CORRETA E COMPLETA)
         var firebaseConfig = {
           apiKey: "AIzaSyAR--VWkuPUBzKtJlEHPXnwBwbapB8JY_w",
           authDomain: "sistema-inscricoes-e9241.firebaseapp.com",
@@ -384,12 +405,8 @@
         let quantidadeAnterior = 0;
         let idEmEdicao = null;
 
-        // ✅ GARANTIR CONEXÃO E REGRAS
         db.ref('.info/connected').on('value', function(snap) {
-            if (snap.val() === true) {
-                // Conectado
-            } else {
-                // Desconectado - tentar reconectar
+            if (snap.val() !== true) {
                 firebase.database().goOnline();
             }
         });
@@ -397,62 +414,47 @@
         function mostrarCadastro() { document.getElementById('fundoCadastro').style.display = 'flex'; }
         function ocultarCadastro() { document.getElementById('fundoCadastro').style.display = 'none'; }
 
-        // ✅ FUNÇÃO: Limitar campo para só 2 dígitos
         function limitarDoisDigitos(campo) {
             if (campo.value.length > 2) {
                 campo.value = campo.value.slice(0, 2);
             }
         }
 
-        // ✅ FUNÇÃO: Pular para o próximo campo ao apertar ENTER
         function pularCampo(event, proximoId) {
             if (event.key === 'Enter') {
-                event.preventDefault(); // Evita enviar formulário
+                event.preventDefault();
                 const proximoCampo = document.getElementById(proximoId);
-                if (proximoCampo) {
-                    proximoCampo.focus(); // Vai para o próximo
-                }
+                if (proximoCampo) { proximoCampo.focus(); }
             }
         }
 
-        // ✅ PULA SÓ SE DIGITAR "campim" (BUSCA NO FIREBASE)
         function verificarUsuario() {
             let u = document.getElementById('usuarioLogin').value.trim().toLowerCase();
-            // Vamos verificar só se já tem algo digitado
             if(u.length > 0) {
-                // A lógica de pular continua, mas o login ainda confere no banco
-                if(u === 'campim') {
-                    document.getElementById('senhaLogin').focus();
-                }
+                if(u === 'campim') { document.getElementById('senhaLogin').focus(); }
             }
         }
 
-        // ✅ LOGIN 100% BUSCANDO NO FIREBASE (CORRIGIDO SEM ERRO)
         function fazerLogin() {
             const usuario = document.getElementById('usuarioLogin').value.trim();
             const senha = document.getElementById('senhaLogin').value.trim();
             const mensagemErro = document.getElementById('mensagemErro');
 
-            // ✅ BUSCA NO BANCO DE DADOS DO FIREBASE
             db.ref('seguranca').once('value')
             .then(snap => {
                 const dados = snap.val();
-                // Confere se existe e se os dados batem
                 if (dados && usuario === dados.usuario && senha === dados.senha) {
-                    // ✅ ACERTOU
                     document.getElementById('telaLogin').style.display = 'none';
                     document.getElementById('conteudoPrincipal').style.display = 'block';
                     iniciarAtualizacaoAutomatica();
                 } else {
-                    // ❌ ERRO
                     mensagemErro.style.display = 'block';
                     document.getElementById('senhaLogin').value = '';
                 }
             })
             .catch(erro => {
-                // ✅ TRATAMENTO DE ERRO MELHORADO
-                alert("❌ Problema ao conectar: Verifique se as regras do Firebase estão configuradas como abaixo!");
-                console.error("Detalhe do erro:", erro);
+                alert("❌ Problema ao conectar à base de dados.");
+                console.error(erro);
             });
         }
 
@@ -480,7 +482,6 @@
                     canvas.width = tamanho;
                     canvas.height = tamanho;
                     var ctx = canvas.getContext('2d');
-                    
                     ctx.imageSmoothingEnabled = true;
                     ctx.imageSmoothingQuality = 'high';
                     
@@ -517,16 +518,11 @@
             lerFotoComoTexto(arquivoFoto, function(textoDaFoto) {
                 db.ref('inscricoes').once('value').then(snap => {
                     var inscricoes = snap.val() || [];
-                    var novoId = inscricoes.length > 0 ? Math.max(...inscricoes.map(i => i.id)) + 1 : 1;
+                    var novoId = inscricoes.length > 0 ? Math.max(...inscricoes.filter(Boolean).map(i => i.id || 0)) + 1 : 1;
                     
                     inscricoes.push({
-                        id: novoId,
-                        nome: nome,
-                        dia: dia,
-                        mes: mes,
-                        status: 'pendente',
-                        foto: textoDaFoto || "",
-                        data_confirmacao: null
+                        id: novoId, nome: nome, dia: dia, mes: mes,
+                        status: 'pendente', foto: textoDaFoto || "", data_confirmacao: null
                     });
                     
                     db.ref('inscricoes').set(inscricoes).then(() => {
@@ -592,11 +588,7 @@
                         return item;
                     });
 
-                    if(alterado){
-                        db.ref('inscricoes').set(lista).then(() => {
-                            fecharEdicao();
-                        });
-                    }
+                    if(alterado){ db.ref('inscricoes').set(lista).then(() => { fecharEdicao(); }); }
                 });
             });
         }
@@ -606,9 +598,7 @@
                 db.ref('inscricoes').once('value').then(snap => {
                     var lista = snap.val() || [];
                     var novaLista = lista.filter(insc => insc && insc.id !== idEmEdicao);
-                    db.ref('inscricoes').set(novaLista).then(() => {
-                        fecharEdicao();
-                    });
+                    db.ref('inscricoes').set(novaLista).then(() => { fecharEdicao(); });
                 });
             }
         }
@@ -652,10 +642,8 @@
             }
         }
 
-        // ✅ AGENDAMENTO CORRIGIDO
         function abrirAgendamento() {
             document.getElementById('modalAgendar').style.display = 'flex';
-            
             const hoje = new Date();
             const dia = String(hoje.getDate()).padStart(2, '0');
             const mes = String(hoje.getMonth() + 1).padStart(2, '0');
@@ -668,11 +656,9 @@
                     const dataObj = new Date(dados.timestamp);
                     const diaAg = String(dataObj.getDate()).padStart(2, '0');
                     const mesAg = String(dataObj.getMonth() + 1).padStart(2, '0');
-                    const anoAg = dataObj.getFullYear();
                     const horaAg = String(dataObj.getHours()).padStart(2, '0');
                     const minAg = String(dataObj.getMinutes()).padStart(2, '0');
-                    
-                    mostrarStatusAgendamento(`⏸️ AGENDADO PARA ${horaAg}:${minAg}H DE ${diaAg}/${mesAg}/${anoAg}`, 'agendado');
+                    mostrarStatusAgendamento(`⏸️ AGENDADO PARA ${horaAg}:${minAg}H DE ${diaAg}/${mesAg}/${dataObj.getFullYear()}`, 'agendado');
                 } else {
                     document.getElementById('statusAgendamento').style.display = 'none';
                 }
@@ -689,15 +675,7 @@
             }
 
             const partesData = dataInput.split('-');
-            const anoEscolhido = parseInt(partesData[0]);
-            const mesEscolhido = parseInt(partesData[1]) - 1;
-            const diaEscolhido = parseInt(partesData[2]);
-
-            const partesHora = horaInput.split(':');
-            const horaEscolhida = parseInt(partesHora[0]);
-            const minutoEscolhido = parseInt(partesHora[1]);
-
-            const dataHoraMarcada = new Date(anoEscolhido, mesEscolhido, diaEscolhido, horaEscolhida, minutoEscolhido, 0);
+            const dataHoraMarcada = new Date(parseInt(partesData[0]), parseInt(partesData[1]) - 1, parseInt(partesData[2]), parseInt(horaInput.split(':')[0]), parseInt(horaInput.split(':')[1]), 0);
             const timestamp = dataHoraMarcada.getTime();
 
             if(timestamp < Date.now()) {
@@ -705,16 +683,10 @@
                 return;
             }
 
-            db.ref('agendamento_reinicio').set({
-                timestamp: timestamp,
-                executado: false
-            })
+            db.ref('agendamento_reinicio').set({ timestamp: timestamp, executado: false })
             .then(() => {
                 mostrarStatusAgendamento('✅ AGENDAMENTO SALVO COM SUCESSO!', 'ativo');
                 setTimeout(() => fecharAgendamento(), 2000);
-            })
-            .catch((erro) => {
-                mostrarStatusAgendamento('❌ ERRO AO SALVAR: ' + erro.message, 'erro');
             });
         }
 
@@ -735,6 +707,63 @@
             status.innerText = texto;
             status.className = `status-agendamento ${tipo}`;
             status.style.display = 'block';
+        }
+
+        /* ===== FUNÇÕES DO MODAL DE PEDIDOS DE CADASTRO ===== */
+        function abrirAprovacao() { document.getElementById('modalAprovacao').style.display = 'flex'; }
+        function fecharAprovacao() { document.getElementById('modalAprovacao').style.display = 'none'; }
+
+        function atualizarListaPedidos(pedidos) {
+            const container = document.getElementById('listaPedidosAprovacao');
+            const ids = Object.keys(pedidos).filter(id => pedidos[id] && pedidos[id].status === 'pendente');
+
+            if (ids.length === 0) {
+                container.innerHTML = '<p style="text-align:center; color:#888; padding:20px;">NENHUM PEDIDO PENDENTE.</p>';
+                return;
+            }
+
+            let html = '';
+            ids.forEach(id => {
+                const p = pedidos[id];
+                const imagemHtml = p.foto ? `<img src="${p.foto}" class="foto-preview" style="width:70px; height:70px; margin-bottom:10px;">` : `<div style="font-size:30px; margin-bottom:10px;">📄</div>`;
+                
+                html += `
+                <div class="item-pedido">
+                    ${imagemHtml}
+                    <p style="font-size:15px; margin-bottom:4px;"><strong>NOME:</strong> ${p.nome}</p>
+                    <p style="font-size:13px; color:#555;"><strong>NASCIMENTO:</strong> ${String(p.dia).padStart(2,'0')}/${String(p.mes).padStart(2,'0')}</p>
+                    <div class="botoes-aprovacao">
+                        <button class="btn-roxo" onclick="aceitarCadastro('${id}')">✅ ACEITAR</button>
+                        <button class="btn-vermelho" onclick="recusarCadastro('${id}')">❌ RECUSAR</button>
+                    </div>
+                </div>`;
+            });
+            container.innerHTML = html;
+        }
+
+        async function aceitarCadastro(idPedido) {
+            const snap = await db.ref(`pedidos_cadastro/${idPedido}`).once('value');
+            const dados = snap.val();
+            if (!dados) return;
+
+            const listaInscSnap = await db.ref('inscricoes').once('value');
+            const listaAtual = listaInscSnap.val() || [];
+            
+            var novoId = listaAtual.length > 0 ? Math.max(...listaAtual.filter(Boolean).map(i => i.id || 0)) + 1 : 1;
+
+            listaAtual.push({
+                id: novoId, nome: dados.nome, dia: parseInt(dados.dia), mes: parseInt(dados.mes),
+                foto: dados.foto || "", status: 'pendente', data_confirmacao: null
+            });
+
+            await db.ref('inscricoes').set(listaAtual);
+            await db.ref(`pedidos_cadastro/${idPedido}`).remove();
+        }
+
+        async function recusarCadastro(idPedido) {
+            if (confirm('⚠️ DESEJA APAGAR DEFINITIVAMENTE ESTE PEDIDO DE CADASTRO?')) {
+                await db.ref(`pedidos_cadastro/${idPedido}`).remove();
+            }
         }
 
         function alternarVisibilidadeData() {
@@ -772,9 +801,7 @@
             var qtdConfirmados = listaOrdenada.filter(i => i.status === 'confirmado').length;
             var vagasRestantes = LIMITE_MAXIMO - qtdConfirmados;
 
-            if (qtdConfirmados > quantidadeAnterior) {
-                mostrarAvisoNovaConfirmacao();
-            }
+            if (qtdConfirmados > quantidadeAnterior) { mostrarAvisoNovaConfirmacao(); }
             quantidadeAnterior = qtdConfirmados;
 
             document.getElementById('contadorConfirmados').innerText = `✅ ${qtdConfirmados} CONFIRMADOS | RESTAM ${vagasRestantes} VAGAS (LIMITE: 16)`;
@@ -785,19 +812,12 @@
                 let dataHora = '';
                 if (insc.data_confirmacao) {
                     const dt = new Date(insc.data_confirmacao);
-                    const dia = String(dt.getDate()).padStart(2, '0');
-                    const mes = String(dt.getMonth()+1).padStart(2, '0');
-                    const ano = dt.getFullYear();
-                    const hora = String(dt.getHours()).padStart(2, '0');
-                    const min = String(dt.getMinutes()).padStart(2, '0');
-                    dataHora = `${dia}/${mes}/${ano}<br>${hora}:${min}`;
+                    dataHora = `${String(dt.getDate()).padStart(2, '0')}/${String(dt.getMonth()+1).padStart(2, '0')}/${dt.getFullYear()}<br>${String(dt.getHours()).padStart(2, '0')}:${String(dt.getMinutes()).padStart(2, '0')}`;
                 }
 
                 var linha = document.createElement('tr');
                 linha.innerHTML = `
-                    <td>
-                        ${insc.foto ? `<img src="${insc.foto}" class="foto-preview" alt="foto">` : '📄'}
-                    </td>
+                    <td>${insc.foto ? `<img src="${insc.foto}" class="foto-preview" alt="foto">` : '📄'}</td>
                     <td>${insc.nome}</td>
                     <td style="display: ${dataVisivel ? '' : 'none'};">${insc.dia}/${insc.mes}</td>
                     <td class="data-hora">${dataHora || '-'}</td>
@@ -819,17 +839,18 @@
 
         function iniciarAtualizacaoAutomatica() {
             db.ref('inscricoes').on('value', function(dados) { atualizarLista(dados); });
+            db.ref('pedidos_cadastro').on('value', function(snap) {
+                const pedidos = snap.val() || {};
+                atualizarListaPedidos(pedidos);
+            });
         }
 
         document.addEventListener('keydown', function(event) {
             if (event.key === 'Escape') {
-                ocultarCadastro();
-                fecharEdicao();
-                fecharAgendamento();
+                ocultarCadastro(); fecharEdicao(); fecharAgendamento(); fecharAprovacao();
             }
         });
 
-        // ✅ EXECUÇÃO AUTOMÁTICA DO AGENDAMENTO
         db.ref('agendamento_reinicio').on('value', snap => {
             const agendado = snap.val();
             if(agendado && !agendado.executado) {
@@ -852,8 +873,6 @@
                 }
             }
         });
-
     </script>
-
 </body>
 </html>
