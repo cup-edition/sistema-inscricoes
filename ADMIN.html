@@ -7,7 +7,11 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase.js"></script>
     <style>
         * {margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; text-transform: uppercase; font-weight: bold;}
-        body {background-color: #343a40; padding: 20px; max-width: 900px; margin: 0 auto;}
+        body {
+            background-color: #343a40; padding: 20px; max-width: 900px; margin: 0 auto;
+            /* Impede a seleção de textos e imagens na página */
+            -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;
+        }
 
         /* ===== ESTILOS DA TELA DE LOGIN ===== */
         #telaLogin {
@@ -428,6 +432,7 @@
             }
         }
 
+        /* ✅ RESTAURADO: Verifica o usuário digitado e joga o foco para a senha */
         function verificarUsuario() {
             let u = document.getElementById('usuarioLogin').value.trim().toLowerCase();
             if(u.length > 0) {
@@ -845,12 +850,6 @@
             });
         }
 
-        document.addEventListener('keydown', function(event) {
-            if (event.key === 'Escape') {
-                ocultarCadastro(); fecharEdicao(); fecharAgendamento(); fecharAprovacao();
-            }
-        });
-
         db.ref('agendamento_reinicio').on('value', snap => {
             const agendado = snap.val();
             if(agendado && !agendado.executado) {
@@ -873,6 +872,63 @@
                 }
             }
         });
+
+        /* ===== ✅ TRAVAMENTOS DE SEGURANÇA E ESCAPE ===== */
+        
+        // 1. Bloqueia o clique com o botão direito em toda a página de forma robusta
+        document.addEventListener('contextmenu', function(event) {
+            event.preventDefault();
+            return false;
+        });
+
+        // 2. Bloqueia F12 e as combinações de teclas especificadas
+        document.addEventListener('keydown', function(event) {
+            // Permite fechar os modais com a tecla 'Escape' normalmente
+            if (event.key === 'Escape') {
+                ocultarCadastro(); fecharEdicao(); fecharAgendamento(); fecharAprovacao();
+                return;
+            }
+
+            // Bloqueia a tecla F12
+            if (event.key === 'F12') {
+                event.preventDefault();
+                return false;
+            }
+
+            // Bloqueia combinações usando a tecla CTRL (Apenas se não for um campo de texto digitando normalmente letras)
+            if (event.ctrlKey) {
+                // Atalhos com Shift (Ctrl+Shift+I e Ctrl+Shift+J)
+                if (event.shiftKey && (event.key === 'I' || event.key === 'i' || event.key === 'J' || event.key === 'j')) {
+                    event.preventDefault();
+                    return false;
+                }
+                
+                // Atalhos diretos: Ctrl+U, Ctrl+S, Ctrl+C, Ctrl+V
+                // Adicionamos a checagem se o usuário NÃO está digitando nos campos de texto para não quebrar a digitação nativa das letras.
+                const digitandoEmInput = (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA');
+                
+                if (!digitandoEmInput) {
+                    if (event.key === 'u' || event.key === 'U' || 
+                        event.key === 's' || event.key === 'S' || 
+                        event.key === 'c' || event.key === 'C' || 
+                        event.key === 'v' || event.key === 'V') {
+                        event.preventDefault();
+                        return false;
+                    }
+                } else {
+                    // Se estiver em um input, bloqueia especificamente a tentativa de CÓPIA e COLAGEM (Ctrl+C / Ctrl+V / Ctrl+U / Ctrl+S)
+                    if (event.key === 'u' || event.key === 'U' || 
+                        event.key === 's' || event.key === 'S' || 
+                        event.key === 'c' || event.key === 'C' || 
+                        event.key === 'v' || event.key === 'V') {
+                        event.preventDefault();
+                        return false;
+                    }
+                }
+            }
+        });
     </script>
 </body>
 </html>
+
+```
