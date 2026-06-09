@@ -20,11 +20,30 @@
             text-align: center;
             width: 100%;
             max-width: 450px;
-            margin-bottom: 20px;
+            margin-bottom: 10px;
             display: none;
         }
 
-        .container {background: #ffffff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); width: 100%; max-width: 450px; text-align: center;}
+        .botao-cadastrar {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #6c757d;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            width: auto;
+            font-weight: normal;
+            z-index: 99;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        .botao-cadastrar:hover {background-color: #495057;}
+
+        .container {background: #ffffff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); width: 100%; max-width: 450px; text-align: center; margin-top: 50px;}
         
         .titulo-container {
             display: flex;
@@ -63,8 +82,7 @@
             background-color: #f8d7da;
             color: #721c24;
             border: 1px solid #f5c6cb;
-            padding: 20px;
-            border-radius: 8px;
+            padding: 20px; border-radius: 8px;
             font-weight: bold;
             font-size: 18px;
         }
@@ -139,7 +157,7 @@
         .janela-flutuante {
             display: none; position: fixed;
             top: 50%; left: 50%; transform: translate(-50%, -50%);
-            background: #ffffff; width: 90%; max-width: 400px; max-height: 80vh;
+            background: #ffffff; width: 90%; max-width: 400px; max-height: 85vh;
             border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.3);
             z-index: 1000; overflow: hidden;
         }
@@ -153,7 +171,7 @@
             font-size: 20px; cursor: pointer;
             width: auto; padding: 0; margin: 0;
         }
-        .conteudo-janela {padding: 15px; overflow-y: auto; max-height: 65vh;}
+        .conteudo-janela {padding: 15px; overflow-y: auto; max-height: 70vh;}
         .item-inscrito {display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid #eee;}
         .foto-inscrito {width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 1px solid #ddd;}
         .dados-inscrito {flex: 1; text-align: left;}
@@ -161,13 +179,23 @@
         .data-hora-inscrito {font-size: 12px; color: #666; margin-top: 2px;}
         .fundo-escuro {display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 999;}
 
+        .grupo-foto {margin: 10px 0;}
+        .foto-perfil-preview {width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 2px solid #ccc; margin: 10px auto; display: block;}
+        .aviso-obrigatorio {color: #dc3545; font-size: 13px; margin: 5px 0; display: none;}
+        .botoes-aprovacao {display: flex; gap: 10px; margin-top: 15px;}
+        .btn-aceitar {background-color: #28a745; flex: 1;}
+        .btn-recusar {background-color: #dc3545; flex: 1;}
+        .btn-aceitar:hover {background-color: #218838;}
+        .btn-recusar:hover {background-color: #c82333;}
+        .item-pedido {border: 1px solid #ddd; border-radius: 8px; padding: 12px; margin-bottom: 12px; background: #f9f9f9;}
+
         @media (max-width: 480px) {
             .titulo-texto { font-size: 32px; }
             .titulo-trofeu { font-size: 32px; }
             .titulo-container { gap: 8px; }
             .subtitulo-principal { font-size: 17px; }
             
-            .botao-regras, .botao-lista {
+            .botao-regras, .botao-lista, .botao-cadastrar {
                 font-size: 11px;
                 padding: 6px 10px;
             }
@@ -175,6 +203,8 @@
     </style>
 </head>
 <body>
+
+    <button class="botao-cadastrar" onclick="abrirJanelaCadastro()">SOU NOVO, QUERO ME CADASTRAR😎</button>
 
     <div id="avisoLimite" class="aviso-topo">
         ⚠️ ATENÇÃO: Restam poucas vagas. Ao atingir 16 confirmados, o sistema será bloqueado automaticamente.
@@ -188,15 +218,96 @@
 
     <button class="botao-lista" onclick="abrirJanelaLista()">✅LISTA DE INSCRITOS✅</button>
 
-    <div id="fundoEscuro" class="fundo-escuro" onclick="fecharJanela()"></div>
+    <div id="fundoEscuro" class="fundo-escuro" onclick="fecharTodasJanelas()"></div>
 
     <div id="janelaLista" class="janela-flutuante">
         <div class="cabecalho-janela">
             <span id="tituloJanela">✅ 0 INSCRITOS CONFIRMADOS ✅</span>
-            <button class="fechar-janela" onclick="fecharJanela()">&times;</button>
+            <button class="fechar-janela" onclick="fecharTodasJanelas()">&times;</button>
         </div>
         <div class="conteudo-janela" id="listaConfirmados">
             <p style="text-align:center; color:#666;">Carregando...</p>
+        </div>
+    </div>
+
+    <div id="janelaCadastro" class="janela-flutuante">
+        <div class="cabecalho-janela">
+            <span>📝 NOVO CADASTRO</span>
+            <button class="fechar-janela" onclick="fecharTodasJanelas()">&times;</button>
+        </div>
+        <div class="conteudo-janela">
+            <div class="grupo-campo">
+                <label>NOME COMPLETO: *</label>
+                <!-- Adicionado oninput para transformar tudo em maiúsculo -->
+                <input type="text" id="novoNome" placeholder="Digite seu nome" oninput="this.value = this.value.toUpperCase()">
+                <div class="aviso-obrigatorio" id="avisoNome">Campo obrigatório</div>
+            </div>
+
+            <div class="grupo-campo">
+                <label>DATA DE NASCIMENTO: *</label>
+                <div class="data-container">
+                    <select id="novoDia">
+                        <option value="">Dia</option>
+                        <option value="01">01</option>
+                        <option value="02">02</option>
+                        <option value="03">03</option>
+                        <option value="04">04</option>
+                        <option value="05">05</option>
+                        <option value="06">06</option>
+                        <option value="07">07</option>
+                        <option value="08">08</option>
+                        <option value="09">09</option>
+                        <option value="10">10</option>
+                        <option value="11">11</option>
+                        <option value="12">12</option>
+                        <option value="13">13</option>
+                        <option value="14">14</option>
+                        <option value="15">15</option>
+                        <option value="16">16</option>
+                        <option value="17">17</option>
+                        <option value="18">18</option>
+                        <option value="19">19</option>
+                        <option value="20">20</option>
+                        <option value="21">21</option>
+                        <option value="22">22</option>
+                        <option value="23">23</option>
+                        <option value="24">24</option>
+                        <option value="25">25</option>
+                        <option value="26">26</option>
+                        <option value="27">27</option>
+                        <option value="28">28</option>
+                        <option value="29">29</option>
+                        <option value="30">30</option>
+                        <option value="31">31</option>
+                    </select>
+                    <select id="novoMes">
+                        <option value="">Mês</option>
+                        <option value="01">JANEIRO</option>
+                        <option value="02">FEVEREIRO</option>
+                        <option value="03">MARÇO</option>
+                        <option value="04">ABRIL</option>
+                        <option value="05">MAIO</option>
+                        <option value="06">JUNHO</option>
+                        <option value="07">JULHO</option>
+                        <option value="08">AGOSTO</option>
+                        <option value="09">SETEMBRO</option>
+                        <option value="10">OUTUBRO</option>
+                        <option value="11">NOVEMBRO</option>
+                        <option value="12">DEZEMBRO</option>
+                    </select>
+                </div>
+                <div class="aviso-obrigatorio" id="avisoData">Dia e mês obrigatórios</div>
+            </div>
+
+            <div class="grupo-campo grupo-foto">
+                <label>FOTO DE PERFIL: *</label>
+                <input type="file" id="novaFoto" accept="image/*" onchange="previsualizarFoto(event)">
+                <img id="previewFoto" class="foto-perfil-preview" src="https://via.placeholder.com/120?text=SEM+FOTO" alt="Prévia da foto">
+                <div class="aviso-obrigatorio" id="avisoFoto">Envie uma foto</div>
+            </div>
+
+            <button onclick="enviarCadastro()" id="btnEnviarCadastro">ENVIAR PARA ANÁLISE</button>
+            <div id="msgCadastro" class="resultado"></div>
         </div>
     </div>
 
@@ -220,7 +331,7 @@
 
             <div class="subtitulo-principal">📝INSCREVA-SE📝</div>
             
-            <p class="descricao">Escolha seu nome e preencha a data de nascimento para confirmar sua participação.</p>
+            <p class="descricao">SELECIONE SEU NOME E DATA DE NASCIMENTO.</p>
 
             <div class="grupo-campo">
                 <label>NOME:</label>
@@ -300,7 +411,7 @@
             authDomain: "sistema-inscricoes-e9241.firebaseapp.com",
             databaseURL: "https://sistema-inscricoes-e9241-default-rtdb.firebaseio.com",
             projectId: "sistema-inscricoes-e9241",
-            storageBucket: "sistema-inscricoes-e9241.firebasestorage.app",
+            storageBucket: "",
             messagingSenderId: "232618438422",
             appId: "1:232618438422:web:1c62103b2169e64e862a37"
         };
@@ -320,13 +431,152 @@
             
             db.ref('inscricoes').on('value', function(snap) {
                 listaCompletaInscricoes = snap.val() || [];
-                
-                if (janelaAberta) {
-                    atualizarListaConfirmados();
-                }
+                if (janelaAberta) atualizarListaConfirmados();
                 carregarListaNomes();
             });
+
+            db.ref('pedidos_cadastro').on('value', function(snap) {
+                const pedidos = snap.val() || {};
+                atualizarListaPedidos(pedidos);
+            });
         };
+
+        function previsualizarFoto(event) {
+            const input = event.target;
+            const preview = document.getElementById('previewFoto');
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        async function enviarCadastro() {
+            const nome = document.getElementById('novoNome').value.trim();
+            const dia = document.getElementById('novoDia').value;
+            const mes = document.getElementById('novoMes').value;
+            const fotoInput = document.getElementById('novaFoto');
+            const msg = document.getElementById('msgCadastro');
+            const btn = document.getElementById('btnEnviarCadastro');
+
+            document.querySelectorAll('.aviso-obrigatorio').forEach(el => el.style.display = 'none');
+            let valido = true;
+
+            if (!nome) {document.getElementById('avisoNome').style.display = 'block'; valido = false;}
+            if (!dia || !mes) {document.getElementById('avisoData').style.display = 'block'; valido = false;}
+            if (!fotoInput.files[0]) {document.getElementById('avisoFoto').style.display = 'block'; valido = false;}
+
+            if (!valido) return;
+
+            btn.disabled = true;
+            msg.className = 'resultado sucesso';
+            msg.innerText = '⏳ ENVIANDO...';
+            msg.style.display = 'block';
+
+            try {
+                const arquivo = fotoInput.files[0];
+                const fotoBase64 = await lerArquivoComoBase64(arquivo);
+
+                const novoPedido = {
+                    nome: nome,
+                    dia: dia,
+                    mes: mes,
+                    foto: fotoBase64,
+                    data_pedido: Date.now(),
+                    status: 'pendente'
+                };
+
+                await db.ref('pedidos_cadastro').push(novoPedido);
+
+                msg.innerText = '✅ ENVIADO COM SUCESSO!';
+                limparFormularioCadastro();
+
+                setTimeout(() => {
+                    fecharTodasJanelas();
+                    msg.style.display = 'none';
+                    btn.disabled = false;
+                }, 2000);
+
+            } catch (erro) {
+                msg.className = 'resultado erro';
+                msg.innerText = '❌ ERRO: ' + erro.message;
+                msg.style.display = 'block';
+                btn.disabled = false;
+                console.error(erro);
+            }
+        }
+
+        function lerArquivoComoBase64(arquivo) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = (erro) => reject(erro);
+                reader.readAsDataURL(arquivo);
+            });
+        }
+
+        function atualizarListaPedidos(pedidos) {
+            const container = document.getElementById('listaPedidosAprovacao');
+            const ids = Object.keys(pedidos).filter(id => pedidos[id].status === 'pendente');
+
+            if (ids.length === 0) {
+                container.innerHTML = '<p style="text-align:center; color:#666;">Nenhum pedido pendente.</p>';
+                return;
+            }
+
+            let html = '';
+            ids.forEach(id => {
+                const p = pedidos[id];
+                html += `
+                <div class="item-pedido">
+                    <img src="${p.foto}" style="width:80px;height:80px;border-radius:50%;object-fit:cover;display:block;margin:0 auto 10px;">
+                    <p><strong>Nome:</strong> ${p.nome}</p>
+                    <p><strong>Nascimento:</strong> ${p.dia}/${p.mes}</p>
+                    <div class="botoes-aprovacao">
+                        <button class="btn-aceitar" onclick="aceitarCadastro('${id}')">ACEITAR</button>
+                        <button class="btn-recusar" onclick="recusarCadastro('${id}')">RECUSAR</button>
+                    </div>
+                </div>`;
+            });
+            container.innerHTML = html;
+        }
+
+        async function aceitarCadastro(idPedido) {
+            const snap = await db.ref(`pedidos_cadastro/${idPedido}`).once('value');
+            const dados = snap.val();
+            if (!dados) return;
+
+            const listaAtual = listaCompletaInscricoes || [];
+            listaAtual.push({
+                nome: dados.nome,
+                dia: dados.dia,
+                mes: dados.mes,
+                foto: dados.foto,
+                status: 'pendente',
+                data_confirmacao: null
+            });
+
+            await db.ref('inscricoes').set(listaAtual);
+            // ✅ AO ACEITAR: APAGA O PEDIDO DA LISTA
+            await db.ref(`pedidos_cadastro/${idPedido}`).remove();
+        }
+
+        // ✅ FUNÇÃO ATUALIZADA: AO RECUSAR, APAGA TOTALMENTE DO BANCO
+        async function recusarCadastro(idPedido) {
+            if (confirm('Tem certeza que deseja recusar e apagar este cadastro?')) {
+                await db.ref(`pedidos_cadastro/${idPedido}`).remove();
+            }
+        }
+
+        function limparFormularioCadastro() {
+            document.getElementById('novoNome').value = '';
+            document.getElementById('novoDia').value = '';
+            document.getElementById('novoMes').value = '';
+            document.getElementById('novaFoto').value = '';
+            document.getElementById('previewFoto').src = 'https://via.placeholder.com/120?text=SEM+FOTO';
+        }
 
         async function verificarAgendamentoEExecutar() {
             const snap = await db.ref('agendamento_reinicio').once('value');
@@ -452,20 +702,21 @@
             }
         }
 
-        function abrirJanelaLista() {
-            const fundo = document.getElementById('fundoEscuro');
-            const janela = document.getElementById('janelaLista');
-            
-            atualizarListaConfirmados();
-            janelaAberta = true;
-
-            fundo.style.display = 'block';
-            janela.style.display = 'block';
+        function abrirJanelaCadastro() {
+            document.getElementById('fundoEscuro').style.display = 'block';
+            document.getElementById('janelaCadastro').style.display = 'block';
         }
 
-        function fecharJanela() {
+        function abrirJanelaLista() {
+            document.getElementById('fundoEscuro').style.display = 'block';
+            document.getElementById('janelaLista').style.display = 'block';
+            janelaAberta = true;
+            atualizarListaConfirmados();
+        }
+
+        function fecharTodasJanelas() {
             document.getElementById('fundoEscuro').style.display = 'none';
-            document.getElementById('janelaLista').style.display = 'none';
+            document.querySelectorAll('.janela-flutuante').forEach(el => el.style.display = 'none');
             janelaAberta = false;
         }
 
@@ -534,7 +785,6 @@
             });
         }
 
-        // ✅ FUNÇÃO CORRIGIDA PARA RECONHECER DATAS DO BANCO
         function confirmarInscricao() {
             var nome = document.getElementById('ver_nome').value.trim();
             var dia = document.getElementById('ver_dia').value;
@@ -566,11 +816,9 @@
                     return;
                 }
 
-                // ✅ AQUI É A PARTE PRINCIPAL CORRIGIDA: COMPARAÇÃO FLEXÍVEL
                 var encontradoIndex = inscricoes.findIndex(insc => {
                     if (!insc || insc.status !== 'pendente') return false;
 
-                    // Normaliza os valores para comparar sem erro de formato
                     const nomeBanco = (insc.nome || "").trim().toLowerCase();
                     const nomeDigitado = nome.toLowerCase();
                     
@@ -580,7 +828,6 @@
                     const mesBanco = String(insc.mes || "").padStart(2, '0');
                     const mesDigitado = mes;
 
-                    // Verifica se bate tudo
                     return nomeBanco === nomeDigitado && diaBanco === diaDigitado && mesBanco === mesDigitado;
                 });
 
@@ -609,10 +856,8 @@
                     });
 
                 } else {
-                    // ✅ MENSAGEM MELHORADA PARA SABER O QUE ESTÁ ERRANDO
                     msg.className = 'resultado erro';
                     
-                    // Verifica se o nome existe, mas a data está errada
                     const nomeExiste = inscricoes.some(insc => insc && insc.nome.trim().toLowerCase() === nome.toLowerCase());
                     
                     if (nomeExiste) {
