@@ -70,8 +70,16 @@
             width: 100%;
             max-width: 450px;
             text-align: center;
-            margin: 30px 0 40px 0; /* ✅ AUMENTEI A MARGEM INFERIOR PARA ABAIXAR MAIS A CAIXA */
-            display: none;
+            margin: 30px 0 40px 0; 
+            /* ✅ ESSENCIAL: tamanho fixo e nunca some, só muda cor */
+            height: 44px;
+            opacity: 0;
+            visibility: hidden;
+            transition: none;
+        }
+        .aviso-proxima-inscricao.visivel {
+            opacity: 1;
+            visibility: visible;
         }
 
         .container {
@@ -82,7 +90,13 @@
             width: 100%;
             max-width: 450px;
             text-align: center;
-            margin-top: 0;
+            
+            /* ✅ AQUI ESTÁ A SOLUÇÃO DEFINITIVA: POSIÇÃO FIXA/ABSOLUTA NO LOCAL EXATO */
+            position: absolute !important;
+            top: 220px !important; /* ← ALTURA EXATA, NÃO MUDA NUNCA */
+            left: 50% !important;
+            transform: translateX(-50%) !important;
+            margin: 0 !important;
         }
         
         .titulo-container {
@@ -265,7 +279,12 @@
             }
 
             .aviso-proxima-inscricao {
-                margin: 25px 0 35px 0; /* ✅ AJUSTE PARA CELULAR TAMBÉM */
+                margin: 25px 0 35px 0; 
+                height: 40px;
+            }
+
+            .container {
+                top: 180px !important; /* ← ajuste para celular */
             }
         }
     </style>
@@ -637,31 +656,6 @@
             container.innerHTML = html;
         }
 
-        async function aceitarCadastro(idPedido) {
-            const snap = await db.ref(`pedidos_cadastro/${idPedido}`).once('value');
-            const dados = snap.val();
-            if (!dados) return;
-
-            const listaAtual = listaCompletaInscricoes || [];
-            listaAtual.push({
-                nome: dados.nome,
-                dia: dados.dia,
-                mes: dados.mes,
-                foto: dados.foto,
-                status: 'pendente',
-                data_confirmacao: null
-            });
-
-            await db.ref('inscricoes').set(listaAtual);
-            await db.ref(`pedidos_cadastro/${idPedido}`).remove();
-        }
-
-        async function recusarCadastro(idPedido) {
-            if (confirm('Tem certeza que deseja recusar e apagar este cadastro?')) {
-                await db.ref(`pedidos_cadastro/${idPedido}`).remove();
-            }
-        }
-
         function limparFormularioCadastro() {
             document.getElementById('novoNome').value = '';
             document.getElementById('novoDia').value = '';
@@ -674,8 +668,10 @@
             const snap = await db.ref('agendamento_reinicio').once('value');
             const agendamento = snap.val();
 
+            const avisoEl = document.getElementById('avisoProximaInscricao');
+
             if (!agendamento) {
-                document.getElementById('avisoProximaInscricao').style.display = 'none';
+                avisoEl.classList.remove('visivel');
                 return;
             }
 
@@ -688,9 +684,9 @@
                 const min = String(dataHora.getMinutes()).padStart(2, '0');
                 
                 document.getElementById('dataReinicioTexto').innerText = `${dia}/${mes}/${ano} às ${hora}:${min}`;
-                document.getElementById('avisoProximaInscricao').style.display = 'block';
+                avisoEl.classList.add('visivel');
             } else {
-                document.getElementById('avisoProximaInscricao').style.display = 'none';
+                avisoEl.classList.remove('visivel');
             }
 
             const agora = Date.now();
