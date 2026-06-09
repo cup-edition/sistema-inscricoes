@@ -40,7 +40,6 @@
             font-weight: normal;
             z-index: 99;
             box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-            /* NOVAS REGRAS PARA ALINHAR TEXTO */
             white-space: nowrap;
             text-align: center;
             line-height: 1.4;
@@ -83,7 +82,16 @@
             display: block;
         }
         
-        p.descricao {color: #666; margin-bottom: 25px; font-size: 15px;}
+        p.descricao {
+            color: #666;
+            margin-bottom: 25px;
+            font-size: 15px;
+            /* ✅ AJUSTE PARA ALINHAR EM CELULAR */
+            text-align: center;
+            width: 100%;
+            padding: 0 5px;
+            line-height: 1.5;
+        }
         
         .encerrado {
             background-color: #f8d7da;
@@ -207,12 +215,18 @@
                 padding: 6px 10px;
             }
 
-            /* AJUSTE ESPECIAL PARA O BOTÃO NO CELULAR */
             .botao-cadastrar {
                 font-size: 12px;
                 padding: 8px 12px;
                 width: auto;
                 max-width: 95%;
+            }
+
+            /* ✅ AJUSTE ESPECIAL PARA O TEXTO NO CELULAR */
+            p.descricao {
+                font-size: 14px;
+                padding: 0 10px;
+                text-align: center !important;
             }
         }
     </style>
@@ -252,8 +266,7 @@
         </div>
         <div class="conteudo-janela">
             <div class="grupo-campo">
-                <label>NOME COMPLETO: *</label>
-                <!-- Já está com o código para maiúsculo -->
+                <label>NOME / APELIDO: *</label>
                 <input type="text" id="novoNome" placeholder="Digite seu nome" oninput="this.value = this.value.toUpperCase()">
                 <div class="aviso-obrigatorio" id="avisoNome">Campo obrigatório</div>
             </div>
@@ -346,6 +359,7 @@
 
             <div class="subtitulo-principal">📝INSCREVA-SE📝</div>
             
+            <!-- ✅ TEXTO ALINHADO E AJUSTADO PARA CELULAR -->
             <p class="descricao">SELECIONE SEU NOME E DATA DE NASCIMENTO.</p>
 
             <div class="grupo-campo">
@@ -574,11 +588,9 @@
             });
 
             await db.ref('inscricoes').set(listaAtual);
-            // ✅ AO ACEITAR: APAGA O PEDIDO DA LISTA
             await db.ref(`pedidos_cadastro/${idPedido}`).remove();
         }
 
-        // ✅ FUNÇÃO ATUALIZADA: AO RECUSAR, APAGA TOTALMENTE DO BANCO
         async function recusarCadastro(idPedido) {
             if (confirm('Tem certeza que deseja recusar e apagar este cadastro?')) {
                 await db.ref(`pedidos_cadastro/${idPedido}`).remove();
