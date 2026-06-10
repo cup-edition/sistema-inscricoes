@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inscreva-se - Sistema de Inscrições</title>
+    <link rel="icon" type="image/png" href="https://endrilsilva.github.io/sistema-inscricoes/CUP%20EDITION.png">
+    
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase.js"></script>
     <style>
         * {margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif;}
@@ -353,8 +355,7 @@
             <button class="fechar-janela" onclick="fecharTodasJanelas()">&times;</button>
         </div>
         <div class="conteudo-janela" id="listaConfirmados">
-            <p style="text-align:center; color:#cbd5e0;">Carregando...</p> <!-- ✅ TEXTO CLARO -->
-        </div>
+            <p style="text-align:center; color:#cbd5e0;">Carregando...</p> </div>
     </div>
 
     <div id="janelaCadastro" class="janela-flutuante">
@@ -728,7 +729,7 @@
             }
         }
 
-        function avancarCampo(event, proximoCampoId) {
+        function anticancerCampo(event, proximoCampoId) {
             if (event.key === 'Enter') {
                 event.preventDefault();
                 document.getElementById(proximoCampoId).focus();
