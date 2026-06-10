@@ -135,7 +135,7 @@
         p.descricao {
             color: #ced4da; /* ✅ TEXTO MAIS CLARO PARA LEITURA */
             margin-bottom: 25px;
-            font-size: 15px;
+            font-size: 14px; /* Tamanho reduzido */
             text-align: center;
             width: 100%;
             padding: 0 5px;
@@ -225,7 +225,7 @@
             top: 50%; left: 50%; transform: translate(-50%, -50%);
             background: #2d3748; /* ✅ MESMA COR ESCURA DA CAIXA PRINCIPAL */
             width: 90%; max-width: 400px; max-height: 85vh;
-            border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            border-radius: 10px box-shadow: 0 5px 15px rgba(0,0,0,0.3);
             z-index: 1000; overflow: hidden;
             border: 2px solid #dc3545;
         }
@@ -282,7 +282,7 @@
             }
 
             p.descricao {
-                font-size: 14px;
+                font-size: 13px; /* Tamanho ainda menor em telas pequenas */
                 padding: 0 10px;
                 text-align: center !important;
             }
@@ -458,7 +458,8 @@
 
             <div class="subtitulo-principal">📝INSCREVA-SE📝</div>
             
-            <p class="descricao">SELECIONE SEU NOME E DATA DE NASCIMENTO.</p>
+            <!-- TEXTO ALTERADO AQUI -->
+            <p class="descricao">SELECIONE SEU NOME E DATA DE NASCIMENTO</p>
 
             <div class="grupo-campo">
                 <label>NOME:</label>
@@ -729,7 +730,7 @@
             }
         }
 
-        function anticancerCampo(event, proximoCampoId) {
+        function avancarCampo(event, proximoCampoId) {
             if (event.key === 'Enter') {
                 event.preventDefault();
                 document.getElementById(proximoCampoId).focus();
