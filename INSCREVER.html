@@ -279,52 +279,55 @@
         #btnEnviarCadastro:hover {background-color: #219653;}
         #btnEnviarCadastro:disabled {background-color: #95a5a6; cursor: not-allowed;}
 
-        /* Ajustes Mobile Mantendo os Absolutes */
+        /* Ajustes Mobile */
         @media (max-width: 480px) {
-            .subtitulo-principal { font-size: 17px; }
-            
             .botao-regras, .botao-lista {
                 font-size: 11px;
                 padding: 6px 10px;
             }
 
             .botao-cadastrar {
-                top: 15px !important;
+                top: 10px !important;
                 font-size: 12px;
                 padding: 8px 12px;
             }
 
             .alerta-vagas-piscando {
-                top: 62px !important;
+                top: 52px !important;
                 font-size: 12px;
-                padding: 6px;
+                padding: 10px;
                 width: 94%;
+                height: 40px;
             }
 
             .aviso-proxima-inscricao { 
-                top: 62px !important; 
-                height: 40px; 
-                width: 94%; 
+                top: 52px !important;
                 font-size: 12px;
                 padding: 10px;
-            }
-
-            p.descricao {
-                font-size: 13px;
-                padding: 0 10px;
+                width: 94%; 
+                height: 40px; 
             }
 
             .container {
-                top: 120px !important;
+                top: 105px !important;
                 width: 94% !important;
                 max-width: 94% !important;
-                padding: 15px 20px 20px 20px; 
+                padding: 12px 20px 20px 20px; 
             }
             
-            /* Caso o alerta dinâmico de vagas rápidas precise coexistir, empurra levemente o container no mobile */
-            body:has(.alerta-vagas-piscando[style*="display: block"]) .container {
-                top: 155px !important;
+            .container .imagem-campim {
+                max-width: 290px;
+                margin: 0 auto 8px auto !important;
             }
+            
+            /* MODIFICADO: Aumentado de 14px para 16px para melhor legibilidade no celular */
+            .container label { font-size: 16px; }
+
+            /* Fontes originais intocadas */
+            .container .subtitulo-principal { font-size: 19px; }
+            .container p.descricao { font-size: 14px; }
+            .container select, .container input { font-size: 16px; }
+            .container #botaoConfirmar, .container .botao-encerrado { font-size: 16px; }
         }
     </style>
 
@@ -804,16 +807,9 @@
                     if (!aberto || qtdConfirmados >= LIMITE_MAXIMO) {
                         document.getElementById('botaoConfirmar').style.display = 'none';
                         document.getElementById('botaoTelaEncerrado').style.display = 'block';
-                        document.getElementById('avisoLimite').style.display = 'none';
                     } else {
                         document.getElementById('botaoConfirmar').style.display = 'block';
                         document.getElementById('botaoTelaEncerrado').style.display = 'none';
-                        
-                        if (qtdConfirmados >= 12 && qtdConfirmados < 13) {
-                            document.getElementById('avisoLimite').style.display = 'block';
-                        } else {
-                            document.getElementById('avisoLimite').style.display = 'none';
-                        }
                     }
                 });
             });
