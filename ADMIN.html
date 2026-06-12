@@ -59,8 +59,11 @@
         input[type="number"] {width: 90px;}
         input[type="file"] {padding: 8px; font-size: 13px; border: 1px dashed #2ecc71; background: #2c3034; color: white; text-transform: none; font-weight: normal; width: 100%;}
         
-        /* FOTOS WITH BORDA VERMELHA */
+        /* FOTOS WITH BORDA VERMELHA (PADRÃO / PENDENTE) */
         .foto-preview { width: 46px; height: 46px; border-radius: 50%; object-fit: cover; border: 2px solid #e74c3c; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+        
+        /* CLASSE ADICIONADA PARA BORDAS EM VERDE DOS CONFIRMADOS */
+        .foto-confirmado { border-color: #2ecc71 !important; }
         
         /* ===== BOTÕES ===== */
         button {background-color: #2ecc71; color: white; border: none; padding: 10px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; transition: all 0.2s; font-weight: bold; display: inline-flex; align-items: center; justify-content: center; gap: 4px;}
@@ -852,9 +855,12 @@
                     dataHora = `${String(dt.getDate()).padStart(2, '0')}/${String(dt.getMonth()+1).padStart(2, '0')}/${dt.getFullYear()}<br>${String(dt.getHours()).padStart(2, '0')}:${String(dt.getMinutes()).padStart(2, '0')}`;
                 }
 
+                // Define a classe de borda dinamicamente dependendo do status do participante
+                const classeBordaFoto = insc.status === 'confirmado' ? 'foto-preview foto-confirmado' : 'foto-preview';
+
                 var linha = document.createElement('tr');
                 linha.innerHTML = `
-                    <td>${insc.foto ? `<img src="${insc.foto}" class="foto-preview" alt="foto">` : '📄'}</td>
+                    <td>${insc.foto ? `<img src="${insc.foto}" class="${classeBordaFoto}" alt="foto">` : '📄'}</td>
                     <td>${insc.nome}</td>
                     <td style="display: ${dataVisivel ? '' : 'none'};">${insc.dia}/${insc.mes}</td>
                     <td class="data-hora">${dataHora || '-'}</td>
