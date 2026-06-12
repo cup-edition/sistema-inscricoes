@@ -147,7 +147,7 @@
         }
         #botaoConfirmar:hover {background-color: #219653;}
 
-        /* SEU BOTÃO VERMELHO DE INSCRIÇÕES ENCERRADAS */
+        /* BOTÃO VERMELHO DE INSCRIÇÕES ENCERRADAS */
         .botao-encerrado {
             background-color: #dc3545;
             color: white;
@@ -231,6 +231,13 @@
         .grupo-foto {margin: 10px 0;}
         .foto-perfil-preview {width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 2px solid #dc3545; margin: 10px auto; display: block; box-shadow: 0 4px 10px rgba(0,0,0,0.3);}
         .aviso-obrigatorio {color: #dc3545; font-size: 13px; margin: 5px 0; display: none;}
+
+        /* ESTILO DO BOTÃO DE ENVIAR CADASTRO ORIGINAL */
+        #btnEnviarCadastro {
+            background-color: #27ae60; color: white; border: none; padding: 14px; border-radius: 6px; cursor: pointer; font-size: 16px; width: 100%; margin-top: 10px; font-weight: bold; transition: background 0.3s;
+        }
+        #btnEnviarCadastro:hover {background-color: #219653;}
+        #btnEnviarCadastro:disabled {background-color: #95a5a6; cursor: not-allowed;}
 
         @media (max-width: 480px) {
             .subtitulo-principal { font-size: 17px; }
@@ -722,7 +729,6 @@
             }
         }
 
-        /* AJUSTADO: Altera apenas a exibição dos botões na parte inferior */
         function verificarStatusSistema() {
             db.ref('configuracao/inscricoes_abertas').once('value').then(snap => {
                 var aberto = snap.val() !== null ? snap.val() : true;
