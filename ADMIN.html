@@ -59,7 +59,7 @@
         input[type="number"] {width: 90px;}
         input[type="file"] {padding: 8px; font-size: 13px; border: 1px dashed #2ecc71; background: #2c3034; color: white; text-transform: none; font-weight: normal; width: 100%;}
         
-        /* FOTOS COM BORDA VERMELHA */
+        /* FOTOS WITH BORDA VERMELHA */
         .foto-preview { width: 46px; height: 46px; border-radius: 50%; object-fit: cover; border: 2px solid #e74c3c; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
         
         /* ===== BOTÕES ===== */
@@ -133,11 +133,8 @@
         .status-confirmado {color: #2ecc71; font-weight: bold;}
         .acoes-tabela button {padding: 6px 10px; font-size: 12px; margin: 0 2px;}
         
-        .area-botoes-finais { display: flex; justify-content: space-between; align-items: center; margin-top: 20px; flex-wrap: wrap; gap: 12px; width: 100%;}
+        .area-botoes-finais { display: flex; justify-content: flex-end; align-items: center; margin-top: 20px; flex-wrap: wrap; gap: 12px; width: 100%;}
         .grupo-botoes-direita { display: flex; gap: 10px; flex-wrap: wrap;}
-
-        #btnMostrarCadastro { background-color: #2ecc71; padding: 12px 20px; border-radius: 6px;}
-        #btnMostrarCadastro:hover { background-color: #27ae60; }
 
         .carregando {color: #3498db; font-style: italic;}
         #conteudoPrincipal {display: none; animation: fadeIn 0.4s ease-in-out;}
@@ -261,7 +258,6 @@
         </div>
     </div>
 
-    <!-- MODAL DE CONFIRMAÇÃO COM FUNDO TOTALMENTE TRANSPARENTE E APENAS BLUR (DESFOQUE) -->
     <div id="avisoNovaConfirmacao" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0); display: none; align-items: center; justify-content: center; z-index: 999999; backdrop-filter: blur(5px); animation: fadeIn 0.3s ease-out;">
         <div style="background: #212529; border: 3px solid #2ecc71; border-radius: 20px; padding: 40px; text-align: center; max-width: 400px; width: 90%; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.7); text-transform: uppercase;">
             <h2 style="color: #2ecc71; font-size: 24px; margin-bottom: 20px; justify-content: center; padding-right: 0;">🎉 INSCRIÇÃO CONFIRMADA!</h2>
@@ -270,7 +266,6 @@
         </div>
     </div>
 
-    <!-- NOVO LINK DIRETO DE SOM DE NOTIFICAÇÃO DO GITHUB (NÃO BLOQUEIA HOTLINK) -->
     <audio id="somConfirmacao" src="https://raw.githubusercontent.com/rafaelwo/aviso-sonoro/main/sucesso.mp3" preload="auto"></audio>
 
     <div id="conteudoPrincipal">
@@ -319,10 +314,6 @@
             </table>
 
             <div class="area-botoes-finais">
-                <div>
-                    <button id="btnMostrarCadastro" onclick="mostrarCadastro()">📝 CADASTRAR NOVA PESSOA</button>
-                </div>
-                
                 <div class="grupo-botoes-direita">
                     <button class="btn-amarelo" onclick="voltarTodosParaPendente()">🔄 VOLTAR TODOS PARA PENDENTES</button>
                     <button class="btn-vermelho" onclick="limparTodasInscricoes()">🗑️ LIMPAR TODAS AS INSCRIÇÕES</button>
@@ -393,12 +384,44 @@
             }
         }
 
+        /* ===== MONITORA CLIQUE FORA PARA FECHAR JANELAS ===== */
         document.addEventListener('click', function(event) {
+            // Menu Hambúrguer
             const menu = document.getElementById('menuFlutuante');
             const btn = document.getElementById('btnMenu');
-            if (!menu.contains(event.target) && !btn.contains(event.target) && menu.style.display === 'flex') {
+            if (menu && btn && !menu.contains(event.target) && !btn.contains(event.target) && menu.style.display === 'flex') {
                 menu.style.display = 'none';
                 btn.classList.remove('aberto');
+            }
+
+            // Janela Editar Cadastro
+            const modalEditar = document.getElementById('modalEditar');
+            if (modalEditar && event.target === modalEditar) {
+                fecharEdicao();
+            }
+
+            // Janela Agendar Reinício
+            const modalAgendar = document.getElementById('modalAgendar');
+            if (modalAgendar && event.target === modalAgendar) {
+                fecharAgendamento();
+            }
+
+            // Janela Pedidos Pendentes
+            const modalAprovacao = document.getElementById('modalAprovacao');
+            if (modalAprovacao && event.target === modalAprovacao) {
+                fecharAprovacao();
+            }
+
+            // Janela Cadastrar Nova Pessoa
+            const fundoCadastro = document.getElementById('fundoCadastro');
+            if (fundoCadastro && event.target === fundoCadastro) {
+                ocultarCadastro();
+            }
+
+            // Janela de Nova Inscrição Confirmada (Aviso na frente da tela)
+            const avisoNovaConfirmacao = document.getElementById('avisoNovaConfirmacao');
+            if (avisoNovaConfirmacao && avisoNovaConfirmacao.style.display === 'flex') {
+                avisoNovaConfirmacao.style.display = 'none';
             }
         });
 
@@ -910,14 +933,10 @@
         });
 
         /* ===== TRAVAMENTOS DE SEGURANÇA E ESCAPE ===== */
-        document.addEventListener('contextmenu', function(event) {
-            event.preventDefault();
-            return false;
-        });
-
         document.addEventListener('keydown', function(event) {
             if (event.key === 'Escape') {
                 ocultarCadastro(); fecharEdicao(); fecharAgendamento(); fecharAprovacao();
+                document.getElementById('avisoNovaConfirmacao').style.display = 'none';
                 const menu = document.getElementById('menuFlutuante');
                 const btn = document.getElementById('btnMenu');
                 menu.style.display = 'none';
@@ -956,6 +975,11 @@
                     }
                 }
             }
+        });
+
+        document.addEventListener('contextmenu', function(event) {
+            event.preventDefault();
+            return false;
         });
     </script>
 </body>
