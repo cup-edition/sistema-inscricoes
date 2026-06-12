@@ -17,7 +17,6 @@
             justify-content: flex-start; 
             min-height: 100vh;
             padding: 20px;
-            padding-top: 80px;
             position: relative;
         }
         
@@ -36,11 +35,12 @@
             display: none;
         }
 
+        /* Botão fixado no topo */
         .botao-cadastrar {
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
+            position: absolute !important;
+            top: 20px !important;
+            left: 50% !important;
+            transform: translateX(-50%) !important;
             background-color: #17a2b8;
             color: white;
             border: none;
@@ -61,7 +61,49 @@
         }
         .botao-cadastrar:hover {background-color: #138496; color: white; text-decoration: none;}
 
+        /* Alerta piscando colocado de forma absoluta caso precise aparecer */
+        .alerta-vagas-piscando {
+            position: absolute !important;
+            top: 75px !important;
+            left: 50% !important;
+            transform: translateX(-50%) !important;
+            width: 90%;
+            max-width: 450px;
+            background-color: rgba(211, 158, 0, 0.45);
+            color: #f8f9fa;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+            border: 2px solid rgba(255, 238, 186, 0.6);
+            padding: 10px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 14px;
+            text-align: center;
+            z-index: 10;
+            display: none;
+            animation: piscar 0.6s infinite alternate;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            backdrop-filter: blur(4px);
+        }
+
+        @keyframes piscar {
+            0% {
+                background-color: rgba(211, 158, 0, 0.40);
+                border-color: rgba(181, 135, 0, 0.5);
+            }
+            100% {
+                background-color: rgba(255, 193, 7, 0.75);
+                border-color: rgba(255, 243, 205, 0.9);
+                color: #000000;
+                text-shadow: none;
+            }
+        }
+
+        /* PERFEITAMENTE CENTRALIZADO E ABSOLUTO ENTRE O BOTÃO (TOP 20px) E O CONTAINER (TOP 140px) */
         .aviso-proxima-inscricao {
+            position: absolute !important;
+            top: 78px !important;
+            left: 50% !important;
+            transform: translateX(-50%) !important;
             background-color: #d1ecf1;
             color: #0c5460;
             border: 1px solid #bee5eb;
@@ -72,8 +114,8 @@
             width: 100%;
             max-width: 450px;
             text-align: center;
-            margin: 15px 0 20px 0;
             height: 44px;
+            z-index: 5;
             opacity: 0;
             visibility: hidden;
             transition: none;
@@ -83,6 +125,7 @@
             visibility: visible;
         }
 
+        /* Container mantido em absolute fixo no Top 140px */
         .container {
             background: #2d3748;
             padding: 15px 30px 30px 30px; 
@@ -141,13 +184,11 @@
             width: 48%;
         }
         
-        /* BOTÃO CONFIRMAR VERDE */
         #botaoConfirmar {
             background-color: #27ae60; color: white; border: none; padding: 14px; border-radius: 6px; cursor: pointer; font-size: 16px; width: 100%; margin-top: 10px; font-weight: bold; transition: background 0.3s;
         }
         #botaoConfirmar:hover {background-color: #219653;}
 
-        /* BOTÃO VERMELHO DE INSCRIÇÕES ENCERRADAS */
         .botao-encerrado {
             background-color: #dc3545;
             color: white;
@@ -232,13 +273,13 @@
         .foto-perfil-preview {width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 2px solid #dc3545; margin: 10px auto; display: block; box-shadow: 0 4px 10px rgba(0,0,0,0.3);}
         .aviso-obrigatorio {color: #dc3545; font-size: 13px; margin: 5px 0; display: none;}
 
-        /* ESTILO DO BOTÃO DE ENVIAR CADASTRO ORIGINAL */
         #btnEnviarCadastro {
             background-color: #27ae60; color: white; border: none; padding: 14px; border-radius: 6px; cursor: pointer; font-size: 16px; width: 100%; margin-top: 10px; font-weight: bold; transition: background 0.3s;
         }
         #btnEnviarCadastro:hover {background-color: #219653;}
         #btnEnviarCadastro:disabled {background-color: #95a5a6; cursor: not-allowed;}
 
+        /* Ajustes Mobile Mantendo os Absolutes */
         @media (max-width: 480px) {
             .subtitulo-principal { font-size: 17px; }
             
@@ -248,21 +289,30 @@
             }
 
             .botao-cadastrar {
+                top: 15px !important;
                 font-size: 12px;
                 padding: 8px 12px;
-                width: auto;
-                max-width: 95%;
+            }
+
+            .alerta-vagas-piscando {
+                top: 62px !important;
+                font-size: 12px;
+                padding: 6px;
+                width: 94%;
+            }
+
+            .aviso-proxima-inscricao { 
+                top: 62px !important; 
+                height: 40px; 
+                width: 94%; 
+                font-size: 12px;
+                padding: 10px;
             }
 
             p.descricao {
                 font-size: 13px;
                 padding: 0 10px;
-                text-align: center !important;
             }
-
-            body { padding-top: 60px; }
-
-            .aviso-proxima-inscricao { margin: 15px 0 20px 0; height: 40px; }
 
             .container {
                 top: 120px !important;
@@ -270,8 +320,11 @@
                 max-width: 94% !important;
                 padding: 15px 20px 20px 20px; 
             }
-
-            .imagem-campim { max-width: 260px; }
+            
+            /* Caso o alerta dinâmico de vagas rápidas precise coexistir, empurra levemente o container no mobile */
+            body:has(.alerta-vagas-piscando[style*="display: block"]) .container {
+                top: 155px !important;
+            }
         }
     </style>
 
@@ -301,12 +354,10 @@
 
     <button class="botao-cadastrar" onclick="abrirJanelaCadastro()">SOU NOVO, QUERO ME CADASTRAR😎</button>
 
+    <div id="alertaVagasRapidas" class="alerta-vagas-piscando"></div>
+
     <div id="avisoProximaInscricao" class="aviso-proxima-inscricao">
         ⏳ PRÓXIMA INSCRIÇÃO EM: <span id="dataReinicioTexto">Carregando...</span>
-    </div>
-
-    <div id="avisoLimite" class="aviso-topo">
-        ⚠️ ATENÇÃO: Restam poucas vagas. Ao atingir 16 confirmados, o sistema será bloqueado automaticamente.
     </div>
 
     <a href="https://docs.google.com/document/d/e/2PACX-1vQ0gM70c4jnQ4q7elOVnWhytTEci6dKq5zUiX_7lAt_m1Wej9ZtubCUBIb0NLfJ0g/pub" target="_blank" class="botao-regras">📄 REGRAS</a>
@@ -428,7 +479,6 @@
             </div>
 
             <button id="botaoConfirmar" onclick="confirmarInscricao()">CONFIRMAR INSCRIÇÃO</button>
-
             <button id="botaoTelaEncerrado" class="botao-encerrado">🚫 Inscrições Encerradas 🚫</button>
 
             <div id="msg_verificacao" class="resultado"></div>
@@ -736,6 +786,20 @@
                 db.ref('inscricoes').once('value').then(snapIns => {
                     var lista = snapIns.val() || [];
                     var qtdConfirmados = lista.filter(i => i && i.status === 'confirmado').length;
+                    
+                    var alertaRapido = document.getElementById('alertaVagasRapidas');
+                    var vagasRestantes = LIMITE_MAXIMO - qtdConfirmados;
+
+                    if (aberto && qtdConfirmados >= 13 && qtdConfirmados < LIMITE_MAXIMO) {
+                        if (vagasRestantes === 1) {
+                            alertaRapido.innerText = "⚠️ ATENÇÃO: RESTAM SOMENTE 1 VAGA!";
+                        } else {
+                            alertaRapido.innerText = "⚠️ ATENÇÃO: RESTAM SOMENTE " + vagasRestantes + " VAGAS!";
+                        }
+                        alertaRapido.style.display = "block";
+                    } else {
+                        alertaRapido.style.display = "none";
+                    }
 
                     if (!aberto || qtdConfirmados >= LIMITE_MAXIMO) {
                         document.getElementById('botaoConfirmar').style.display = 'none';
@@ -745,7 +809,7 @@
                         document.getElementById('botaoConfirmar').style.display = 'block';
                         document.getElementById('botaoTelaEncerrado').style.display = 'none';
                         
-                        if (qtdConfirmados >= 12) {
+                        if (qtdConfirmados >= 12 && qtdConfirmados < 13) {
                             document.getElementById('avisoLimite').style.display = 'block';
                         } else {
                             document.getElementById('avisoLimite').style.display = 'none';
