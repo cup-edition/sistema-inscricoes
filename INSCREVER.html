@@ -76,7 +76,7 @@
             padding: 10px;
             border-radius: 8px;
             font-weight: bold;
-            font-size: 14px;
+            font-size: 16px;
             text-align: center;
             z-index: 10;
             display: none;
@@ -110,7 +110,7 @@
             padding: 10px 15px;
             border-radius: 6px;
             font-weight: bold;
-            font-size: 14px;
+            font-size: 16px;
             width: 100%;
             max-width: 450px;
             text-align: center;
@@ -176,12 +176,17 @@
         .grupo-campo {margin-bottom: 15px; text-align: left;}
         label {display: block; margin-bottom: 6px; font-weight: bold; color: #e2e8f0;}
         select, input {width: 100%; padding: 12px; border: 1px solid #4a5568; border-radius: 6px; font-size: 16px; background-color: #1a202c; color: #f7fafc;}
+        
         .data-container {
             display: flex;
             gap: 4%;
+            width: 100%;
         }
-        .data-container select {
-            width: 48%;
+        .data-container select:first-child {
+            width: 35%;
+        }
+        .data-container select:last-child {
+            width: 61%;
         }
         
         #botaoConfirmar {
@@ -294,7 +299,7 @@
 
             .alerta-vagas-piscando {
                 top: 52px !important;
-                font-size: 12px;
+                font-size: 16px !important;
                 padding: 10px;
                 width: 94%;
                 height: 40px;
@@ -302,7 +307,7 @@
 
             .aviso-proxima-inscricao { 
                 top: 52px !important;
-                font-size: 12px;
+                font-size: 14px !important;
                 padding: 10px;
                 width: 94%; 
                 height: 40px; 
@@ -320,7 +325,6 @@
                 margin: 0 auto 8px auto !important;
             }
             
-            /* MODIFICADO: Aumentado de 14px para 16px para melhor legibilidade no celular */
             .container label { font-size: 16px; }
 
             /* Fontes originais intocadas */
