@@ -655,7 +655,7 @@
                     const segundos = Math.floor((diferenca % (1000 * 60)) / 1000);
 
                     let textoFinal = "";
-                    if (dias > 0) textoFinal += `${dias} Dias | `;
+                    if (dias > 0) textoFinal += `${dias} DIAS : `;
                     
                     // Modificado aqui: Usa innerHTML em vez de innerText para aceitar a tag span que colore os segundos
                     textoFinal += `${String(horas).padStart(2, '0')}H : ${String(minutos).padStart(2, '0')}m : <span class="segundos-vermelho">${String(segundos).padStart(2, '0')}s</span>`;
