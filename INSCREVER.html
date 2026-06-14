@@ -86,7 +86,7 @@
         }
 
         @keyframes piscar {
-            0% {
+            0 {
                 background-color: rgba(211, 158, 0, 0.40);
                 border-color: rgba(181, 135, 0, 0.5);
             }
@@ -123,6 +123,11 @@
         .aviso-proxima-inscricao.visivel {
             opacity: 1;
             visibility: visible;
+        }
+
+        /* Classe criada para deixar os segundos em vermelho */
+        .segundos-vermelho {
+            color: #dc3545;
         }
 
         /* Container mantido em absolute fixo no Top 140px */
@@ -509,6 +514,7 @@
         var listaCompletaInscricoes = [];
         var janelaAberta = false;
         var fotoReduzidaBase64 = "";
+        var intervaloRegressiva = null;
 
         window.onload = function() {
             verificarAgendamentoEExecutar();
@@ -624,25 +630,49 @@
 
             if (!agendamento) {
                 avisoEl.classList.remove('visivel');
+                if(intervaloRegressiva) clearInterval(intervaloRegressiva);
                 return;
             }
 
             if (!agendamento.executado) {
-                const dataHora = new Date(agendamento.timestamp);
-                const dia = String(dataHora.getDate()).padStart(2, '0');
-                const mes = String(dataHora.getMonth() + 1).padStart(2, '0');
-                const ano = dataHora.getFullYear();
-                const hora = String(dataHora.getHours()).padStart(2, '0');
-                const min = String(dataHora.getMinutes()).padStart(2, '0');
-                
-                document.getElementById('dataReinicioTexto').innerText = `${dia}/${mes}/${ano} às ${hora}:${min}`;
                 avisoEl.classList.add('visivel');
+                
+                if (intervaloRegressiva) clearInterval(intervaloRegressiva);
+                
+                function atualizarRegressiva() {
+                    const agoraTempo = Date.now();
+                    const diferenca = agendamento.timestamp - agoraTempo;
+
+                    if (diferenca <= 0) {
+                        document.getElementById('dataReinicioTexto').innerText = "Sistema reiniciando...";
+                        clearInterval(intervaloRegressiva);
+                        return;
+                    }
+
+                    const dias = Math.floor(diferenca / (1000 * 60 * 60 * 24));
+                    const horas = Math.floor((diferenca % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    const minutos = Math.floor((diferenca % (1000 * 60 * 60)) / (1000 * 60));
+                    const segundos = Math.floor((diferenca % (1000 * 60)) / 1000);
+
+                    let textoFinal = "";
+                    if (dias > 0) textoFinal += `${dias} Dias | `;
+                    
+                    // Modificado aqui: Usa innerHTML em vez de innerText para aceitar a tag span que colore os segundos
+                    textoFinal += `${String(horas).padStart(2, '0')}H : ${String(minutos).padStart(2, '0')}m : <span class="segundos-vermelho">${String(segundos).padStart(2, '0')}s</span>`;
+
+                    document.getElementById('dataReinicioTexto').innerHTML = textoFinal;
+                }
+
+                atualizarRegressiva();
+                intervaloRegressiva = setInterval(atualizarRegressiva, 1000);
             } else {
                 avisoEl.classList.remove('visivel');
+                if(intervaloRegressiva) clearInterval(intervaloRegressiva);
             }
 
             const agora = Date.now();
             if (agendamento.executado === false && agora >= agendamento.timestamp) {
+                if(intervaloRegressiva) clearInterval(intervaloRegressiva);
                 document.getElementById('avisoReiniciando').style.display = 'block';
                 document.getElementById('conteudoFormulario').style.opacity = '0.5';
 
