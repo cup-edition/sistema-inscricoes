@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>INSCRIÇÃO CUP EDITION</title>
-    <link rel="icon" type="image/png" href="https://cup-edition.github.io/sistema-inscricoes/CUP%20EDITION.png">
+    <link class="icon" type="image/png" href="https://cup-edition.github.io/sistema-inscricoes/CUP%20EDITION.png">
     
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase.js"></script>
     <style>
@@ -251,15 +251,83 @@
         }
         .botao-regras:hover {background-color: #138496; color: white; text-decoration: none;}
 
+        /* TRANSIÇÃO ADICIONADA NAS JANELAS FLUTUANTES */
         .janela-flutuante {
-            display: none; position: fixed;
-            top: 50%; left: 50%; transform: translate(-50%, -50%);
+            position: fixed;
+            top: 50%; left: 50%; 
+            transform: translate(-50%, -50%) scale(0.7);
             background: #2d3748;
             width: 90%; max-width: 400px; max-height: 85vh;
             border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.3);
             z-index: 1000; overflow: hidden;
             border: 2px solid #dc3545;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease-in-out;
         }
+
+        /* JANELA DE REGRAS EM TELA CHEIA COM TRANSIÇÃO */
+        .janela-regras-cheia {
+            position: fixed;
+            top: 50%; left: 50%; 
+            transform: translate(-50%, -50%) scale(0.7);
+            background: #2d3748;
+            width: 95%; height: 90vh; max-width: 600px;
+            border-radius: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.5);
+            z-index: 1011; overflow: hidden;
+            border: 2px solid #dc3545;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease-in-out;
+        }
+
+        /* Classe activa para abrir as janelas com a animação */
+        .janela-flutuante.aberta, .janela-regras-cheia.aberta {
+            opacity: 1;
+            visibility: visible;
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .conteudo-regras-texto {
+            padding: 20px; overflow-y: auto; height: calc(100% - 48px);
+            color: #f7fafc; text-align: left; font-size: 15px; line-height: 1.6;
+        }
+        .conteudo-regras-texto .regra-item {
+            margin-bottom: 18px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #4a5568;
+        }
+        .conteudo-regras-texto .regra-item:last-child {
+            border-bottom: none;
+        }
+        .conteudo-regras-texto h3 { 
+            color: #17a2b8; 
+            font-size: 15px; 
+            margin-bottom: 4px;
+            font-weight: bold;
+        }
+        .conteudo-regras-texto p { 
+            color: #cbd5e0; 
+            font-size: 14px;
+        }
+        .conteudo-regras-texto .destaque-regra {
+            color: #ffc107;
+            font-weight: bold;
+        }
+        .rodape-regras-box {
+            background-color: #1a202c;
+            padding: 12px;
+            border-radius: 6px;
+            text-align: center;
+            margin-top: 15px;
+            border: 1px solid #dc3545;
+        }
+        .rodape-regras-box p {
+            color: #ffffff;
+            font-size: 13px;
+            margin-bottom: 5px;
+        }
+
         .cabecalho-janela {
             background-color: #1a202c;
             color: white; padding: 12px;
@@ -277,7 +345,19 @@
         .dados-inscrito {flex: 1; text-align: left;}
         .nome-inscrito {font-weight: 600; color: #f7fafc; font-size: 15px;}
         .data-hora-inscrito {font-size: 12px; color: #cbd5e0; margin-top: 2px;}
-        .fundo-escuro {display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 999;}
+        
+        /* Fundo escuro com transição suave */
+        .fundo-escuro {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.6); z-index: 999;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease-in-out;
+        }
+        .fundo-escuro.visivel {
+            opacity: 1;
+            visibility: visible;
+        }
 
         .grupo-foto {margin: 10px 0;}
         .foto-perfil-preview {width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 2px solid #dc3545; margin: 10px auto; display: block; box-shadow: 0 4px 10px rgba(0,0,0,0.3);}
@@ -332,11 +412,17 @@
             
             .container label { font-size: 16px; }
 
-            /* Fontes originais intocadas */
             .container .subtitulo-principal { font-size: 19px; }
             .container p.descricao { font-size: 14px; }
             .container select, .container input { font-size: 16px; }
             .container #botaoConfirmar, .container .botao-encerrado { font-size: 16px; }
+            
+            .janela-regras-cheia {
+                width: 100%;
+                height: 100vh;
+                border-radius: 0;
+                border: none;
+            }
         }
     </style>
 
@@ -372,11 +458,83 @@
         ⏳ PRÓXIMA INSCRIÇÃO EM: <span id="dataReinicioTexto">Carregando...</span>
     </div>
 
-    <a href="https://campimfc.my.canva.site/regras" target="_blank" class="botao-regras">📄 REGRAS</a>
+    <button onclick="abrirJanelaRegras()" class="botao-regras">📄 REGRAS</button>
 
     <button class="botao-lista" onclick="abrirJanelaLista()">✅LISTA DE INSCRITOS✅</button>
 
     <div id="fundoEscuro" class="fundo-escuro" onclick="fecharTodasJanelas()"></div>
+
+    <div id="janelaRegras" class="janela-regras-cheia">
+        <div class="cabecalho-janela">
+            <span>📄 REGRAS CUP EDITION CAMPIM FC</span>
+            <button class="fechar-janela" onclick="fecharTodasJanelas()">&times;</button>
+        </div>
+        <div class="conteudo-regras-texto">
+            
+            <div class="regra-item">
+                <h3>1-Duração do Jogo:</h3>
+                <p>8 minutes, divididos em dois tempos de 4 minutos, com troca de lado do campo. <span class="destaque-regra">(Prorrogação de 4 minutos e pênaltis apenas na final, caso haja empate no tempo normal)</span></p>
+            </div>
+
+            <div class="regra-item">
+                <h3>2-Gol de Goleiro:</h3>
+                <p>Apenas se for chute a gol de primeira, mais de 1 toque na bola invalidará o gol.</p>
+            </div>
+
+            <div class="regra-item">
+                <h3>3-Mãos com Braços Abertos:</h3>
+                <p>É proibido o uso das mãos para manipular a bola depois do meio de campo, exceto pelo goleiro dentro de sua área. <span class="destaque-regra">(Será cobrado uma falta direta sem barreira atrás da linha do pênalti)</span></p>
+            </div>
+
+            <div class="regra-item">
+                <h3>4-Faltas Leves:</h3>
+                <p>Será cobrado uma falta não direta por quem sofreu a falta e o adversário terá que dar pelo menos um passo de distância.</p>
+            </div>
+
+            <div class="regra-item">
+                <h3>5-Faltas Agressivas:</h3>
+                <p>Agressões físicas no adversário, como chutes, carrinho, voadora, murro, cotoveladas, tapas. <span class="destaque-regra">(Será cobrado uma falta direta sem barreira atrás da linha do pênalti | 8 passos)</span></p>
+            </div>
+
+            <div class="regra-item">
+                <h3>6-Faltas com Lesão Grave e Brigas:</h3>
+                <p>Será suspenso de uma ou até duas edições de Cup Edition.</p>
+            </div>
+
+            <div class="regra-item">
+                <h3>7-Pênalti:</h3>
+                <p>É concedido dentro da área quando um toque de mão é cometido pelo jogador defensor contra o time atacante. <span class="destaque-regra">(6 passos)</span></p>
+            </div>
+
+            <div class="regra-item">
+                <h3>8-Recuada:</h3>
+                <p>O goleiro não pode segurar a bola recuada com as mãos mais de uma vez por lance de jogo, só podendo pegar com as mãos se o último toque for do time adversário e ficar com ela nas mãos por no máximo por 8 segundos. <span class="destaque-regra">(Será cobrado uma falta direta sem barreira atrás da linha do pênalti caso descumpra a regra | 8 passos)</span></p>
+            </div>
+
+            <div class="regra-item">
+                <h3>9-Abandono:</h3>
+                <p>Se o jogador abandonar a partida sem motivo contundente, seu time será desqualificado.</p>
+            </div>
+
+            <div class="regra-item">
+                <h3>10-Atraso:</h3>
+                <p>Se chegar atrasado pro jogo e tiver jogador sem time no campo, você poderá perder sua vaga.</p>
+            </div>
+
+            <div class="regra-item">
+                <h3>11-Arbitragem:</h3>
+                <p>O jogador que confrontar quem estiver apitando o jogo será suspenso de uma edição de copinha.</p>
+            </div>
+
+            <div class="rodape-regras-box">
+                <p>📌 <b>INSCRIÇÃO DO NOME PELO SITE</b>, DISPONÍVEL TODA SEXTA MEIA-NOITE.</p>
+                <p>📌 <b>SORTEIO DE TIMES SEXTA ÀS 20:00 HORAS</b> PELO GOOGLE MEET NO SITE.</p>
+                <p style="color: #17a2b8; margin-top: 8px; font-weight: bold; font-size: 12px;">ARBITRAGEM - ADM e de sua escolha</p>
+                <p style="color: #cbd5e0; font-size: 11px;">(RYAN, JUNIOR, VICTOR, DAVI OU PAULO ANDRÉ)</p>
+            </div>
+            
+        </div>
+    </div>
 
     <div id="janelaLista" class="janela-flutuante">
         <div class="cabecalho-janela">
@@ -515,18 +673,19 @@
         var janelaAberta = false;
         var fotoReduzidaBase64 = "";
         var intervaloRegressiva = null;
+        var agendamentoAtual = null;
 
         window.onload = function() {
-            verificarAgendamentoEExecutar();
-            verificarStatusSistema();
-            carregarListaNomes();
-            setInterval(verificarStatusSistema, 3000);
-            setInterval(verificarAgendamentoEExecutar, 10000);
+            db.ref('agendamento_reinicio').on('value', function(snap) {
+                var agendamento = snap.val();
+                tratarAgendamentoLocal(agendamento);
+            });
             
             db.ref('inscricoes').on('value', function(snap) {
                 listaCompletaInscricoes = snap.val() || [];
                 if (janelaAberta) atualizarListaConfirmados();
                 carregarListaNomes();
+                verificarStatusSistemaComDados(listaCompletaInscricoes);
             });
         };
 
@@ -623,9 +782,8 @@
             fotoReduzidaBase64 = "";
         }
 
-        async function verificarAgendamentoEExecutar() {
-            const snap = await db.ref('agendamento_reinicio').once('value');
-            const agendamento = snap.val();
+        function tratarAgendamentoLocal(agendamento) {
+            agendamentoAtual = agendamento;
             const avisoEl = document.getElementById('avisoProximaInscricao');
 
             if (!agendamento) {
@@ -646,19 +804,19 @@
                     if (diferenca <= 0) {
                         document.getElementById('dataReinicioTexto').innerText = "Sistema reiniciando...";
                         clearInterval(intervaloRegressiva);
+                        executarREINICIO();
                         return;
                     }
 
                     const dias = Math.floor(diferenca / (1000 * 60 * 60 * 24));
                     const horas = Math.floor((diferenca % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                    const minutos = Math.floor((diferenca % (1000 * 60 * 60)) / (1000 * 60));
+                    const minutes = Math.floor((diferenca % (1000 * 60 * 60)) / (1000 * 60));
                     const segundos = Math.floor((diferenca % (1000 * 60)) / 1000);
 
                     let textoFinal = "";
                     if (dias > 0) textoFinal += `${dias} DIAS : `;
                     
-                    // Modificado aqui: Usa innerHTML em vez de innerText para aceitar a tag span que colore os segundos
-                    textoFinal += `${String(horas).padStart(2, '0')}H : ${String(minutos).padStart(2, '0')}m : <span class="segundos-vermelho">${String(segundos).padStart(2, '0')}s</span>`;
+                    textoFinal += `${String(horas).padStart(2, '0')}H : ${String(minutes).padStart(2, '0')}m : <span class="segundos-vermelho">${String(segundos).padStart(2, '0')}s</span>`;
 
                     document.getElementById('dataReinicioTexto').innerHTML = textoFinal;
                 }
@@ -669,13 +827,13 @@
                 avisoEl.classList.remove('visivel');
                 if(intervaloRegressiva) clearInterval(intervaloRegressiva);
             }
+        }
 
-            const agora = Date.now();
-            if (agendamento.executado === false && agora >= agendamento.timestamp) {
-                if(intervaloRegressiva) clearInterval(intervaloRegressiva);
-                document.getElementById('avisoReiniciando').style.display = 'block';
-                document.getElementById('conteudoFormulario').style.opacity = '0.5';
+        async function executarREINICIO() {
+            document.getElementById('avisoReiniciando').style.display = 'block';
+            document.getElementById('conteudoFormulario').style.opacity = '0.5';
 
+            try {
                 const inscSnap = await db.ref('inscricoes').once('value');
                 const lista = inscSnap.val() || [];
 
@@ -691,7 +849,17 @@
                 await db.ref('configuracao').update({inscricoes_abertas: true, ultimo_reinicio: Date.now()});
                 await db.ref('agendamento_reinicio').update({executado: true});
 
-                location.reload();
+                setTimeout(() => {
+                    location.reload();
+                }, 1500);
+
+            } catch (erro) {
+                console.error("Erro no reinício automático:", erro);
+                document.getElementById('dataReinicioTexto').innerText = "Erro ao reiniciar. Sem permissão.";
+                // Alerta direto na tela informando que as Regras do Firebase bloquearam a gravação
+                alert("O sistema tentou reiniciar, mas o Firebase bloqueou a gravação por falta de permissão pública. Atualize as regras de segurança no console do Firebase para gravação pública nas tabelas 'inscricoes' e 'configuracao'.");
+                document.getElementById('avisoReiniciando').style.display = 'none';
+                document.getElementById('conteudoFormulario').style.opacity = '1';
             }
         }
 
@@ -762,39 +930,45 @@
         }
 
         function abrirJanelaCadastro() {
-            document.getElementById('fundoEscuro').style.display = 'block';
-            document.getElementById('janelaCadastro').style.display = 'block';
+            document.getElementById('fundoEscuro').classList.add('visivel');
+            document.getElementById('janelaCadastro').classList.add('aberta');
         }
 
         function abrirJanelaLista() {
-            document.getElementById('fundoEscuro').style.display = 'block';
-            document.getElementById('janelaLista').style.display = 'block';
+            document.getElementById('fundoEscuro').classList.add('visivel');
+            document.getElementById('janelaLista').classList.add('aberta');
             janelaAberta = true;
             atualizarListaConfirmados();
         }
 
+        function abrirJanelaRegras() {
+            document.getElementById('fundoEscuro').classList.add('visivel');
+            document.getElementById('janelaRegras').classList.add('aberta');
+        }
+
         function fecharTodasJanelas() {
-            document.getElementById('fundoEscuro').style.display = 'none';
-            document.querySelectorAll('.janela-flutuante').forEach(el => el.style.display = 'none');
+            document.getElementById('fundoEscuro').classList.remove('visivel');
+            document.getElementById('janelaCadastro').classList.remove('aberta');
+            document.getElementById('janelaLista').classList.remove('aberta');
+            document.getElementById('janelaRegras').classList.remove('aberta');
             janelaAberta = false;
         }
 
         function carregarListaNomes() {
-            db.ref('inscricoes').once('value').then(snap => {
-                listaCompletaInscricoes = snap.val() || [];
-                var selectNome = document.getElementById('ver_nome');
-                selectNome.innerHTML = '<option value="">-- Selecione seu nome --</option>';
+            var selectNome = document.getElementById('ver_nome');
+            const valorAtual = selectNome.value;
+            selectNome.innerHTML = '<option value="">-- Selecione seu nome --</option>';
 
-                var nomesPendentes = listaCompletaInscricoes.filter(insc => insc && insc.status === 'pendente').map(insc => insc.nome);
-                var nomesUnicos = [...new Set(nomesPendentes)].sort();
+            var nomesPendentes = listaCompletaInscricoes.filter(insc => insc && insc.status === 'pendente').map(insc => insc.nome);
+            var nomesUnicos = [...new Set(nomesPendentes)].sort();
 
-                nomesUnicos.forEach(nome => {
-                    var opcao = document.createElement('option');
-                    opcao.value = nome;
-                    opcao.textContent = nome;
-                    selectNome.appendChild(opcao);
-                });
+            nomesUnicos.forEach(nome => {
+                var opcao = document.createElement('option');
+                opcao.value = nome;
+                opcao.textContent = nome;
+                selectNome.appendChild(opcao);
             });
+            if(valorAtual) selectNome.value = valorAtual;
         }
 
         function mostrarFotoSelecionado() {
@@ -817,35 +991,35 @@
         }
 
         function verificarStatusSistema() {
+            verificarStatusSistemaComDados(listaCompletaInscricoes);
+        }
+
+        function verificarStatusSistemaComDados(listaInscricoes) {
             db.ref('configuracao/inscricoes_abertas').once('value').then(snap => {
                 var aberto = snap.val() !== null ? snap.val() : true;
+                var qtdConfirmados = listaInscricoes.filter(i => i && i.status === 'confirmado').length;
                 
-                db.ref('inscricoes').once('value').then(snapIns => {
-                    var lista = snapIns.val() || [];
-                    var qtdConfirmados = lista.filter(i => i && i.status === 'confirmado').length;
-                    
-                    var alertaRapido = document.getElementById('alertaVagasRapidas');
-                    var vagasRestantes = LIMITE_MAXIMO - qtdConfirmados;
+                var alertaRapido = document.getElementById('alertaVagasRapidas');
+                var vagasRestantes = LIMITE_MAXIMO - qtdConfirmados;
 
-                    if (aberto && qtdConfirmados >= 13 && qtdConfirmados < LIMITE_MAXIMO) {
-                        if (vagasRestantes === 1) {
-                            alertaRapido.innerText = "⚠️ ATENÇÃO: RESTAM SOMENTE 1 VAGA!";
-                        } else {
-                            alertaRapido.innerText = "⚠️ ATENÇÃO: RESTAM SOMENTE " + vagasRestantes + " VAGAS!";
-                        }
-                        alertaRapido.style.display = "block";
+                if (aberto && qtdConfirmados >= 13 && qtdConfirmados < LIMITE_MAXIMO) {
+                    if (vagasRestantes === 1) {
+                        alertaRapido.innerText = "⚠️ ATENÇÃO: RESTAM SOMENTE 1 VAGA!";
                     } else {
-                        alertaRapido.style.display = "none";
+                        alertaRapido.innerText = "⚠️ ATENÇÃO: RESTAM SOMENTE " + vagasRestantes + " VAGAS!";
                     }
+                    alertaRapido.style.display = "block";
+                } else {
+                    alertaRapido.style.display = "none";
+                }
 
-                    if (!aberto || qtdConfirmados >= LIMITE_MAXIMO) {
-                        document.getElementById('botaoConfirmar').style.display = 'none';
-                        document.getElementById('botaoTelaEncerrado').style.display = 'block';
-                    } else {
-                        document.getElementById('botaoConfirmar').style.display = 'block';
-                        document.getElementById('botaoTelaEncerrado').style.display = 'none';
-                    }
-                });
+                if (!aberto || qtdConfirmados >= LIMITE_MAXIMO) {
+                    document.getElementById('botaoConfirmar').style.display = 'none';
+                    document.getElementById('botaoTelaEncerrado').style.display = 'block';
+                } else {
+                    document.getElementById('botaoConfirmar').style.display = 'block';
+                    document.getElementById('botaoTelaEncerrado').style.display = 'none';
+                }
             });
         }
 
@@ -876,7 +1050,7 @@
                     msg.className = 'resultado erro';
                     msg.innerText = '❌ LIMITE DE 16 CONFIRMADOS ATINGIDO! Inscrições encerradas.';
                     msg.style.display = 'block';
-                    verificarStatusSistema();
+                    verificarStatusSistemaComDados(inscricoes);
                     return;
                 }
 
@@ -911,7 +1085,7 @@
                         document.getElementById('fotoUsuario').style.display = 'none';
                         
                         carregarListaNomes();
-                        verificarStatusSistema();
+                        verificarStatusSistemaComDados(inscricoes);
                     })
                     .catch((erro) => {
                         msg.className = 'resultado erro';
