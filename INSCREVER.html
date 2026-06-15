@@ -417,11 +417,12 @@
             .container select, .container input { font-size: 16px; }
             .container #botaoConfirmar, .container .botao-encerrado { font-size: 16px; }
             
+            /* Diminuído ligeiramente o tamanho da janela de regras em celulares */
             .janela-regras-cheia {
-                width: 100%;
-                height: 100vh;
-                border-radius: 0;
-                border: none;
+                width: 92%;
+                height: 82vh;
+                border-radius: 10px;
+                border: 2px solid #dc3545;
             }
         }
     </style>
@@ -462,12 +463,12 @@
 
     <button class="botao-lista" onclick="abrirJanelaLista()">✅LISTA DE INSCRITOS✅</button>
 
-    <div id="fundoEscuro" class="fundo-escuro" onclick="fecharTodasJanelas()"></div>
+    <div id="fundoEscuro" class="fundo-escuro" onclick="fecharTodasJanelasManual()"></div>
 
     <div id="janelaRegras" class="janela-regras-cheia">
         <div class="cabecalho-janela">
             <span>📄 REGRAS CUP EDITION CAMPIM FC</span>
-            <button class="fechar-janela" onclick="fecharTodasJanelas()">&times;</button>
+            <button class="fechar-janela" onclick="fecharTodasJanelasManual()">&times;</button>
         </div>
         <div class="conteudo-regras-texto">
             
@@ -539,7 +540,7 @@
     <div id="janelaLista" class="janela-flutuante">
         <div class="cabecalho-janela">
             <span id="tituloJanela">✅ 0 INSCRITOS CONFIRMADOS ✅</span>
-            <button class="fechar-janela" onclick="fecharTodasJanelas()">&times;</button>
+            <button class="fechar-janela" onclick="fecharTodasJanelasManual()">&times;</button>
         </div>
         <div class="conteudo-janela" id="listaConfirmados">
             <p style="text-align:center; color:#cbd5e0;">Carregando...</p>
@@ -549,7 +550,7 @@
     <div id="janelaCadastro" class="janela-flutuante">
         <div class="cabecalho-janela">
             <span>📝 NOVO CADASTRO</span>
-            <button class="fechar-janela" onclick="fecharTodasJanelas()">&times;</button>
+            <button class="fechar-janela" onclick="fecharTodasJanelasManual()">&times;</button>
         </div>
         <div class="conteudo-janela">
             <div class="grupo-campo">
@@ -689,6 +690,33 @@
             });
         };
 
+        /* Lógica para interceptar o botão voltar do celular */
+        window.addEventListener('popstate', function(event) {
+            if (document.querySelector('.janela-flutuante.aberta') || document.querySelector('.janela-regras-cheia.aberta')) {
+                fecharTodasJanelasMecanismo();
+            }
+        });
+
+        function gerenciarHistoricoJanelaAberta() {
+            window.history.pushState({janelaAberta: true}, "");
+        }
+
+        function fecharTodasJanelasManual() {
+            if (window.history.state && window.history.state.janelaAberta) {
+                window.history.back();
+            } else {
+                fecharTodasJanelasMecanismo();
+            }
+        }
+
+        function fecharTodasJanelasMecanismo() {
+            document.getElementById('fundoEscuro').classList.remove('visivel');
+            document.getElementById('janelaCadastro').classList.remove('aberta');
+            document.getElementById('janelaLista').classList.remove('aberta');
+            document.getElementById('janelaRegras').classList.remove('aberta'); /* Corrigido o ID aqui */
+            janelaAberta = false;
+        }
+
         function previsualizarETemperarFoto(event) {
             const input = event.target;
             const preview = document.getElementById('previewFoto');
@@ -759,7 +787,7 @@
                 limparFormularioCadastro();
 
                 setTimeout(() => {
-                    fecharTodasJanelas();
+                    fecharTodasJanelasManual();
                     msg.style.display = 'none';
                     btn.disabled = false;
                 }, 2000);
@@ -856,7 +884,6 @@
             } catch (erro) {
                 console.error("Erro no reinício automático:", erro);
                 document.getElementById('dataReinicioTexto').innerText = "Erro ao reiniciar. Sem permissão.";
-                // Alerta direto na tela informando que as Regras do Firebase bloquearam a gravação
                 alert("O sistema tentou reiniciar, mas o Firebase bloqueou a gravação por falta de permissão pública. Atualize as regras de segurança no console do Firebase para gravação pública nas tabelas 'inscricoes' e 'configuracao'.");
                 document.getElementById('avisoReiniciando').style.display = 'none';
                 document.getElementById('conteudoFormulario').style.opacity = '1';
@@ -932,6 +959,7 @@
         function abrirJanelaCadastro() {
             document.getElementById('fundoEscuro').classList.add('visivel');
             document.getElementById('janelaCadastro').classList.add('aberta');
+            gerenciarHistoricoJanelaAberta();
         }
 
         function abrirJanelaLista() {
@@ -939,19 +967,13 @@
             document.getElementById('janelaLista').classList.add('aberta');
             janelaAberta = true;
             atualizarListaConfirmados();
+            gerenciarHistoricoJanelaAberta();
         }
 
         function abrirJanelaRegras() {
             document.getElementById('fundoEscuro').classList.add('visivel');
             document.getElementById('janelaRegras').classList.add('aberta');
-        }
-
-        function fecharTodasJanelas() {
-            document.getElementById('fundoEscuro').classList.remove('visivel');
-            document.getElementById('janelaCadastro').classList.remove('aberta');
-            document.getElementById('janelaLista').classList.remove('aberta');
-            document.getElementById('janelaRegras').classList.remove('aberta');
-            janelaAberta = false;
+            gerenciarHistoricoJanelaAberta();
         }
 
         function carregarListaNomes() {
