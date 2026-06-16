@@ -34,25 +34,15 @@
         .caixa-login button:hover {background-color: #27ae60; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(46, 204, 113, 0.3);}
         .errologin {color: #e74c3c; font-size: 14px; margin-top: 15px; display: none; font-weight: bold; animation: piscar 0.5s ease;}
 
-        /* ===== ESTILOS DOS CRÉDITOS (ESTILO IRADO) ===== */
+        /* ===== ESTILOS DOS CRÉDITOS ===== */
         .creditos-container {
-            margin-top: 25px;
-            text-align: center;
-            letter-spacing: 2px;
-            animation: fadeIn 1s ease-out;
+            margin-top: 25px; text-align: center; letter-spacing: 2px; animation: fadeIn 1s ease-out;
         }
-        .creditos-menor {
-            font-size: 10px;
-            color: #7f8c8d;
-            font-weight: 500;
-        }
+        .creditos-menor { font-size: 10px; color: #7f8c8d; font-weight: 500; }
         .creditos-maior {
-            font-size: 22px;
-            color: #2ecc71;
+            font-size: 22px; color: #2ecc71;
             text-shadow: 0 0 10px rgba(46, 204, 113, 0.6), 0 0 20px rgba(46, 204, 113, 0.3);
-            margin-top: 4px;
-            letter-spacing: 3px;
-            font-weight: 900;
+            margin-top: 4px; letter-spacing: 3px; font-weight: 900;
         }
 
         /* ===== ESTILOS DO SISTEMA ===== */
@@ -61,7 +51,6 @@
         
         @keyframes avisoPiscar { from { opacity: 0.7; } to { opacity: 1; } }
 
-        /* SEÇÃO DO PAINEL PRINCIPAL */
         .secao {
             background: #212529; padding: 25px; border-radius: 14px; 
             box-shadow: 0 8px 24px rgba(0,0,0,0.5); margin-bottom: 25px;
@@ -80,10 +69,7 @@
         input[type="number"] {width: 90px;}
         input[type="file"] {padding: 8px; font-size: 13px; border: 1px dashed #2ecc71; background: #2c3034; color: white; text-transform: none; font-weight: normal; width: 100%;}
         
-        /* FOTOS WITH BORDA VERMELHA (PADRÃO / PENDENTE) */
         .foto-preview { width: 46px; height: 46px; border-radius: 50%; object-fit: cover; border: 2px solid #e74c3c; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
-        
-        /* CLASSE ADICIONADA PARA BORDAS EM VERDE DOS CONFIRMADOS */
         .foto-confirmado { border-color: #2ecc71 !important; }
         
         /* ===== BOTÕES ===== */
@@ -105,7 +91,11 @@
         .btn-pendente {background-color: #e67e22; padding: 6px 10px;}
         .btn-pendente:hover {background-color: #d35400;}
 
-        /* ===== BOTÃO DE MENU HAMBURGUER (3 TRACINHOS) ===== */
+        /* ===== BOTÃO SUSPENSOS ===== */
+        .btn-suspensos {background-color: #c0392b; font-size: 12px;}
+        .btn-suspensos:hover {background-color: #a93226; box-shadow: 0 4px 12px rgba(192, 57, 43, 0.3);}
+
+        /* ===== BOTÃO MENU HAMBURGUER ===== */
         .btn-menu-hamburguer {
             position: absolute; top: 20px; right: 25px;
             background-color: #2c3034; border: 1px solid #495057;
@@ -118,13 +108,11 @@
             display: block; width: 22px; height: 3px; background-color: #f8f9fa;
             border-radius: 2px; transition: all 0.3s;
         }
-        
-        /* Animação dos tracinhos mudando para um "X" ao abrir */
         .btn-menu-hamburguer.aberto span:nth-child(1) { transform: translateY(8px) rotate(45deg); }
         .btn-menu-hamburguer.aberto span:nth-child(2) { opacity: 0; }
         .btn-menu-hamburguer.aberto span:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
 
-        /* ===== CONTAINER FLUTUANTE DO MENU NOVO ===== */
+        /* ===== MENU FLUTUANTE ===== */
         .menu-suspenso-container {
             position: absolute; top: 70px; right: 25px;
             background-color: #1e2124; border: 2px solid #495057; border-radius: 12px;
@@ -148,7 +136,7 @@
         .sucesso {background-color: #1a3327; color: #2ecc71; border: 1px solid #2ecc71;}
         .erro {background-color: #3a1e1e; color: #e74c3c; border: 1px solid #e74c3c;}
         
-        /* TABELA RESPONSIVA */
+        /* TABELA */
         table {width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 13px;}
         th, td {padding: 12px 10px; text-align: left; border-bottom: 1px solid #2c3034; font-weight: bold; color: #f8f9fa;}
         th {background-color: #2c3034; color: #e9ecef; font-size: 12px; border-bottom: 2px solid #495057; letter-spacing: 0.5px;}
@@ -164,8 +152,8 @@
         #conteudoPrincipal {display: none; animation: fadeIn 0.4s ease-in-out;}
         .data-hora {font-size: 11px; color: #a0aec0; white-space: nowrap;}
 
-        /* ===== MODAIS COM ANIMAÇÃO FADE-IN ===== */
-        #modalEditar, #modalAgendar, #modalAprovacao, #fundoCadastro {
+        /* ===== MODAIS ===== */
+        #modalEditar, #modalAgendar, #modalAprovacao, #fundoCadastro, #modalSuspensos {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background-color: rgba(0, 0, 0, 0.75);
             display: none; align-items: center; justify-content: center; z-index: 99999;
@@ -179,6 +167,41 @@
         }
         .caixa-aprovacao { max-width: 480px; max-height: 85vh; display: flex; flex-direction: column; }
         #janelaCadastro { width: 360px; position: relative; }
+
+        /* ===== MODAL SUSPENSOS ===== */
+        .caixa-suspensos {
+            background: #212529; padding: 30px; border-radius: 16px; width: 100%; max-width: 460px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.6); border: 2px solid #c0392b; color: #f8f9fa;
+            max-height: 85vh; display: flex; flex-direction: column;
+        }
+        .caixa-suspensos h3 { color: #e74c3c; }
+
+        /* SELECT ESTILIZADO */
+        .select-nome {
+            width: 100%; padding: 12px; border: 1px solid #495057; background-color: #2c3034;
+            color: white; border-radius: 8px; font-size: 14px; font-weight: bold;
+            text-transform: uppercase; cursor: pointer; transition: border 0.2s;
+            appearance: none; -webkit-appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%23adb5bd' d='M6 8L0 0h12z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat; background-position: right 14px center;
+        }
+        .select-nome:focus { border-color: #e74c3c; outline: none; }
+        .select-nome option { background-color: #2c3034; color: white; padding: 8px; }
+
+        /* LISTA DE SUSPENSOS */
+        .conteudo-suspensos { overflow-y: auto; flex: 1; margin-top: 20px; }
+        .item-suspenso {
+            display: flex; align-items: center; justify-content: space-between;
+            background: #2c3034; border: 1px solid #e74c3c; border-radius: 10px;
+            padding: 14px 16px; margin-bottom: 10px;
+            gap: 12px;
+        }
+        .item-suspenso-info { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0; }
+        .item-suspenso-nome { font-size: 14px; color: #f8f9fa; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .item-suspenso-vazio { text-align: center; color: #adb5bd; padding: 20px; font-size: 13px; }
+
+        .btn-remover-suspenso { background-color: #2ecc71; padding: 7px 12px; font-size: 12px; white-space: nowrap; flex-shrink: 0; }
+        .btn-remover-suspenso:hover { background-color: #27ae60; }
 
         h3 {margin-bottom: 20px; color: #f8f9fa; text-align: center; font-size: 18px; letter-spacing: 0.5px;}
         .botoes-modal {display: flex; gap: 12px; justify-content: space-between; align-items: center; margin-top: 25px;}
@@ -201,6 +224,9 @@
             display: flex; align-items: center; justify-content: center; padding: 0; line-height: 1;
         }
         .botao-fechar:hover {background: #c0392b;}
+
+        /* DIVISOR DENTRO DO MODAL */
+        .divisor-modal { border: none; border-top: 1px solid #343a40; margin: 20px 0; }
     </style>
 </head>
 <body>
@@ -208,14 +234,12 @@
     <div id="telaLogin">
         <div class="caixa-login">
             <img src="https://cup-edition.github.io/sistema-inscricoes/CUP%20EDITION%20CAMPIM%20FC.png" alt="Cup Edition Logo" style="width: 280px; height: auto; margin-top: 0px; margin-bottom: 10px; display: inline-block;">
-            
             <h2>🔐 ACESSO RESTRITO</h2>
             <input type="text" id="usuarioLogin" placeholder="USUÁRIO" required oninput="verificarUsuario()">
             <input type="password" id="senhaLogin" placeholder="SENHA" required onkeydown="if(event.key === 'Enter') fazerLogin()">
             <button onclick="fazerLogin()">ENTRAR</button>
             <div class="errologin" id="mensagemErro">USUÁRIO OU SENHA INCORRETOS!</div>
         </div>
-        <!-- TEXTO SOLICITADO FORA E LOGO ABAIXO DA CAIXA -->
         <div class="creditos-container">
             <div class="creditos-menor">DESENVOLVIDO POR</div>
             <div class="creditos-maior">ENDRIL SILVA</div>
@@ -289,6 +313,36 @@
         </div>
     </div>
 
+    <!-- ===== MODAL SUSPENSOS ===== -->
+    <div id="modalSuspensos">
+        <div class="caixa-suspensos">
+            <h3>🟥 GERENCIAR SUSPENSOS</h3>
+
+            <!-- CAMPO PARA SUSPENDER -->
+            <div class="grupo-campo">
+                <label>SELECIONAR INSCRITO PARA SUSPENDER:</label>
+                <select id="selectSuspenso" class="select-nome">
+                    <option value="">— ESCOLHA UM NOME —</option>
+                </select>
+            </div>
+            <button class="btn-vermelho" onclick="suspenderJogador()" style="width:100%; padding: 13px; font-size: 14px;">
+                🟥 SUSPENDER
+            </button>
+
+            <hr class="divisor-modal">
+
+            <!-- LISTA DOS JÁ SUSPENSOS -->
+            <label>SUSPENSOS ATUALMENTE:</label>
+            <div class="conteudo-suspensos" id="listaSuspensos">
+                <div class="item-suspenso-vazio">NENHUM SUSPENSO CADASTRADO.</div>
+            </div>
+
+            <div class="botoes-modal" style="margin-top: 20px; justify-content: flex-end;">
+                <button type="button" onclick="fecharSuspensos()">FECHAR</button>
+            </div>
+        </div>
+    </div>
+
     <div id="avisoNovaConfirmacao" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0); display: none; align-items: center; justify-content: center; z-index: 999999; backdrop-filter: blur(5px); animation: fadeIn 0.3s ease-out;">
         <div style="background: #212529; border: 3px solid #2ecc71; border-radius: 20px; padding: 40px; text-align: center; max-width: 400px; width: 90%; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.7); text-transform: uppercase;">
             <h2 style="color: #2ecc71; font-size: 24px; margin-bottom: 20px; justify-content: center; padding-right: 0;">🎉 INSCRIÇÃO CONFIRMADA!</h2>
@@ -311,12 +365,12 @@
             </h2>
 
             <div class="btn-menu-hamburguer" id="btnMenu" onclick="alternarMenuFlutuante()">
-                <span></span>
-                <span></span>
-                <span></span>
+                <span></span><span></span><span></span>
             </div>
 
             <div class="menu-suspenso-container" id="menuFlutuante">
+                <!-- BOTÃO SUSPENSOS — ACIMA DE PEDIDOS DE CADASTRO -->
+                <button class="btn-suspensos" onclick="abrirSuspensos(); alternarMenuFlutuante();">🟥 SUSPENSOS</button>
                 <button class="btn-amarelo btn-com-notificacao" onclick="abrirAprovacao(); alternarMenuFlutuante();">
                     📋 PEDIDOS DE CADASTRO
                     <span id="badgePedidos" class="badge-pedidos">0</span>
@@ -350,30 +404,22 @@
                     <button class="btn-vermelho" onclick="limparTodasInscricoes()">🗑️ LIMPAR TODAS AS INSCRIÇÕES</button>
                 </div>
             </div>
-
         </div>
     </div>
 
     <div id="fundoCadastro">
         <div id="janelaCadastro">
             <button class="botao-fechar" onclick="ocultarCadastro()">&times;</button>
-            
             <h3>📋 CADASTRAR NOVA PESSOA</h3>
-            
             <label>NOME / APELIDO:</label>
             <input type="text" id="cad_nome" placeholder="DIGITE O NOME OR APELIDO" onkeydown="pularCampo(event, 'cad_dia')">
-
             <label>DIA DE NASCIMENTO:</label>
             <input type="number" id="cad_dia" min="1" max="31" placeholder="DIA" maxlength="2" oninput="limitarDoisDigitos(this)" onkeydown="pularCampo(event, 'cad_mes')">
-
             <label>MÊS DE NASCIMENTO:</label>
             <input type="number" id="cad_mes" min="1" max="12" placeholder="MÊS" maxlength="2" oninput="limitarDoisDigitos(this)" onkeydown="pularCampo(event, 'cad_foto')">
-
             <label>📸 FOTO DE PERFIL (OPCIONAL):</label>
             <input type="file" id="cad_foto" accept="image/*" onkeydown="pularCampo(event, 'btnCadastrarPessoa')">
-
             <button id="btnCadastrarPessoa" onclick="cadastrarPessoa()">CADASTRAR</button>
-            
             <div id="msg_cadastro" class="resultado" style="display: none;"></div>
         </div>
     </div>
@@ -396,13 +442,14 @@
         let quantidadeAnterior = 0;
         let idEmEdicao = null;
 
+        // Cache local dos inscritos para o select de suspensos
+        let inscritosCache = [];
+
         db.ref('.info/connected').on('value', function(snap) {
-            if (snap.val() !== true) {
-                firebase.database().goOnline();
-            }
+            if (snap.val() !== true) { firebase.database().goOnline(); }
         });
 
-        /* ===== CONTROLE DO MENU HAMBURGUER ===== */
+        /* ===== MENU HAMBURGUER ===== */
         function alternarMenuFlutuante() {
             const menu = document.getElementById('menuFlutuante');
             const btn = document.getElementById('btnMenu');
@@ -415,69 +462,40 @@
             }
         }
 
-        /* ===== MONITORA CLIQUE FORA PARA FECHAR JANELAS ===== */
         document.addEventListener('click', function(event) {
-            // Menu Hambúrguer
             const menu = document.getElementById('menuFlutuante');
             const btn = document.getElementById('btnMenu');
             if (menu && btn && !menu.contains(event.target) && !btn.contains(event.target) && menu.style.display === 'flex') {
                 menu.style.display = 'none';
                 btn.classList.remove('aberto');
             }
-
-            // Janela Editar Cadastro
-            const modalEditar = document.getElementById('modalEditar');
-            if (modalEditar && event.target === modalEditar) {
-                fecharEdicao();
-            }
-
-            // Janela Agendar Reinício
-            const modalAgendar = document.getElementById('modalAgendar');
-            if (modalAgendar && event.target === modalAgendar) {
-                fecharAgendamento();
-            }
-
-            // Janela Pedidos Pendentes
-            const modalAprovacao = document.getElementById('modalAprovacao');
-            if (modalAprovacao && event.target === modalAprovacao) {
-                fecharAprovacao();
-            }
-
-            // Janela Cadastrar Nova Pessoa
-            const fundoCadastro = document.getElementById('fundoCadastro');
-            if (fundoCadastro && event.target === fundoCadastro) {
-                ocultarCadastro();
-            }
-
-            // Janela de Nova Inscrição Confirmada (Aviso na frente da tela)
+            if (document.getElementById('modalEditar') && event.target === document.getElementById('modalEditar')) fecharEdicao();
+            if (document.getElementById('modalAgendar') && event.target === document.getElementById('modalAgendar')) fecharAgendamento();
+            if (document.getElementById('modalAprovacao') && event.target === document.getElementById('modalAprovacao')) fecharAprovacao();
+            if (document.getElementById('fundoCadastro') && event.target === document.getElementById('fundoCadastro')) ocultarCadastro();
+            if (document.getElementById('modalSuspensos') && event.target === document.getElementById('modalSuspensos')) fecharSuspensos();
             const avisoNovaConfirmacao = document.getElementById('avisoNovaConfirmacao');
-            if (avisoNovaConfirmacao && avisoNovaConfirmacao.style.display === 'flex') {
-                avisoNovaConfirmacao.style.display = 'none';
-            }
+            if (avisoNovaConfirmacao && avisoNovaConfirmacao.style.display === 'flex') avisoNovaConfirmacao.style.display = 'none';
         });
 
         function mostrarCadastro() { document.getElementById('fundoCadastro').style.display = 'flex'; }
         function ocultarCadastro() { document.getElementById('fundoCadastro').style.display = 'none'; }
 
         function limitarDoisDigitos(campo) {
-            if (campo.value.length > 2) {
-                campo.value = campo.value.slice(0, 2);
-            }
+            if (campo.value.length > 2) campo.value = campo.value.slice(0, 2);
         }
 
         function pularCampo(event, proximoId) {
             if (event.key === 'Enter') {
                 event.preventDefault();
                 const proximoCampo = document.getElementById(proximoId);
-                if (proximoCampo) { proximoCampo.focus(); }
+                if (proximoCampo) proximoCampo.focus();
             }
         }
 
         function verificarUsuario() {
             let u = document.getElementById('usuarioLogin').value.trim().toLowerCase();
-            if(u.length > 0) {
-                if(u === 'campim') { document.getElementById('senhaLogin').focus(); }
-            }
+            if(u.length > 0 && u === 'campim') document.getElementById('senhaLogin').focus();
         }
 
         function fazerLogin() {
@@ -485,36 +503,27 @@
             const senha = document.getElementById('senhaLogin').value.trim();
             const mensagemErro = document.getElementById('mensagemErro');
 
-            db.ref('seguranca').once('value')
-            .then(snap => {
+            db.ref('seguranca').once('value').then(snap => {
                 const dados = snap.val();
                 if (dados && usuario === dados.usuario && senha === dados.senha) {
                     document.getElementById('telaLogin').style.display = 'none';
                     document.getElementById('conteudoPrincipal').style.display = 'block';
-                    
                     const escolhaSalva = localStorage.getItem('dataNascVisivel');
                     if (escolhaSalva !== null) {
                         dataVisivel = (escolhaSalva === 'true');
                         aplicarVisibilidadeData();
                     }
-                    
                     iniciarAtualizacaoAutomatica();
                 } else {
                     mensagemErro.style.display = 'block';
                     document.getElementById('senhaLogin').value = '';
                 }
-            })
-            .catch(erro => {
-                alert("❌ Problema ao conectar à base de dados.");
-                console.error(erro);
-            });
+            }).catch(erro => { alert("❌ Problema ao conectar à base de dados."); console.error(erro); });
         }
 
         function verificarLimiteConfirmados(qtd) {
             const aviso = document.getElementById('avisoLimite');
-            const vagasRestantes = LIMITE_MAXIMO - qtd;
-            
-            if (vagasRestantes === 0) {
+            if (LIMITE_MAXIMO - qtd === 0) {
                 db.ref('configuracao').set({inscricoes_abertas: false});
                 aviso.style.display = 'block';
             } else {
@@ -531,16 +540,12 @@
                 img.onload = function() {
                     var canvas = document.createElement('canvas');
                     var tamanho = 150;
-                    canvas.width = tamanho;
-                    canvas.height = tamanho;
+                    canvas.width = tamanho; canvas.height = tamanho;
                     var ctx = canvas.getContext('2d');
-                    ctx.imageSmoothingEnabled = true;
-                    ctx.imageSmoothingQuality = 'high';
-                    
+                    ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
                     const tamanhoOriginal = Math.min(img.width, img.height);
                     const xInicio = (img.width - tamanhoOriginal) / 2;
                     const yInicio = (img.height - tamanhoOriginal) / 2;
-                    
                     ctx.drawImage(img, xInicio, yInicio, tamanhoOriginal, tamanhoOriginal, 0, 0, tamanho, tamanho);
                     callback(canvas.toDataURL('image/webp', 0.7));
                 };
@@ -557,30 +562,17 @@
             var msg = document.getElementById('msg_cadastro');
 
             if (!nome || !dia || !mes || dia < 1 || dia > 31 || mes < 1 || mes > 12) {
-                msg.className = 'resultado erro';
-                msg.innerText = '❌ PREENCHA TODOS OS DADOS CORRETAMENTE!';
-                msg.style.display = 'block';
-                return;
+                msg.className = 'resultado erro'; msg.innerText = '❌ PREENCHA TODOS OS DADOS CORRETAMENTE!'; msg.style.display = 'block'; return;
             }
-
-            msg.className = 'resultado sucesso';
-            msg.innerText = '⏳ PROCESSANDO...';
-            msg.style.display = 'block';
+            msg.className = 'resultado sucesso'; msg.innerText = '⏳ PROCESSANDO...'; msg.style.display = 'block';
 
             lerFotoComoTexto(arquivoFoto, function(textoDaFoto) {
                 db.ref('inscricoes').once('value').then(snap => {
                     var inscricoes = snap.val() || [];
                     var novoId = inscricoes.length > 0 ? Math.max(...inscricoes.filter(Boolean).map(i => i.id || 0)) + 1 : 1;
-                    
-                    inscricoes.push({
-                        id: novoId, nome: nome, dia: dia, mes: mes,
-                        status: 'pendente', foto: textoDaFoto || "", data_confirmacao: null
-                    });
-                    
+                    inscricoes.push({ id: novoId, nome: nome, dia: dia, mes: mes, status: 'pendente', foto: textoDaFoto || "", data_confirmacao: null });
                     db.ref('inscricoes').set(inscricoes).then(() => {
-                        msg.className = 'resultado sucesso';
-                        msg.innerText = '✅ CADASTRO REALIZADO COM SUCESSO!';
-                        msg.style.display = 'block';
+                        msg.className = 'resultado sucesso'; msg.innerText = '✅ CADASTRO REALIZADO COM SUCESSO!';
                         document.getElementById('cad_nome').value = '';
                         document.getElementById('cad_dia').value = '';
                         document.getElementById('cad_mes').value = '';
@@ -607,11 +599,7 @@
             });
         }
 
-        function fecharEdicao() {
-            document.getElementById('modalEditar').style.display = 'none';
-            idEmEdicao = null;
-            document.getElementById('edit_foto').value = "";
-        }
+        function fecharEdicao() { document.getElementById('modalEditar').style.display = 'none'; idEmEdicao = null; document.getElementById('edit_foto').value = ""; }
 
         function salvarEdicao() {
             var novoNome = document.getElementById('edit_nome').value.trim();
@@ -619,27 +607,16 @@
             var novoMes = parseInt(document.getElementById('edit_mes').value);
             var novaFotoArquivo = document.getElementById('edit_foto').files[0];
 
-            if (!novoNome || !novoDia || !novoMes || novoDia < 1 || novoDia > 31 || novoMes < 1 || novoMes > 12) {
-                alert('❌ PREENCHA TODOS OS DADOS CORRETAMENTE!');
-                return;
-            }
+            if (!novoNome || !novoDia || !novoMes || novoDia < 1 || novoDia > 31 || novoMes < 1 || novoMes > 12) { alert('❌ PREENCHA TODOS OS DADOS CORRETAMENTE!'); return; }
 
             lerFotoComoTexto(novaFotoArquivo, function(novaFotoTexto) {
                 db.ref('inscricoes').once('value').then(snap => {
                     var lista = snap.val() || [];
                     var alterado = false;
-
                     lista = lista.map(item => {
-                        if(item && item.id === idEmEdicao){
-                            item.nome = novoNome;
-                            item.dia = novoDia;
-                            item.mes = novoMes;
-                            if(novaFotoTexto) item.foto = novaFotoTexto;
-                            alterado = true;
-                        }
+                        if(item && item.id === idEmEdicao){ item.nome = novoNome; item.dia = novoDia; item.mes = novoMes; if(novaFotoTexto) item.foto = novaFotoTexto; alterado = true; }
                         return item;
                     });
-
                     if(alterado){ db.ref('inscricoes').set(lista).then(() => { fecharEdicao(); }); }
                 });
             });
@@ -658,35 +635,20 @@
         function voltarUmParaPendente(id) {
             db.ref('inscricoes').once('value').then(snap => {
                 var lista = snap.val() || [];
-                lista = lista.map(insc => {
-                    if(insc && insc.id === id) {
-                        insc.status = 'pendente';
-                        insc.data_confirmacao = null;
-                    }
-                    return insc;
-                });
+                lista = lista.map(insc => { if(insc && insc.id === id){ insc.status = 'pendente'; insc.data_confirmacao = null; } return insc; });
                 db.ref('inscricoes').set(lista);
             });
         }
 
         function limparTodasInscricoes() {
-            if (confirm('⚠️ ATENÇÃO: ISSO APAGARÁ TODOS OS CADASTROS! TEM CERTEZA?')) {
-                db.ref('inscricoes').remove();
-                alert('TODOS OS DADOS FORAM APAGADOS!');
-            }
+            if (confirm('⚠️ ATENÇÃO: ISSO APAGARÁ TODOS OS CADASTROS! TEM CERTEZA?')) { db.ref('inscricoes').remove(); alert('TODOS OS DADOS FORAM APAGADOS!'); }
         }
 
         function voltarTodosParaPendente() {
             if (confirm('⚠️ ISSO IRÁ MUDAR TODOS PARA PENDENTE E REABRIR AS INSCRIÇÕES. DESEJA CONTINUAR?')) {
                 db.ref('inscricoes').once('value').then(snap => {
                     var lista = snap.val() || [];
-                    lista = lista.map(insc => { 
-                        if(insc) {
-                            insc.status = 'pendente'; 
-                            insc.data_confirmacao = null;
-                        }
-                        return insc; 
-                    });
+                    lista = lista.map(insc => { if(insc){ insc.status = 'pendente'; insc.data_confirmacao = null; } return insc; });
                     db.ref('inscricoes').set(lista);
                     db.ref('configuracao').set({inscricoes_abertas: true, ultimo_reinicio: Date.now()});
                     alert('✅ TODOS VOLTARAM PARA PENDENTES E INSCRIÇÕES FORAM REABERTAS!');
@@ -694,23 +656,110 @@
             }
         }
 
+        /* ===== SUSPENSOS ===== */
+        function abrirSuspensos() {
+            document.getElementById('modalSuspensos').style.display = 'flex';
+            popularSelectSuspensos();
+            carregarListaSuspensos();
+        }
+
+        function fecharSuspensos() {
+            document.getElementById('modalSuspensos').style.display = 'none';
+        }
+
+        function popularSelectSuspensos() {
+            const select = document.getElementById('selectSuspenso');
+            select.innerHTML = '<option value="">— ESCOLHA UM NOME —</option>';
+
+            // Busca suspensos atuais para não mostrar quem já está suspenso
+            db.ref('suspensos').once('value').then(snapSusp => {
+                const suspensos = snapSusp.val() || {};
+                const nomesSuspensos = Object.values(suspensos).map(s => s.nome.toUpperCase());
+
+                // Filtra os inscritos que ainda não estão suspensos
+                const disponiveis = inscritosCache.filter(i => i && !nomesSuspensos.includes(i.nome.toUpperCase()));
+
+                if (disponiveis.length === 0) {
+                    select.innerHTML = '<option value="">NENHUM INSCRITO DISPONÍVEL</option>';
+                    return;
+                }
+
+                disponiveis.sort((a, b) => a.nome.localeCompare(b.nome));
+                disponiveis.forEach(insc => {
+                    const op = document.createElement('option');
+                    op.value = insc.id;
+                    op.textContent = insc.nome.toUpperCase();
+                    select.appendChild(op);
+                });
+            });
+        }
+
+        function suspenderJogador() {
+            const select = document.getElementById('selectSuspenso');
+            const idSelecionado = parseInt(select.value);
+            if (!idSelecionado) { alert('⚠️ SELECIONE UM NOME PARA SUSPENDER!'); return; }
+
+            const inscrito = inscritosCache.find(i => i && i.id === idSelecionado);
+            if (!inscrito) return;
+
+            const novoRef = db.ref('suspensos').push();
+            novoRef.set({ nome: inscrito.nome, foto: inscrito.foto || "", id_inscricao: inscrito.id, data: Date.now() })
+            .then(() => {
+                carregarListaSuspensos();
+                popularSelectSuspensos();
+            });
+        }
+
+        function carregarListaSuspensos() {
+            const container = document.getElementById('listaSuspensos');
+            db.ref('suspensos').once('value').then(snap => {
+                const dados = snap.val();
+                if (!dados) {
+                    container.innerHTML = '<div class="item-suspenso-vazio">NENHUM SUSPENSO CADASTRADO.</div>';
+                    return;
+                }
+
+                const ids = Object.keys(dados);
+                let html = '';
+                ids.forEach(key => {
+                    const s = dados[key];
+                    const fotoHtml = s.foto
+                        ? `<img src="${s.foto}" class="foto-preview" style="width:40px;height:40px;border-color:#e74c3c;">`
+                        : `<span style="font-size:28px;">📄</span>`;
+
+                    html += `
+                    <div class="item-suspenso">
+                        <div class="item-suspenso-info">
+                            ${fotoHtml}
+                            <span class="item-suspenso-nome">${s.nome.toUpperCase()}</span>
+                        </div>
+                        <button class="btn-remover-suspenso" onclick="removerSuspenso('${key}')">✅ REABILITAR</button>
+                    </div>`;
+                });
+
+                container.innerHTML = html;
+            });
+        }
+
+        function removerSuspenso(key) {
+            if (confirm('⚠️ DESEJA REABILITAR ESTE JOGADOR?')) {
+                db.ref(`suspensos/${key}`).remove().then(() => {
+                    carregarListaSuspensos();
+                    popularSelectSuspensos();
+                });
+            }
+        }
+
+        /* ===== AGENDAMENTO ===== */
         function abrirAgendamento() {
             document.getElementById('modalAgendar').style.display = 'flex';
             const hoje = new Date();
-            const dia = String(hoje.getDate()).padStart(2, '0');
-            const mes = String(hoje.getMonth() + 1).padStart(2, '0');
-            const ano = hoje.getFullYear();
-            document.getElementById('dataAgendamento').min = `${ano}-${mes}-${dia}`;
-
+            document.getElementById('dataAgendamento').min = `${hoje.getFullYear()}-${String(hoje.getMonth()+1).padStart(2,'0')}-${String(hoje.getDate()).padStart(2,'0')}`;
             db.ref('agendamento_reinicio').once('value').then(snap => {
                 const dados = snap.val();
                 if(dados && dados.timestamp) {
-                    const dataObj = new Date(dados.timestamp);
-                    const diaAg = String(dataObj.getDate()).padStart(2, '0');
-                    const mesAg = String(dataObj.getMonth() + 1).padStart(2, '0');
-                    const horaAg = String(dataObj.getHours()).padStart(2, '0');
-                    const minAg = String(dataObj.getMinutes()).padStart(2, '0');
-                    mostrarStatusAgendamento(`⏸️ AGENDADO PARA ${horaAg}:${minAg}H DE ${diaAg}/${mesAg}/${dataObj.getFullYear()}`, 'agendado');
+                    const d = new Date(dados.timestamp);
+                    mostrarStatusAgendamento(`⏸️ AGENDADO PARA ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}H DE ${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`, 'agendado');
                 } else {
                     document.getElementById('statusAgendamento').style.display = 'none';
                 }
@@ -720,23 +769,11 @@
         function salvarAgendamento() {
             const dataInput = document.getElementById('dataAgendamento').value;
             const horaInput = document.getElementById('horaAgendamento').value;
-            
-            if(!dataInput || !horaInput) {
-                mostrarStatusAgendamento('❌ PREENCHA DATA E HORA!', 'erro');
-                return;
-            }
-
-            const partesData = dataInput.split('-');
-            const dataHoraMarcada = new Date(parseInt(partesData[0]), parseInt(partesData[1]) - 1, parseInt(partesData[2]), parseInt(horaInput.split(':')[0]), parseInt(horaInput.split(':')[1]), 0);
-            const timestamp = dataHoraMarcada.getTime();
-
-            if(timestamp < Date.now()) {
-                mostrarStatusAgendamento('❌ ESCOLHA UMA DATA/HORA FUTURA!', 'erro');
-                return;
-            }
-
-            db.ref('agendamento_reinicio').set({ timestamp: timestamp, executado: false })
-            .then(() => {
+            if(!dataInput || !horaInput) { mostrarStatusAgendamento('❌ PREENCHA DATA E HORA!', 'erro'); return; }
+            const partes = dataInput.split('-');
+            const dt = new Date(parseInt(partes[0]), parseInt(partes[1])-1, parseInt(partes[2]), parseInt(horaInput.split(':')[0]), parseInt(horaInput.split(':')[1]), 0);
+            if(dt.getTime() < Date.now()) { mostrarStatusAgendamento('❌ ESCOLHA UMA DATA/HORA FUTURA!', 'erro'); return; }
+            db.ref('agendamento_reinicio').set({ timestamp: dt.getTime(), executado: false }).then(() => {
                 mostrarStatusAgendamento('✅ AGENDAMENTO SALVO COM SUCESSO!', 'ativo');
                 setTimeout(() => fecharAgendamento(), 2000);
             });
@@ -749,16 +786,11 @@
             });
         }
 
-        function fecharAgendamento() {
-            document.getElementById('modalAgendar').style.display = 'none';
-            document.getElementById('statusAgendamento').style.display = 'none';
-        }
+        function fecharAgendamento() { document.getElementById('modalAgendar').style.display = 'none'; document.getElementById('statusAgendamento').style.display = 'none'; }
 
         function mostrarStatusAgendamento(texto, tipo) {
             const status = document.getElementById('statusAgendamento');
-            status.innerText = texto;
-            status.className = `status-agendamento ${tipo}`;
-            status.style.display = 'block';
+            status.innerText = texto; status.className = `status-agendamento ${tipo}`; status.style.display = 'block';
         }
 
         function abrirAprovacao() { document.getElementById('modalAprovacao').style.display = 'flex'; }
@@ -769,60 +801,32 @@
             const badge = document.getElementById('badgePedidos');
             const ids = Object.keys(pedidos).filter(id => pedidos[id] && pedidos[id].status === 'pendente');
 
-            if (ids.length > 0) {
-                badge.innerText = ids.length;
-                badge.style.display = 'block';
-            } else {
-                badge.style.display = 'none';
-            }
+            if (ids.length > 0) { badge.innerText = ids.length; badge.style.display = 'block'; } else { badge.style.display = 'none'; }
 
-            if (ids.length === 0) {
-                container.innerHTML = '<p style="text-align:center; color:#adb5bd; padding:20px;">NENHUM PEDIDO PENDENTE.</p>';
-                return;
-            }
+            if (ids.length === 0) { container.innerHTML = '<p style="text-align:center; color:#adb5bd; padding: 20px;">NENHUM PEDIDO PENDENTE.</p>'; return; }
 
             let html = '';
             ids.forEach(id => {
                 const p = pedidos[id];
                 const imagemHtml = p.foto ? `<img src="${p.foto}" class="foto-preview" style="width:70px; height:70px; margin-bottom:10px;">` : `<div style="font-size:30px; margin-bottom:10px;">📄</div>`;
-                
-                html += `
-                <div class="item-pedido">
-                    ${imagemHtml}
-                    <p style="font-size:15px; margin-bottom:4px;"><strong>NOME:</strong> ${p.nome}</p>
-                    <p style="font-size:13px; color:#ced4da;"><strong>NASCIMENTO:</strong> ${String(p.dia).padStart(2,'0')}/${String(p.mes).padStart(2,'0')}</p>
-                    <div class="botoes-aprovacao">
-                        <button class="btn-roxo" onclick="aceitarCadastro('${id}')">✅ ACEITAR</button>
-                        <button class="btn-vermelho" onclick="recusarCadastro('${id}')">❌ RECUSAR</button>
-                    </div>
-                </div>`;
+                html += `<div class="item-pedido">${imagemHtml}<p style="font-size:15px; margin-bottom:4px;"><strong>NOME:</strong> ${p.nome}</p><p style="font-size:13px; color:#ced4da;"><strong>NASCIMENTO:</strong> ${String(p.dia).padStart(2,'0')}/${String(p.mes).padStart(2,'0')}</p><div class="botoes-aprovacao"><button class="btn-roxo" onclick="aceitarCadastro('${id}')">✅ ACEITAR</button><button class="btn-vermelho" onclick="recusarCadastro('${id}')">❌ RECUSAR</button></div></div>`;
             });
             container.innerHTML = html;
         }
 
         async function aceitarCadastro(idPedido) {
             const snap = await db.ref(`pedidos_cadastro/${idPedido}`).once('value');
-            const dados = snap.val();
-            if (!dados) return;
-
-            const listaInscSnap = await db.ref('inscricoes').once('value');
-            const listaAtual = listaInscSnap.val() || [];
-            
+            const dados = snap.val(); if (!dados) return;
+            const listaSnap = await db.ref('inscricoes').once('value');
+            const listaAtual = listaSnap.val() || [];
             var novoId = listaAtual.length > 0 ? Math.max(...listaAtual.filter(Boolean).map(i => i.id || 0)) + 1 : 1;
-
-            listaAtual.push({
-                id: novoId, nome: dados.nome, dia: parseInt(dados.dia), mes: parseInt(dados.mes),
-                foto: dados.foto || "", status: 'pendente', data_confirmacao: null
-            });
-
+            listaAtual.push({ id: novoId, nome: dados.nome, dia: parseInt(dados.dia), mes: parseInt(dados.mes), foto: dados.foto || "", status: 'pendente', data_confirmacao: null });
             await db.ref('inscricoes').set(listaAtual);
             await db.ref(`pedidos_cadastro/${idPedido}`).remove();
         }
 
         async function recusarCadastro(idPedido) {
-            if (confirm('⚠️ DESEJA APAGAR DEFINITIVAMENTE ESTE PEDIDO DE CADASTRO?')) {
-                await db.ref(`pedidos_cadastro/${idPedido}`).remove();
-            }
+            if (confirm('⚠️ DESEJA APAGAR DEFINITIVAMENTE ESTE PEDIDO DE CADASTRO?')) { await db.ref(`pedidos_cadastro/${idPedido}`).remove(); }
         }
 
         function alternarVisibilidadeData() {
@@ -834,14 +838,11 @@
         function aplicarVisibilidadeData() {
             var botao = document.querySelector('.btn-ocultar-coluna');
             var cabecalho = document.getElementById('colunaDataCabecalho');
-            
             if (cabecalho && botao) {
                 cabecalho.style.display = dataVisivel ? '' : 'none';
                 botao.innerText = dataVisivel ? '🙈 OCULTAR DATA NASC.' : '👁️ MOSTRAR DATA NASC.';
             }
-            
-            var celulasData = document.querySelectorAll('td:nth-child(3)');
-            celulasData.forEach(celula => { celula.style.display = dataVisivel ? '' : 'none'; });
+            document.querySelectorAll('td:nth-child(3)').forEach(c => { c.style.display = dataVisivel ? '' : 'none'; });
         }
 
         function atualizarLista(dados) {
@@ -851,6 +852,7 @@
 
         function processarLista(inscricoes) {
             var tabela = document.getElementById('lista_inscricoes');
+            inscritosCache = inscricoes.filter(Boolean); // atualiza o cache
 
             if (inscricoes.length === 0 || !inscricoes[0]) {
                 tabela.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #adb5bd;">NENHUMA INSCRIÇÃO CADASTRADA AINDA.</td></tr>';
@@ -869,7 +871,7 @@
             var qtdConfirmados = listaOrdenada.filter(i => i.status === 'confirmado').length;
             var vagasRestantes = LIMITE_MAXIMO - qtdConfirmados;
 
-            if (qtdConfirmados > quantidadeAnterior) { mostrarAvisoNovaConfirmacao(listaOrdenada); }
+            if (qtdConfirmados > quantidadeAnterior) mostrarAvisoNovaConfirmacao(listaOrdenada);
             quantidadeAnterior = qtdConfirmados;
 
             document.getElementById('contadorConfirmados').innerText = `✅ ${qtdConfirmados} CONFIRMADOS | RESTAM ${vagasRestantes} VAGAS (LIMITE: 16)`;
@@ -880,11 +882,9 @@
                 let dataHora = '';
                 if (insc.data_confirmacao) {
                     const dt = new Date(insc.data_confirmacao);
-                    dataHora = `${String(dt.getDate()).padStart(2, '0')}/${String(dt.getMonth()+1).padStart(2, '0')}/${dt.getFullYear()}<br>${String(dt.getHours()).padStart(2, '0')}:${String(dt.getMinutes()).padStart(2, '0')}`;
+                    dataHora = `${String(dt.getDate()).padStart(2,'0')}/${String(dt.getMonth()+1).padStart(2,'0')}/${dt.getFullYear()}<br>${String(dt.getHours()).padStart(2,'0')}:${String(dt.getMinutes()).padStart(2,'0')}`;
                 }
-
                 const classeBordaFoto = insc.status === 'confirmado' ? 'foto-preview foto-confirmado' : 'foto-preview';
-
                 var linha = document.createElement('tr');
                 linha.innerHTML = `
                     <td>${insc.foto ? `<img src="${insc.foto}" class="${classeBordaFoto}" alt="foto">` : '📄'}</td>
@@ -895,8 +895,7 @@
                     <td class="acoes-tabela">
                         <button class="btn-pendente" onclick="voltarUmParaPendente(${insc.id})" title="VOLTAR PARA PENDENTE">🔄</button>
                         <button class="btn-editar" onclick="abrirEdicao(${insc.id})">📝</button>
-                    </td>
-                `;
+                    </td>`;
                 tabela.appendChild(linha);
             });
 
@@ -906,113 +905,57 @@
         function mostrarAvisoNovaConfirmacao(lista) {
             const confirmados = lista.filter(i => i && i.status === 'confirmado' && i.data_confirmacao);
             if (confirmados.length === 0) return;
-            
             confirmados.sort((a, b) => b.data_confirmacao - a.data_confirmacao);
-            const ultimoConfirmado = confirmados[0];
-
+            const ultimo = confirmados[0];
             const aviso = document.getElementById('avisoNovaConfirmacao');
             const fotoContainer = document.getElementById('popupConfirmadoFotoContainer');
             const nomeContainer = document.getElementById('popupConfirmadoNome');
             const som = document.getElementById('somConfirmacao');
-
-            if (ultimoConfirmado.foto) {
-                fotoContainer.innerHTML = `<img src="${ultimoConfirmado.foto}" style="width: 140px; height: 140px; border-radius: 50%; object-fit: cover; border: 4px solid #2ecc71; box-shadow: 0 4px 15px rgba(0,0,0,0.5);">`;
-            } else {
-                fotoContainer.innerHTML = `<div style="font-size: 80px; line-height: 140px; width: 140px; height: 140px; background: #2c3034; border-radius: 50%; margin: 0 auto; border: 4px solid #2ecc71;">📄</div>`;
-            }
-
-            nameContainer.innerText = ultimoConfirmado.nome;
+            fotoContainer.innerHTML = ultimo.foto
+                ? `<img src="${ultimo.foto}" style="width:140px;height:140px;border-radius:50%;object-fit:cover;border:4px solid #2ecc71;box-shadow:0 4px 15px rgba(0,0,0,0.5);">`
+                : `<div style="font-size:80px;line-height:140px;width:140px;height:140px;background:#2c3034;border-radius:50%;margin:0 auto;border:4px solid #2ecc71;">📄</div>`;
+            nomeContainer.innerText = ultimo.nome;
             aviso.style.display = 'flex';
-
-            if (som) {
-                som.currentTime = 0;
-                som.load();
-                som.play().catch(e => console.log("Erro ao tocar áudio:", e));
-            }
-
+            if (som) { som.currentTime = 0; som.load(); som.play().catch(e => console.log("Erro ao tocar áudio:", e)); }
             setTimeout(() => { aviso.style.display = 'none'; }, 4000);
         }
 
         function iniciarAtualizacaoAutomatica() {
             db.ref('inscricoes').on('value', function(dados) { atualizarLista(dados); });
-            db.ref('pedidos_cadastro').on('value', function(snap) {
-                const pedidos = snap.val() || {};
-                atualizarListaPedidos(pedidos);
-            });
+            db.ref('pedidos_cadastro').on('value', function(snap) { atualizarListaPedidos(snap.val() || {}); });
         }
 
         db.ref('agendamento_reinicio').on('value', snap => {
             const agendado = snap.val();
-            if(agendado && !agendado.executado) {
-                const agora = Date.now();
-                if(agendado.timestamp <= agora) {
-                    db.ref('inscricoes').once('value').then(snap => {
-                        const lista = snap.val() || [];
-                        const novaLista = lista.map(insc => {
-                            if(insc) {
-                                insc.status = 'pendente';
-                                insc.data_confirmacao = null;
-                            }
-                            return insc;
-                        });
-                        db.ref('inscricoes').set(novaLista);
-                        db.ref('configuracao').set({inscricoes_abertas: true, ultimo_reinicio: Date.now()});
-                        db.ref('agendamento_reinicio/executado').set(true);
-                        alert('✅ Reinício automático realizado com sucesso!');
-                    });
-                }
+            if(agendado && !agendado.executado && agendado.timestamp <= Date.now()) {
+                db.ref('inscricoes').once('value').then(snap => {
+                    const lista = (snap.val() || []).map(insc => { if(insc){ insc.status='pendente'; insc.data_confirmacao=null; } return insc; });
+                    db.ref('inscricoes').set(lista);
+                    db.ref('configuracao').set({inscricoes_abertas: true, ultimo_reinicio: Date.now()});
+                    db.ref('agendamento_reinicio/executado').set(true);
+                    alert('✅ Reinício automático realizado com sucesso!');
+                });
             }
         });
 
-        /* ===== TRAVAMENTOS DE SEGURANÇA E ESCAPE ===== */
+        /* ===== TRAVAMENTOS DE SEGURANÇA ===== */
         document.addEventListener('keydown', function(event) {
             if (event.key === 'Escape') {
-                ocultarCadastro(); fecharEdicao(); fecharAgendamento(); fecharAprovacao();
+                ocultarCadastro(); fecharEdicao(); fecharAgendamento(); fecharAprovacao(); fecharSuspensos();
                 document.getElementById('avisoNovaConfirmacao').style.display = 'none';
                 const menu = document.getElementById('menuFlutuante');
                 const btn = document.getElementById('btnMenu');
-                menu.style.display = 'none';
-                btn.classList.remove('aberto');
+                menu.style.display = 'none'; btn.classList.remove('aberto');
                 return;
             }
-
-            if (event.key === 'F12') {
-                event.preventDefault();
-                return false;
-            }
-
+            if (event.key === 'F12') { event.preventDefault(); return false; }
             if (event.ctrlKey) {
-                if (event.shiftKey && (event.key === 'I' || event.key === 'i' || event.key === 'J' || event.key === 'j')) {
-                    event.preventDefault();
-                    return false;
-                }
-                
-                const digitandoEmInput = (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA');
-                
-                if (!digitandoEmInput) {
-                    if (event.key === 'u' || event.key === 'U' || 
-                        event.key === 's' || event.key === 'S' || 
-                        event.key === 'c' || event.key === 'C' || 
-                        event.key === 'v' || event.key === 'V') {
-                        event.preventDefault();
-                        return false;
-                    }
-                } else {
-                    if (event.key === 'u' || event.key === 'U' || 
-                        event.key === 's' || event.key === 'S' || 
-                        event.key === 'c' || event.key === 'C' || 
-                        event.key === 'v' || event.key === 'V') {
-                        event.preventDefault();
-                        return false;
-                    }
-                }
+                if (event.shiftKey && (event.key === 'I' || event.key === 'i' || event.key === 'J' || event.key === 'j')) { event.preventDefault(); return false; }
+                if (event.key === 'u' || event.key === 'U' || event.key === 's' || event.key === 'S' || event.key === 'c' || event.key === 'C' || event.key === 'v' || event.key === 'V') { event.preventDefault(); return false; }
             }
         });
 
-        document.addEventListener('contextmenu', function(event) {
-            event.preventDefault();
-            return false;
-        });
+        document.addEventListener('contextmenu', function(event) { event.preventDefault(); return false; });
     </script>
 </body>
 </html>
