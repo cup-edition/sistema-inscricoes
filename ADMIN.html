@@ -145,9 +145,6 @@
         .status-confirmado {color: #2ecc71; font-weight: bold;}
         .acoes-tabela button {padding: 6px 10px; font-size: 12px; margin: 0 2px;}
         
-        .area-botoes-finais { display: flex; justify-content: flex-end; align-items: center; margin-top: 20px; flex-wrap: wrap; gap: 12px; width: 100%;}
-        .grupo-botoes-direita { display: flex; gap: 10px; flex-wrap: wrap;}
-
         .carregando {color: #3498db; font-style: italic;}
         #conteudoPrincipal {display: none; animation: fadeIn 0.4s ease-in-out;}
         .data-hora {font-size: 11px; color: #a0aec0; white-space: nowrap;}
@@ -401,12 +398,8 @@
                 </tbody>
             </table>
 
-            <div class="area-botoes-finais">
-                <div class="grupo-botoes-direita">
-                    <button class="btn-amarelo" onclick="voltarTodosParaPendente()">🔄 VOLTAR TODOS PARA PENDENTES</button>
-                    <button class="btn-vermelho" onclick="limparTodasInscricoes()">🗑️ LIMPAR TODAS AS INSCRIÇÕES</button>
-                </div>
-            </div>
+            <!-- BOTÕES REMOVIDOS AQUI -->
+            
         </div>
     </div>
 
@@ -641,22 +634,6 @@
                 lista = lista.map(insc => { if(insc && insc.id === id){ insc.status = 'pendente'; insc.data_confirmacao = null; } return insc; });
                 db.ref('inscricoes').set(lista);
             });
-        }
-
-        function limparTodasInscricoes() {
-            if (confirm('⚠️ ATENÇÃO: ISSO APAGARÁ TODOS OS CADASTROS! TEM CERTEZA?')) { db.ref('inscricoes').remove(); alert('TODOS OS DADOS FORAM APAGADOS!'); }
-        }
-
-        function voltarTodosParaPendente() {
-            if (confirm('⚠️ ISSO IRÁ MUDAR TODOS PARA PENDENTE E REABRIR AS INSCRIÇÕES. DESEJA CONTINUAR?')) {
-                db.ref('inscricoes').once('value').then(snap => {
-                    var lista = snap.val() || [];
-                    lista = lista.map(insc => { if(insc){ insc.status = 'pendente'; insc.data_confirmacao = null; } return insc; });
-                    db.ref('inscricoes').set(lista);
-                    db.ref('configuracao').set({inscricoes_abertas: true, ultimo_reinicio: Date.now()});
-                    alert('✅ TODOS VOLTARAM PARA PENDENTES E INSCRIÇÕES FORAM REABERTAS!');
-                });
-            }
         }
 
         /* ===== SUSPENSOS ===== */
@@ -898,7 +875,8 @@
                     <td class="acoes-tabela">
                         <button class="btn-pendente" onclick="voltarUmParaPendente(${insc.id})" title="VOLTAR PARA PENDENTE">🔄</button>
                         <button class="btn-editar" onclick="abrirEdicao(${insc.id})">📝</button>
-                    </td>`;
+                    </td>
+                `;
                 tabela.appendChild(linha);
             });
 
