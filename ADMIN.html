@@ -69,6 +69,10 @@
         input[type="number"] {width: 90px;}
         input[type="file"] {padding: 8px; font-size: 13px; border: 1px dashed #2ecc71; background: #2c3034; color: white; text-transform: none; font-weight: normal; width: 100%;}
         input[type="url"] {width: 100%;}
+        input[type="checkbox"] {
+            width: 20px; height: 20px; cursor: pointer; accent-color: #3498db;
+            transform: scale(1.2); margin: 0 auto; display: block;
+        }
         
         .foto-preview { width: 46px; height: 46px; border-radius: 50%; object-fit: cover; border: 2px solid #e74c3c; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
         .foto-confirmado { border-color: #2ecc71 !important; }
@@ -150,6 +154,7 @@
         tr:hover td {background-color: #25292e;}
         .status-pendente {color: #f39c12; font-weight: bold;}
         .status-confirmado {color: #2ecc71; font-weight: bold;}
+        .status-aprovado {color: #3498db; font-weight: bold;}
         .acoes-tabela button {padding: 6px 10px; font-size: 12px; margin: 0 2px;}
         
         .carregando {color: #3498db; font-style: italic;}
@@ -231,6 +236,18 @@
 
         /* DIVISOR DENTRO DO MODAL */
         .divisor-modal { border: none; border-top: 1px solid #343a40; margin: 20px 0; }
+
+        /* CHECKBOX PERSONALIZADA */
+        .checkbox-pagamento {
+            display: flex; justify-content: center; align-items: center;
+        }
+        .checkbox-pagamento input[type="checkbox"] {
+            width: 22px; height: 22px; cursor: pointer;
+            accent-color: #3498db; transform: scale(1.1);
+        }
+        .checkbox-pagamento input[type="checkbox"]:checked {
+            accent-color: #2ecc71;
+        }
     </style>
 </head>
 <body>
@@ -405,11 +422,12 @@
                         <th id="colunaDataCabecalho">DATA NASC.</th>
                         <th>CONFIRMAÇÃO</th>
                         <th>STATUS</th>
+                        <th>PAGAMENTO</th>
                         <th>AÇÕES</th>
                     </tr>
                 </thead>
                 <tbody id="lista_inscricoes">
-                    <tr><td colspan="6" style="text-align: center; color: #adb5bd;">CARREGANDO...</td></tr>
+                    <tr><td colspan="7" style="text-align: center; color: #adb5bd;">CARREGANDO...</td></tr>
                 </tbody>
             </table>
 
@@ -581,7 +599,7 @@
                 db.ref('inscricoes').once('value').then(snap => {
                     var inscricoes = snap.val() || [];
                     var novoId = inscricoes.length > 0 ? Math.max(...inscricoes.filter(Boolean).map(i => i.id || 0)) + 1 : 1;
-                    inscricoes.push({ id: novoId, nome: nome, dia: dia, mes: mes, status: 'pendente', foto: textoDaFoto || "", data_confirmacao: null, link_pagamento: "" });
+                    inscricoes.push({ id: novoId, nome: nome, dia: dia, mes: mes, status: 'pendente', foto: textoDaFoto || "", data_confirmacao: null, link_pagamento: "", pagamento_aprovado: false });
                     db.ref('inscricoes').set(inscricoes).then(() => {
                         msg.className = 'resultado sucesso'; msg.innerText = '✅ CADASTRO REALIZADO COM SUCESSO!';
                         document.getElementById('cad_nome').value = '';
@@ -655,8 +673,53 @@
         function voltarUmParaPendente(id) {
             db.ref('inscricoes').once('value').then(snap => {
                 var lista = snap.val() || [];
-                lista = lista.map(insc => { if(insc && insc.id === id){ insc.status = 'pendente'; insc.data_confirmacao = null; } return insc; });
+                lista = lista.map(insc => { 
+                    if(insc && insc.id === id){ 
+                        insc.status = 'pendente'; 
+                        insc.data_confirmacao = null;
+                        insc.pagamento_aprovado = false;
+                    } 
+                    return insc; 
+                });
                 db.ref('inscricoes').set(lista);
+            });
+        }
+
+        // ===== FUNÇÃO PARA ALTERNAR PAGAMENTO =====
+        function alternarPagamento(id) {
+            const checkbox = document.getElementById(`pagamento_${id}`);
+            if (!checkbox) return;
+            
+            const pago = checkbox.checked;
+            
+            db.ref('inscricoes').once('value').then(snap => {
+                var lista = snap.val() || [];
+                var alterado = false;
+                lista = lista.map(item => {
+                    if(item && item.id === id){
+                        item.pagamento_aprovado = pago;
+                        
+                        if(pago) {
+                            // Se marcou o pagamento, vira APROVADO (independente do status anterior)
+                            item.status = 'aprovado';
+                        } else {
+                            // Se desmarcou, volta para o status que estava antes de virar aprovado
+                            // Se o status atual é 'aprovado', volta para 'confirmado' (se tinha data_confirmacao) ou 'pendente'
+                            if(item.status === 'aprovado') {
+                                // Verifica se já foi confirmado anteriormente (tem data_confirmacao)
+                                if(item.data_confirmacao) {
+                                    item.status = 'confirmado';
+                                } else {
+                                    item.status = 'pendente';
+                                }
+                            }
+                            // Se o status não era 'aprovado', mantém o que já estava
+                        }
+                        alterado = true;
+                    }
+                    return item;
+                });
+                if(alterado){ db.ref('inscricoes').set(lista); }
             });
         }
 
@@ -824,7 +887,7 @@
             const listaSnap = await db.ref('inscricoes').once('value');
             const listaAtual = listaSnap.val() || [];
             var novoId = listaAtual.length > 0 ? Math.max(...listaAtual.filter(Boolean).map(i => i.id || 0)) + 1 : 1;
-            listaAtual.push({ id: novoId, nome: dados.nome, dia: parseInt(dados.dia), mes: parseInt(dados.mes), foto: dados.foto || "", status: 'pendente', data_confirmacao: null, link_pagamento: "" });
+            listaAtual.push({ id: novoId, nome: dados.nome, dia: parseInt(dados.dia), mes: parseInt(dados.mes), foto: dados.foto || "", status: 'pendente', data_confirmacao: null, link_pagamento: "", pagamento_aprovado: false });
             await db.ref('inscricoes').set(listaAtual);
             await db.ref(`pedidos_cadastro/${idPedido}`).remove();
         }
@@ -859,20 +922,23 @@
             inscritosCache = inscricoes.filter(Boolean); // atualiza o cache
 
             if (inscricoes.length === 0 || !inscricoes[0]) {
-                tabela.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #adb5bd;">NENHUMA INSCRIÇÃO CADASTRADA AINDA.</td></tr>';
+                tabela.innerHTML = '<tr><td colspan="7" style="text-align: center; color: #adb5bd;">NENHUMA INSCRIÇÃO CADASTRADA AINDA.</td></tr>';
                 document.getElementById('contadorConfirmados').innerText = `✅ 0 CONFIRMADOS | RESTAM 16 VAGAS (LIMITE: 16)`;
                 verificarLimiteConfirmados(0);
                 return;
             }
 
             var listaOrdenada = inscricoes.filter(Boolean).sort((a, b) => {
-                if (a.status === 'confirmado' && b.status !== 'confirmado') return -1;
-                if (a.status !== 'confirmado' && b.status === 'confirmado') return 1;
+                // Ordenar: aprovado > confirmado > pendente
+                const statusOrder = { 'aprovado': 0, 'confirmado': 1, 'pendente': 2 };
+                const orderA = statusOrder[a.status] ?? 2;
+                const orderB = statusOrder[b.status] ?? 2;
+                if (orderA !== orderB) return orderA - orderB;
                 if (a.status === 'confirmado' && b.status === 'confirmado') return (b.data_confirmacao || 0) - (a.data_confirmacao || 0);
                 return a.nome.localeCompare(b.nome);
             });
 
-            var qtdConfirmados = listaOrdenada.filter(i => i.status === 'confirmado').length;
+            var qtdConfirmados = listaOrdenada.filter(i => i.status === 'confirmado' || i.status === 'aprovado').length;
             var vagasRestantes = LIMITE_MAXIMO - qtdConfirmados;
 
             if (qtdConfirmados > quantidadeAnterior) mostrarAvisoNovaConfirmacao(listaOrdenada);
@@ -888,14 +954,34 @@
                     const dt = new Date(insc.data_confirmacao);
                     dataHora = `${String(dt.getDate()).padStart(2,'0')}/${String(dt.getMonth()+1).padStart(2,'0')}/${dt.getFullYear()}<br>${String(dt.getHours()).padStart(2,'0')}:${String(dt.getMinutes()).padStart(2,'0')}`;
                 }
-                const classeBordaFoto = insc.status === 'confirmado' ? 'foto-preview foto-confirmado' : 'foto-preview';
+                const classeBordaFoto = (insc.status === 'confirmado' || insc.status === 'aprovado') ? 'foto-preview foto-confirmado' : 'foto-preview';
+                
+                // Definir classe de status
+                let statusClass = 'status-pendente';
+                let statusText = 'PENDENTE';
+                if (insc.status === 'confirmado') {
+                    statusClass = 'status-confirmado';
+                    statusText = 'CONFIRMADO✅';
+                } else if (insc.status === 'aprovado') {
+                    statusClass = 'status-aprovado';
+                    statusText = 'APROVADO💰';
+                }
+                
+                // Checkbox de pagamento
+                const checkedAttr = insc.pagamento_aprovado ? 'checked' : '';
+                
                 var linha = document.createElement('tr');
                 linha.innerHTML = `
                     <td>${insc.foto ? `<img src="${insc.foto}" class="${classeBordaFoto}" alt="foto">` : '📄'}</td>
                     <td>${insc.nome}</td>
                     <td style="display: ${dataVisivel ? '' : 'none'};">${insc.dia}/${insc.mes}</td>
                     <td class="data-hora">${dataHora || '-'}</td>
-                    <td class="status-${insc.status}">${insc.status === 'pendente' ? 'PENDENTE' : 'CONFIRMADO✅'}</td>
+                    <td class="${statusClass}">${statusText}</td>
+                    <td style="text-align: center;">
+                        <div class="checkbox-pagamento">
+                            <input type="checkbox" id="pagamento_${insc.id}" ${checkedAttr} onchange="alternarPagamento(${insc.id})">
+                        </div>
+                    </td>
                     <td class="acoes-tabela">
                         <button class="btn-pendente" onclick="voltarUmParaPendente(${insc.id})" title="VOLTAR PARA PENDENTE">🔄</button>
                         <button class="btn-editar" onclick="abrirEdicao(${insc.id})">📝</button>
@@ -908,7 +994,7 @@
         }
 
         function mostrarAvisoNovaConfirmacao(lista) {
-            const confirmados = lista.filter(i => i && i.status === 'confirmado' && i.data_confirmacao);
+            const confirmados = lista.filter(i => i && (i.status === 'confirmado' || i.status === 'aprovado') && i.data_confirmacao);
             if (confirmados.length === 0) return;
             confirmados.sort((a, b) => b.data_confirmacao - a.data_confirmacao);
             const ultimo = confirmados[0];
@@ -940,7 +1026,14 @@
             const agendado = snap.val();
             if(agendado && !agendado.executado && agendado.timestamp <= Date.now()) {
                 db.ref('inscricoes').once('value').then(snap => {
-                    const lista = (snap.val() || []).map(insc => { if(insc){ insc.status='pendente'; insc.data_confirmacao=null; } return insc; });
+                    const lista = (snap.val() || []).map(insc => { 
+                        if(insc){ 
+                            insc.status='pendente'; 
+                            insc.data_confirmacao=null;
+                            insc.pagamento_aprovado = false;
+                        } 
+                        return insc; 
+                    });
                     db.ref('inscricoes').set(lista);
                     db.ref('configuracao').set({inscricoes_abertas: true, ultimo_reinicio: Date.now()});
                     db.ref('agendamento_reinicio/executado').set(true);
@@ -962,7 +1055,7 @@
             if (event.key === 'F12') { event.preventDefault(); return false; }
             if (event.ctrlKey) {
                 if (event.shiftKey && (event.key === 'I' || event.key === 'i' || event.key === 'J' || event.key === 'j')) { event.preventDefault(); return false; }
-                if (event.key === 'u' || event.key === 'U' || event.key === 's' || event.key === 'S' || event.key === 'c' || event.key === 'C' || event.key === '' || event.key === '') { event.preventDefault(); return false; }
+                if (event.key === 'u' || event.key === 'U' || event.key === 's' || event.key === 'S' || event.key === 'c' || event.key === 'C' || event.key === 'v' || event.key === 'V') { event.preventDefault(); return false; }
             }
         });
 
