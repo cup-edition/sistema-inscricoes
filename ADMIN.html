@@ -68,6 +68,7 @@
         input:focus {border-color: #3498db; outline: none;}
         input[type="number"] {width: 90px;}
         input[type="file"] {padding: 8px; font-size: 13px; border: 1px dashed #2ecc71; background: #2c3034; color: white; text-transform: none; font-weight: normal; width: 100%;}
+        input[type="url"] {width: 100%;}
         
         .foto-preview { width: 46px; height: 46px; border-radius: 50%; object-fit: cover; border: 2px solid #e74c3c; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
         .foto-confirmado { border-color: #2ecc71 !important; }
@@ -261,6 +262,10 @@
                 <input type="number" id="edit_dia" min="1" max="31" placeholder="DIA">
                 <label style="margin-left: 10px;">MÊS DE NASCIMENTO:</label>
                 <input type="number" id="edit_mes" min="1" max="12" placeholder="MÊS">
+            </div>
+            <div class="grupo-campo">
+                <label>🔗 LINK DE PAGAMENTO:</label>
+                <input type="url" id="edit_link_pagamento" placeholder="COLE O LINK DE PAGAMENTO AQUI">
             </div>
             <div class="grupo-campo">
                 <label>📸 TROCAR FOTO (OPCIONAL):</label>
@@ -576,7 +581,7 @@
                 db.ref('inscricoes').once('value').then(snap => {
                     var inscricoes = snap.val() || [];
                     var novoId = inscricoes.length > 0 ? Math.max(...inscricoes.filter(Boolean).map(i => i.id || 0)) + 1 : 1;
-                    inscricoes.push({ id: novoId, nome: nome, dia: dia, mes: mes, status: 'pendente', foto: textoDaFoto || "", data_confirmacao: null });
+                    inscricoes.push({ id: novoId, nome: nome, dia: dia, mes: mes, status: 'pendente', foto: textoDaFoto || "", data_confirmacao: null, link_pagamento: "" });
                     db.ref('inscricoes').set(inscricoes).then(() => {
                         msg.className = 'resultado sucesso'; msg.innerText = '✅ CADASTRO REALIZADO COM SUCESSO!';
                         document.getElementById('cad_nome').value = '';
@@ -599,6 +604,7 @@
                     document.getElementById('edit_nome').value = item.nome;
                     document.getElementById('edit_dia').value = item.dia;
                     document.getElementById('edit_mes').value = item.mes;
+                    document.getElementById('edit_link_pagamento').value = item.link_pagamento || "";
                     document.getElementById('edit_foto').value = "";
                     document.getElementById('modalEditar').style.display = 'flex';
                 }
@@ -611,6 +617,7 @@
             var novoNome = document.getElementById('edit_nome').value.trim();
             var novoDia = parseInt(document.getElementById('edit_dia').value);
             var novoMes = parseInt(document.getElementById('edit_mes').value);
+            var novoLinkPagamento = document.getElementById('edit_link_pagamento').value.trim();
             var novaFotoArquivo = document.getElementById('edit_foto').files[0];
 
             if (!novoNome || !novoDia || !novoMes || novoDia < 1 || novoDia > 31 || novoMes < 1 || novoMes > 12) { alert('❌ PREENCHA TODOS OS DADOS CORRETAMENTE!'); return; }
@@ -620,7 +627,14 @@
                     var lista = snap.val() || [];
                     var alterado = false;
                     lista = lista.map(item => {
-                        if(item && item.id === idEmEdicao){ item.nome = novoNome; item.dia = novoDia; item.mes = novoMes; if(novaFotoTexto) item.foto = novaFotoTexto; alterado = true; }
+                        if(item && item.id === idEmEdicao){ 
+                            item.nome = novoNome; 
+                            item.dia = novoDia; 
+                            item.mes = novoMes; 
+                            item.link_pagamento = novoLinkPagamento;
+                            if(novaFotoTexto) item.foto = novaFotoTexto; 
+                            alterado = true; 
+                        }
                         return item;
                     });
                     if(alterado){ db.ref('inscricoes').set(lista).then(() => { fecharEdicao(); }); }
@@ -810,7 +824,7 @@
             const listaSnap = await db.ref('inscricoes').once('value');
             const listaAtual = listaSnap.val() || [];
             var novoId = listaAtual.length > 0 ? Math.max(...listaAtual.filter(Boolean).map(i => i.id || 0)) + 1 : 1;
-            listaAtual.push({ id: novoId, nome: dados.nome, dia: parseInt(dados.dia), mes: parseInt(dados.mes), foto: dados.foto || "", status: 'pendente', data_confirmacao: null });
+            listaAtual.push({ id: novoId, nome: dados.nome, dia: parseInt(dados.dia), mes: parseInt(dados.mes), foto: dados.foto || "", status: 'pendente', data_confirmacao: null, link_pagamento: "" });
             await db.ref('inscricoes').set(listaAtual);
             await db.ref(`pedidos_cadastro/${idPedido}`).remove();
         }
@@ -948,7 +962,7 @@
             if (event.key === 'F12') { event.preventDefault(); return false; }
             if (event.ctrlKey) {
                 if (event.shiftKey && (event.key === 'I' || event.key === 'i' || event.key === 'J' || event.key === 'j')) { event.preventDefault(); return false; }
-                if (event.key === 'u' || event.key === 'U' || event.key === 's' || event.key === 'S' || event.key === 'c' || event.key === 'C' || event.key === 'v' || event.key === 'V') { event.preventDefault(); return false; }
+                if (event.key === 'u' || event.key === 'U' || event.key === 's' || event.key === 'S' || event.key === 'c' || event.key === 'C' || event.key === '' || event.key === '') { event.preventDefault(); return false; }
             }
         });
 
