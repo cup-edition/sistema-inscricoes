@@ -58,7 +58,7 @@
         }
         
         h2 {color: #f8f9fa; margin-bottom: 20px; font-size: 18px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding-right: 60px;}
-        .contador-confirmados {color: #2ecc71; font-weight: bold; font-size: 13px; background: #1a3327; padding: 6px 12px; border-radius: 6px; border: 1px solid #2ecc71;}
+        .contador-aprovados {color: #2ecc71; font-weight: bold; font-size: 13px; background: #1a3327; padding: 6px 12px; border-radius: 6px; border: 1px solid #2ecc71;}
         .aviso-limite {color: #e74c3c; font-weight: bold; font-size: 13px; background: #3a1e1e; padding: 6px 12px; border-radius: 6px; border: 1px solid #e74c3c; animation: piscar 1s infinite;}
         @keyframes piscar { 0%{opacity:1;} 50%{opacity:0.4;} 100%{opacity:1;} }
         
@@ -76,6 +76,7 @@
         
         .foto-preview { width: 46px; height: 46px; border-radius: 50%; object-fit: cover; border: 2px solid #e74c3c; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
         .foto-confirmado { border-color: #2ecc71 !important; }
+        .foto-aprovado { border-color: #3498db !important; }
         
         /* ===== BOTÕES ===== */
         button {background-color: #2ecc71; color: white; border: none; padding: 10px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; transition: all 0.2s; font-weight: bold; display: inline-flex; align-items: center; justify-content: center; gap: 4px;}
@@ -385,8 +386,8 @@
         <div class="secao">
             <h2>
                 📊 LISTA DE INSCRIÇÕES 
-                <span id="contadorConfirmados" class="contador-confirmados"></span>
-                <div id="avisoLimite" class="aviso-limite">⚠️ LIMITE DE 16 CONFIRMADOS ATINGIDO! INSCRIÇÕES ENCERRADAS AUTOMATICAMENTE.</div>
+                <span id="contadorAprovados" class="contador-aprovados"></span>
+                <div id="avisoLimite" class="aviso-limite">⚠️ LIMITE DE 16 APROVADOS ATINGIDO! INSCRIÇÕES ENCERRADAS AUTOMATICAMENTE.</div>
             </h2>
 
             <div class="btn-menu-hamburguer" id="btnMenu" onclick="alternarMenuFlutuante()">
@@ -470,6 +471,7 @@
         const LIMITE_MAXIMO = 16;
         let quantidadeAnterior = 0;
         let idEmEdicao = null;
+        let listaAnterior = [];
 
         // Cache local dos inscritos para o select de suspensos
         let inscritosCache = [];
@@ -550,7 +552,7 @@
             }).catch(erro => { alert("❌ Problema ao conectar à base de dados."); console.error(erro); });
         }
 
-        function verificarLimiteConfirmados(qtd) {
+        function verificarLimiteAprovados(qtd) {
             const aviso = document.getElementById('avisoLimite');
             if (LIMITE_MAXIMO - qtd === 0) {
                 db.ref('configuracao').set({inscricoes_abertas: false});
@@ -700,20 +702,15 @@
                         item.pagamento_aprovado = pago;
                         
                         if(pago) {
-                            // Se marcou o pagamento, vira APROVADO (independente do status anterior)
                             item.status = 'aprovado';
                         } else {
-                            // Se desmarcou, volta para o status que estava antes de virar aprovado
-                            // Se o status atual é 'aprovado', volta para 'confirmado' (se tinha data_confirmacao) ou 'pendente'
                             if(item.status === 'aprovado') {
-                                // Verifica se já foi confirmado anteriormente (tem data_confirmacao)
                                 if(item.data_confirmacao) {
                                     item.status = 'confirmado';
                                 } else {
                                     item.status = 'pendente';
                                 }
                             }
-                            // Se o status não era 'aprovado', mantém o que já estava
                         }
                         alterado = true;
                     }
@@ -738,12 +735,10 @@
             const select = document.getElementById('selectSuspenso');
             select.innerHTML = '<option value="">— ESCOLHA UM NOME —</option>';
 
-            // Busca suspensos atuais para não mostrar quem já está suspenso
             db.ref('suspensos').once('value').then(snapSusp => {
                 const suspensos = snapSusp.val() || {};
                 const nomesSuspensos = Object.values(suspensos).map(s => s.nome.toUpperCase());
 
-                // Filtra os inscritos que ainda não estão suspensos
                 const disponiveis = inscritosCache.filter(i => i && !nomesSuspensos.includes(i.nome.toUpperCase()));
 
                 if (disponiveis.length === 0) {
@@ -919,33 +914,52 @@
 
         function processarLista(inscricoes) {
             var tabela = document.getElementById('lista_inscricoes');
-            inscritosCache = inscricoes.filter(Boolean); // atualiza o cache
+            inscritosCache = inscricoes.filter(Boolean);
+
+            // Verifica se houve mudança de status de pendente para confirmado (nova inscrição)
+            const listaAtual = inscricoes.filter(Boolean);
+            if (listaAnterior.length > 0) {
+                listaAtual.forEach(item => {
+                    const anterior = listaAnterior.find(a => a.id === item.id);
+                    if (anterior && anterior.status === 'pendente' && item.status === 'confirmado' && item.data_confirmacao) {
+                        mostrarAvisoNovaConfirmacao(item);
+                    }
+                });
+            }
+            listaAnterior = JSON.parse(JSON.stringify(listaAtual));
 
             if (inscricoes.length === 0 || !inscricoes[0]) {
                 tabela.innerHTML = '<tr><td colspan="7" style="text-align: center; color: #adb5bd;">NENHUMA INSCRIÇÃO CADASTRADA AINDA.</td></tr>';
-                document.getElementById('contadorConfirmados').innerText = `✅ 0 CONFIRMADOS | RESTAM 16 VAGAS (LIMITE: 16)`;
-                verificarLimiteConfirmados(0);
+                document.getElementById('contadorAprovados').innerText = `✅ 0 APROVADOS | RESTAM 16 VAGAS (LIMITE: 16)`;
+                verificarLimiteAprovados(0);
                 return;
             }
 
+            // ===== NOVA ORDENAÇÃO =====
             var listaOrdenada = inscricoes.filter(Boolean).sort((a, b) => {
-                // Ordenar: aprovado > confirmado > pendente
-                const statusOrder = { 'aprovado': 0, 'confirmado': 1, 'pendente': 2 };
-                const orderA = statusOrder[a.status] ?? 2;
-                const orderB = statusOrder[b.status] ?? 2;
-                if (orderA !== orderB) return orderA - orderB;
-                if (a.status === 'confirmado' && b.status === 'confirmado') return (b.data_confirmacao || 0) - (a.data_confirmacao || 0);
+                // Primeiro: APROVADOS por data de confirmação (mais recente primeiro)
+                if (a.status === 'aprovado' && b.status === 'aprovado') {
+                    return (b.data_confirmacao || 0) - (a.data_confirmacao || 0);
+                }
+                // Segundo: CONFIRMADOS por data de confirmação (mais recente primeiro)
+                if (a.status === 'confirmado' && b.status === 'confirmado') {
+                    return (b.data_confirmacao || 0) - (a.data_confirmacao || 0);
+                }
+                // Terceiro: APROVADOS sempre antes de CONFIRMADOS
+                if (a.status === 'aprovado' && b.status !== 'aprovado') return -1;
+                if (a.status !== 'aprovado' && b.status === 'aprovado') return 1;
+                // Quarto: CONFIRMADOS sempre antes de PENDENTES
+                if (a.status === 'confirmado' && b.status === 'pendente') return -1;
+                if (a.status === 'pendente' && b.status === 'confirmado') return 1;
+                // Quinto: PENDENTES por nome (ordem alfabética)
                 return a.nome.localeCompare(b.nome);
             });
 
-            var qtdConfirmados = listaOrdenada.filter(i => i.status === 'confirmado' || i.status === 'aprovado').length;
-            var vagasRestantes = LIMITE_MAXIMO - qtdConfirmados;
+            var qtdAprovados = listaOrdenada.filter(i => i.status === 'aprovado').length;
+            var vagasRestantes = LIMITE_MAXIMO - qtdAprovados;
 
-            if (qtdConfirmados > quantidadeAnterior) mostrarAvisoNovaConfirmacao(listaOrdenada);
-            quantidadeAnterior = qtdConfirmados;
-
-            document.getElementById('contadorConfirmados').innerText = `✅ ${qtdConfirmados} CONFIRMADOS | RESTAM ${vagasRestantes} VAGAS (LIMITE: 16)`;
-            verificarLimiteConfirmados(qtdConfirmados);
+            document.getElementById('contadorAprovados').innerText = `✅ ${qtdAprovados} APROVADOS | RESTAM ${vagasRestantes} VAGAS (LIMITE: 16)`;
+            verificarLimiteAprovados(qtdAprovados);
 
             tabela.innerHTML = '';
             listaOrdenada.forEach(insc => {
@@ -954,9 +968,15 @@
                     const dt = new Date(insc.data_confirmacao);
                     dataHora = `${String(dt.getDate()).padStart(2,'0')}/${String(dt.getMonth()+1).padStart(2,'0')}/${dt.getFullYear()}<br>${String(dt.getHours()).padStart(2,'0')}:${String(dt.getMinutes()).padStart(2,'0')}`;
                 }
-                const classeBordaFoto = (insc.status === 'confirmado' || insc.status === 'aprovado') ? 'foto-preview foto-confirmado' : 'foto-preview';
                 
-                // Definir classe de status
+                // ===== BORDA DAS FOTOS =====
+                let classeBordaFoto = 'foto-preview';
+                if (insc.status === 'aprovado') {
+                    classeBordaFoto += ' foto-aprovado'; // AZUL
+                } else if (insc.status === 'confirmado') {
+                    classeBordaFoto += ' foto-confirmado'; // VERDE
+                }
+                
                 let statusClass = 'status-pendente';
                 let statusText = 'PENDENTE';
                 if (insc.status === 'confirmado') {
@@ -967,7 +987,6 @@
                     statusText = 'APROVADO💰';
                 }
                 
-                // Checkbox de pagamento
                 const checkedAttr = insc.pagamento_aprovado ? 'checked' : '';
                 
                 var linha = document.createElement('tr');
@@ -993,19 +1012,16 @@
             aplicarVisibilidadeData();
         }
 
-        function mostrarAvisoNovaConfirmacao(lista) {
-            const confirmados = lista.filter(i => i && (i.status === 'confirmado' || i.status === 'aprovado') && i.data_confirmacao);
-            if (confirmados.length === 0) return;
-            confirmados.sort((a, b) => b.data_confirmacao - a.data_confirmacao);
-            const ultimo = confirmados[0];
+        function mostrarAvisoNovaConfirmacao(inscricao) {
             const aviso = document.getElementById('avisoNovaConfirmacao');
             const fotoContainer = document.getElementById('popupConfirmadoFotoContainer');
             const nomeContainer = document.getElementById('popupConfirmadoNome');
             const som = document.getElementById('somConfirmacao');
-            fotoContainer.innerHTML = ultimo.foto
-                ? `<img src="${ultimo.foto}" style="width:140px;height:140px;border-radius:50%;object-fit:cover;border:4px solid #2ecc71;box-shadow:0 4px 15px rgba(0,0,0,0.5);">`
+            
+            fotoContainer.innerHTML = inscricao.foto
+                ? `<img src="${inscricao.foto}" style="width:140px;height:140px;border-radius:50%;object-fit:cover;border:4px solid #2ecc71;box-shadow:0 4px 15px rgba(0,0,0,0.5);">`
                 : `<div style="font-size:80px;line-height:140px;width:140px;height:140px;background:#2c3034;border-radius:50%;margin:0 auto;border:4px solid #2ecc71;">📄</div>`;
-            nomeContainer.innerText = ultimo.nome;
+            nomeContainer.innerText = inscricao.nome;
             aviso.style.display = 'flex';
             if (som) { som.currentTime = 0; som.load(); som.play().catch(e => console.log("Erro ao tocar áudio:", e)); }
             setTimeout(() => { aviso.style.display = 'none'; }, 4000);
