@@ -699,20 +699,26 @@
                 var alterado = false;
                 lista = lista.map(item => {
                     if(item && item.id === id){
-                        item.pagamento_aprovado = pago;
-                        
-                        if(pago) {
-                            item.status = 'aprovado';
-                        } else {
-                            if(item.status === 'aprovado') {
+                        // SÓ PERMITE ALTERAR O PAGAMENTO SE O STATUS NÃO FOR PENDENTE
+                        if (item.status !== 'pendente') {
+                            item.pagamento_aprovado = pago;
+                            
+                            if(pago) {
+                                item.status = 'aprovado';
+                            } else {
                                 if(item.data_confirmacao) {
                                     item.status = 'confirmado';
                                 } else {
                                     item.status = 'pendente';
                                 }
                             }
+                            alterado = true;
+                        } else {
+                            // SE FOR PENDENTE, FORÇA O CHECKBOX A FICAR DESMARCADO
+                            checkbox.checked = false;
+                            alert('⚠️ NÃO É PERMITIDO MARCAR PAGAMENTO DE UM INSCRITO PENDENTE!');
+                            alterado = false;
                         }
-                        alterado = true;
                     }
                     return item;
                 });
@@ -987,7 +993,10 @@
                     statusText = 'APROVADO💰';
                 }
                 
-                const checkedAttr = insc.pagamento_aprovado ? 'checked' : '';
+                // ===== VERIFICAÇÃO CRÍTICA: NUNCA MARCAR CHECKBOX SE STATUS FOR PENDENTE =====
+                // SÓ MARCA SE FOR APROVADO E pagamento_aprovado = true
+                const checkboxChecked = (insc.status === 'aprovado' && insc.pagamento_aprovado === true);
+                const checkedAttr = checkboxChecked ? 'checked' : '';
                 
                 var linha = document.createElement('tr');
                 linha.innerHTML = `
