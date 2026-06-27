@@ -964,7 +964,7 @@
             var qtdAprovados = listaOrdenada.filter(i => i.status === 'aprovado').length;
             var vagasRestantes = LIMITE_MAXIMO - qtdAprovados;
 
-            document.getElementById('contadorAprovados').innerText = `✅ ${qtdAprovados} APROVADOS | RESTAM ${vagasRestantes} VAGAS (LIMITE: 16)`;
+            document.getElementById('contadorAprovados').innerText = `💰 ${qtdAprovados} APROVADOS | RESTAM ${vagasRestantes} VAGAS (LIMITE: 16)`;
             verificarLimiteAprovados(qtdAprovados);
 
             tabela.innerHTML = '';
