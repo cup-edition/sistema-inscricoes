@@ -380,6 +380,8 @@
             display: flex;
             border-bottom: 2px solid #4a5568;
             margin-bottom: 15px;
+            position: relative;
+            overflow: hidden;
         }
         .aba {
             flex: 1;
@@ -392,6 +394,9 @@
             transition: all 0.3s;
             border-bottom: 3px solid transparent;
             position: relative;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: pan-y;
         }
         .aba:hover {
             color: #f7fafc;
@@ -435,17 +440,6 @@
         }
         .conteudo-aba.ativa {
             display: block;
-        }
-
-        .status-confirmado {
-            color: #28a745;
-            font-weight: bold;
-            font-size: 12px;
-        }
-        .status-aprovado-azul {
-            color: #007bff;
-            font-weight: bold;
-            font-size: 12px;
         }
 
         @media (max-width: 480px) {
@@ -553,8 +547,8 @@
             <span id="tituloJanela">📋 LISTA DE INSCRITOS</span>
             <button class="fechar-janela" onclick="fecharTodasJanelasManual()">&times;</button>
         </div>
-        <div class="conteudo-janela">
-            <div class="abas-container">
+        <div class="conteudo-janela" id="conteudoLista">
+            <div class="abas-container" id="abasContainer">
                 <div class="aba inscritos-aba ativa" id="abaInscritos" onclick="trocarAba('inscritos')">
                     ✅ INSCRITOS <span class="contador-aba" id="contadorInscritos">0</span>
                 </div>
@@ -710,6 +704,12 @@
         var agendamentoAtual = null;
         var abaAtual = 'inscritos';
 
+        // Variáveis para controle de swipe
+        var touchStartX = 0;
+        var touchEndX = 0;
+        var isSwiping = false;
+        var swipeThreshold = 50;
+
         var suspensosList = [];
         db.ref('suspensos').on('value', function(snap) {
             const dados = snap.val() || {};
@@ -729,7 +729,70 @@
                 carregarListaNomes();
                 verificarStatusSistemaComDados(listaCompletaInscricoes);
             });
+            
+            // Inicializar eventos de touch para swipe
+            inicializarSwipe();
         };
+
+        // Função para inicializar os eventos de swipe
+        function inicializarSwipe() {
+            var janelaLista = document.getElementById('janelaLista');
+            var conteudoLista = document.getElementById('conteudoLista');
+            
+            // Eventos de touch no container de abas e conteúdo
+            var elementosSwipe = document.querySelectorAll('.abas-container, .conteudo-aba, #conteudoLista');
+            
+            elementosSwipe.forEach(function(el) {
+                el.addEventListener('touchstart', handleTouchStart, { passive: true });
+                el.addEventListener('touchmove', handleTouchMove, { passive: true });
+                el.addEventListener('touchend', handleTouchEnd, { passive: true });
+            });
+            
+            // Também adicionar ao container principal da janela
+            janelaLista.addEventListener('touchstart', handleTouchStart, { passive: true });
+            janelaLista.addEventListener('touchmove', handleTouchMove, { passive: true });
+            janelaLista.addEventListener('touchend', handleTouchEnd, { passive: true });
+        }
+
+        function handleTouchStart(e) {
+            touchStartX = e.changedTouches[0].screenX;
+            isSwiping = true;
+        }
+
+        function handleTouchMove(e) {
+            if (!isSwiping) return;
+            touchEndX = e.changedTouches[0].screenX;
+            // Prevenir scroll durante o swipe
+            if (Math.abs(touchEndX - touchStartX) > 10) {
+                e.preventDefault();
+            }
+        }
+
+        function handleTouchEnd(e) {
+            if (!isSwiping) return;
+            isSwiping = false;
+            
+            // Verificar se foi um swipe significativo
+            if (touchStartX && touchEndX) {
+                var diff = touchStartX - touchEndX;
+                if (Math.abs(diff) > swipeThreshold) {
+                    if (diff > 0) {
+                        // Swipe para esquerda - vai para APROVADOS
+                        if (abaAtual === 'inscritos') {
+                            trocarAba('aprovados');
+                        }
+                    } else {
+                        // Swipe para direita - vai para INSCRITOS
+                        if (abaAtual === 'aprovados') {
+                            trocarAba('inscritos');
+                        }
+                    }
+                }
+            }
+            
+            touchStartX = 0;
+            touchEndX = 0;
+        }
 
         window.addEventListener('popstate', function(event) {
             if (document.querySelector('.janela-flutuante.aberta') || document.querySelector('.janela-regras-cheia.aberta')) {
@@ -1047,14 +1110,11 @@
             else { fotoElement.style.display = 'none'; }
         }
 
-        // ===== FUNÇÃO VERIFICAR STATUS DO SISTEMA (BASEADO EM APROVADOS) =====
         function verificarStatusSistemaComDados(listaInscricoes) {
-            // Conta APROVADOS (não confirmados)
             var qtdAprovados = listaInscricoes.filter(i => i && i.status === 'aprovado').length;
             var alertaRapido = document.getElementById('alertaVagasRapidas');
             var vagasRestantes = LIMITE_MAXIMO - qtdAprovados;
 
-            // ALERTA DE VAGAS ACABANDO - quando atinge 13 APROVADOS
             if (qtdAprovados >= 13 && qtdAprovados < LIMITE_MAXIMO) {
                 alertaRapido.innerText = `⚠️ ATENÇÃO: RESTAM SOMENTE ${vagasRestantes} VAGA${vagasRestantes === 1 ? '' : 'S'}!`;
                 alertaRapido.style.display = "block";
@@ -1062,7 +1122,6 @@
                 alertaRapido.style.display = "none";
             }
 
-            // ENCERRAR INSCRIÇÕES - quando atinge 16 APROVADOS (mostra botão encerrado)
             if (qtdAprovados >= LIMITE_MAXIMO) {
                 document.getElementById('botaoConfirmar').style.display = 'none';
                 document.getElementById('botaoTelaEncerrado').style.display = 'block';
@@ -1095,7 +1154,6 @@
             });
         }
 
-        // ===== FUNÇÃO CONFIRMAR INSCRIÇÃO =====
         function confirmarInscricao() {
             var nome = document.getElementById('ver_nome').value.trim();
             var dia = document.getElementById('ver_dia').value;
@@ -1129,10 +1187,8 @@
             db.ref('inscricoes').once('value').then(snap => {
                 var inscricoes = snap.val() || [];
                 
-                // Conta APROVADOS
                 var qtdAprovados = inscricoes.filter(i => i && i.status === 'aprovado').length;
 
-                // Verifica se já atingiu o limite de APROVADOS
                 if (qtdAprovados >= LIMITE_MAXIMO) {
                     msg.className = 'resultado erro';
                     msg.innerText = '❌ LIMITE DE 16 APROVADOS ATINGIDO!';
