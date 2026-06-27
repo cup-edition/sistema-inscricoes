@@ -339,7 +339,8 @@
         }
         .conteudo-janela {padding: 15px; overflow-y: auto; max-height: 70vh;}
         .item-inscrito {display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid #4a5568;}
-        .foto-inscrito {width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid #28a745; /* VERDE */ }
+        .foto-inscrito {width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid #28a745; }
+        .foto-inscrito-aprovado {border: 2px solid #007bff; }
         .dados-inscrito {flex: 1; text-align: left;}
         .nome-inscrito {font-weight: 600; color: #f7fafc; font-size: 15px;}
         .data-hora-inscrito {font-size: 12px; color: #cbd5e0; margin-top: 2px;}
@@ -361,6 +362,92 @@
         #btnEnviarCadastro:hover {background-color: #219653;}
         #btnEnviarCadastro:disabled {background-color: #95a5a6; cursor: not-allowed;}
 
+        #loadingPagamento {
+            display: none;
+            color: #f8f9fa;
+            margin-top: 10px;
+            font-size: 14px;
+            animation: piscarLoading 0.8s infinite alternate;
+        }
+
+        @keyframes piscarLoading {
+            0% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        /* Estilos para as abas */
+        .abas-container {
+            display: flex;
+            border-bottom: 2px solid #4a5568;
+            margin-bottom: 15px;
+        }
+        .aba {
+            flex: 1;
+            padding: 10px 5px;
+            text-align: center;
+            cursor: pointer;
+            color: #cbd5e0;
+            font-weight: bold;
+            font-size: 14px;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+            position: relative;
+        }
+        .aba:hover {
+            color: #f7fafc;
+            background-color: rgba(255,255,255,0.05);
+        }
+        .aba.ativa {
+            color: #17a2b8;
+            border-bottom-color: #17a2b8;
+        }
+        .aba.ativa.inscritos-aba {
+            color: #28a745;
+            border-bottom-color: #28a745;
+        }
+        .aba.ativa.aprovados-aba {
+            color: #007bff;
+            border-bottom-color: #007bff;
+        }
+        
+        .aba .contador-aba {
+            display: inline-block;
+            background-color: rgba(255,255,255,0.15);
+            border-radius: 50%;
+            padding: 0 8px;
+            font-size: 11px;
+            margin-left: 4px;
+            min-width: 20px;
+            text-align: center;
+            line-height: 20px;
+        }
+        .aba.ativa.inscritos-aba .contador-aba {
+            background-color: rgba(40, 167, 69, 0.3);
+            color: #28a745;
+        }
+        .aba.ativa.aprovados-aba .contador-aba {
+            background-color: rgba(0, 123, 255, 0.3);
+            color: #007bff;
+        }
+        
+        .conteudo-aba {
+            display: none;
+        }
+        .conteudo-aba.ativa {
+            display: block;
+        }
+
+        .status-confirmado {
+            color: #28a745;
+            font-weight: bold;
+            font-size: 12px;
+        }
+        .status-aprovado-azul {
+            color: #007bff;
+            font-weight: bold;
+            font-size: 12px;
+        }
+
         @media (max-width: 480px) {
             .botao-regras, .botao-lista { font-size: 11px; padding: 6px 10px; }
             .botao-cadastrar { top: 10px !important; font-size: 12px; padding: 8px 12px; }
@@ -374,6 +461,8 @@
             .container select, .container input { font-size: 16px; }
             .container #botaoConfirmar, .container .botao-encerrado { font-size: 16px; }
             .janela-regras-cheia { width: 92%; height: 82vh; border-radius: 10px; border: 2px solid #dc3545; }
+            .aba { font-size: 12px; padding: 8px 5px; }
+            .aba .contador-aba { font-size: 10px; padding: 0 6px; min-width: 16px; line-height: 18px; }
         }
     </style>
 
@@ -461,11 +550,30 @@
 
     <div id="janelaLista" class="janela-flutuante">
         <div class="cabecalho-janela">
-            <span id="tituloJanela">✅ 0 INSCRITOS CONFIRMADOS ✅</span>
+            <span id="tituloJanela">📋 LISTA DE INSCRITOS</span>
             <button class="fechar-janela" onclick="fecharTodasJanelasManual()">&times;</button>
         </div>
-        <div class="conteudo-janela" id="listaConfirmados">
-            <p style="text-align:center; color:#cbd5e0;">Carregando...</p>
+        <div class="conteudo-janela">
+            <div class="abas-container">
+                <div class="aba inscritos-aba ativa" id="abaInscritos" onclick="trocarAba('inscritos')">
+                    ✅ INSCRITOS <span class="contador-aba" id="contadorInscritos">0</span>
+                </div>
+                <div class="aba aprovados-aba" id="abaAprovados" onclick="trocarAba('aprovados')">
+                    💰 APROVADOS <span class="contador-aba" id="contadorAprovados">0</span>
+                </div>
+            </div>
+            
+            <div class="conteudo-aba ativa" id="conteudoInscritos">
+                <div id="listaInscritos">
+                    <p style="text-align:center; color:#cbd5e0;">Carregando...</p>
+                </div>
+            </div>
+            
+            <div class="conteudo-aba" id="conteudoAprovados">
+                <div id="listaAprovados">
+                    <p style="text-align:center; color:#cbd5e0;">Carregando...</p>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -568,17 +676,16 @@
                 </div>
             </div>
 
-            <!-- ===== AVISO DE SUSPENSO (aparece acima do botão confirmar) ===== -->
             <div id="avisoSuspenso">
                 <span class="suspenso-titulo">🟥JOGADOR SUSPENSO!</span>
                 <span class="suspenso-subtitulo">ESTE JOGADOR ESTÁ IMPEDIDO DE SE INSCREVER.</span>
             </div>
-            <!-- ================================================================ -->
 
             <button id="botaoConfirmar" onclick="confirmarInscricao()">CONFIRMAR INSCRIÇÃO</button>
             <button id="botaoTelaEncerrado" class="botao-encerrado">🚫 Inscrições Encerradas 🚫</button>
 
             <div id="msg_verificacao" class="resultado"></div>
+            <div id="loadingPagamento">⏳ Redirecionando para o pagamento...</div>
         </div>
     </div>
 
@@ -601,8 +708,8 @@
         var fotoReduzidaBase64 = "";
         var intervaloRegressiva = null;
         var agendamentoAtual = null;
+        var abaAtual = 'inscritos';
 
-        // Cache dos suspensos carregado uma vez e atualizado em tempo real
         var suspensosList = [];
         db.ref('suspensos').on('value', function(snap) {
             const dados = snap.val() || {};
@@ -616,7 +723,9 @@
             
             db.ref('inscricoes').on('value', function(snap) {
                 listaCompletaInscricoes = snap.val() || [];
-                if (janelaAberta) atualizarListaConfirmados();
+                if (janelaAberta) {
+                    atualizarListas();
+                }
                 carregarListaNomes();
                 verificarStatusSistemaComDados(listaCompletaInscricoes);
             });
@@ -641,6 +750,101 @@
             document.getElementById('janelaLista').classList.remove('aberta');
             document.getElementById('janelaRegras').classList.remove('aberta');
             janelaAberta = false;
+        }
+
+        function trocarAba(aba) {
+            abaAtual = aba;
+            
+            document.querySelectorAll('.aba').forEach(el => el.classList.remove('ativa'));
+            document.querySelectorAll('.conteudo-aba').forEach(el => el.classList.remove('ativa'));
+            
+            if (aba === 'inscritos') {
+                document.getElementById('abaInscritos').classList.add('ativa');
+                document.getElementById('conteudoInscritos').classList.add('ativa');
+            } else {
+                document.getElementById('abaAprovados').classList.add('ativa');
+                document.getElementById('conteudoAprovados').classList.add('ativa');
+            }
+            
+            atualizarListas();
+        }
+
+        function atualizarListas() {
+            atualizarListaInscritos();
+            atualizarListaAprovados();
+            atualizarContadores();
+        }
+
+        function atualizarContadores() {
+            const totalInscritos = listaCompletaInscricoes.filter(insc => insc && (insc.status === 'confirmado' || insc.status === 'aprovado')).length;
+            const totalAprovados = listaCompletaInscricoes.filter(insc => insc && insc.status === 'aprovado').length;
+            
+            document.getElementById('contadorInscritos').textContent = totalInscritos;
+            document.getElementById('contadorAprovados').textContent = totalAprovados;
+        }
+
+        function atualizarListaInscritos() {
+            const conteudo = document.getElementById('listaInscritos');
+            
+            const inscritos = listaCompletaInscricoes
+                .filter(insc => insc && (insc.status === 'confirmado' || insc.status === 'aprovado'))
+                .sort((a, b) => (b.data_confirmacao || 0) - (a.data_confirmacao || 0));
+            
+            if (inscritos.length === 0) {
+                conteudo.innerHTML = '<p style="text-align:center; color:#cbd5e0;">Nenhum inscrito confirmado ainda.</p>';
+                return;
+            }
+            
+            let html = '';
+            inscritos.forEach(insc => {
+                const foto = insc.foto || 'https://via.placeholder.com/50?text=Sem+Foto';
+                let dataHora = 'Data não registrada';
+                if (insc.data_confirmacao) {
+                    const data = new Date(insc.data_confirmacao);
+                    dataHora = data.toLocaleString('pt-BR', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
+                }
+                
+                html += `<div class="item-inscrito">
+                    <img src="${foto}" class="foto-inscrito" alt="Foto">
+                    <div class="dados-inscrito">
+                        <div class="nome-inscrito">${insc.nome}</div>
+                        <div class="data-hora-inscrito">${dataHora} - <span class="status-confirmado">✅ CONFIRMADO</span></div>
+                    </div>
+                </div>`;
+            });
+            conteudo.innerHTML = html;
+        }
+
+        function atualizarListaAprovados() {
+            const conteudo = document.getElementById('listaAprovados');
+            
+            const aprovados = listaCompletaInscricoes
+                .filter(insc => insc && insc.status === 'aprovado')
+                .sort((a, b) => (b.data_confirmacao || 0) - (a.data_confirmacao || 0));
+            
+            if (aprovados.length === 0) {
+                conteudo.innerHTML = '<p style="text-align:center; color:#cbd5e0;">Nenhum jogador aprovado ainda.</p>';
+                return;
+            }
+            
+            let html = '';
+            aprovados.forEach(insc => {
+                const foto = insc.foto || 'https://via.placeholder.com/50?text=Sem+Foto';
+                let dataHora = 'Data não registrada';
+                if (insc.data_confirmacao) {
+                    const data = new Date(insc.data_confirmacao);
+                    dataHora = data.toLocaleString('pt-BR', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
+                }
+                
+                html += `<div class="item-inscrito">
+                    <img src="${foto}" class="foto-inscrito foto-inscrito-aprovado" alt="Foto">
+                    <div class="dados-inscrito">
+                        <div class="nome-inscrito">${insc.nome}</div>
+                        <div class="data-hora-inscrito">${dataHora} - <span class="status-aprovado-azul">💰 APROVADO</span></div>
+                    </div>
+                </div>`;
+            });
+            conteudo.innerHTML = html;
         }
 
         function previsualizarETemperarFoto(event) {
@@ -774,10 +978,9 @@
         function mudouNome() {
             mostrarFotoSelecionado();
             focarNoDia();
-            verificarSeSuspenso(); // ← CHECA SUSPENSÃO AO MUDAR O NOME
+            verificarSeSuspenso();
         }
 
-        // ===== VERIFICAÇÃO DE SUSPENSO =====
         function verificarSeSuspenso() {
             const nomeSelecionado = document.getElementById('ver_nome').value.trim().toLowerCase();
             const aviso = document.getElementById('avisoSuspenso');
@@ -785,6 +988,9 @@
 
             if (!nomeSelecionado) {
                 aviso.style.display = 'none';
+                btnConfirmar.disabled = false;
+                btnConfirmar.style.opacity = '1';
+                btnConfirmar.style.cursor = 'pointer';
                 return;
             }
 
@@ -802,36 +1008,21 @@
                 btnConfirmar.style.cursor = 'pointer';
             }
         }
-        // ====================================
 
         function focarNoDia() {
             if (document.getElementById('ver_nome').value !== "") setTimeout(() => { document.getElementById('ver_dia').focus(); }, 10);
         }
 
-        function atualizarListaConfirmados() {
-            const conteudo = document.getElementById('listaConfirmados');
-            const tituloJanela = document.getElementById('tituloJanela');
-            const confirmados = listaCompletaInscricoes.filter(insc => insc && insc.status === 'confirmado').sort((a, b) => (b.data_confirmacao || 0) - (a.data_confirmacao || 0));
-            tituloJanela.innerText = `✅ ${confirmados.length} INSCRITOS CONFIRMADOS ✅`;
-            if (confirmados.length === 0) {
-                conteudo.innerHTML = '<p style="text-align:center; color:#cbd5e0;">Nenhum inscrito confirmado ainda.</p>';
-            } else {
-                let html = '';
-                confirmados.forEach(insc => {
-                    const foto = insc.foto || 'https://via.placeholder.com/50?text=Sem+Foto';
-                    let dataHora = 'Data não registrada';
-                    if (insc.data_confirmacao) {
-                        const data = new Date(insc.data_confirmacao);
-                        dataHora = data.toLocaleString('pt-BR', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
-                    }
-                    html += `<div class="item-inscrito"><img src="${foto}" class="foto-inscrito" alt="Foto"><div class="dados-inscrito"><div class="nome-inscrito">${insc.nome}</div><div class="data-hora-inscrito">✅ Confirmado em: ${dataHora}</div></div></div>`;
-                });
-                conteudo.innerHTML = html;
-            }
-        }
-
         function abrirJanelaCadastro() { document.getElementById('fundoEscuro').classList.add('visivel'); document.getElementById('janelaCadastro').classList.add('aberta'); gerenciarHistoricoJanelaAberta(); }
-        function abrirJanelaLista() { document.getElementById('fundoEscuro').classList.add('visivel'); document.getElementById('janelaLista').classList.add('aberta'); janelaAberta = true; atualizarListaConfirmados(); gerenciarHistoricoJanelaAberta(); }
+        
+        function abrirJanelaLista() { 
+            document.getElementById('fundoEscuro').classList.add('visivel'); 
+            document.getElementById('janelaLista').classList.add('aberta'); 
+            janelaAberta = true; 
+            trocarAba(abaAtual);
+            gerenciarHistoricoJanelaAberta(); 
+        }
+        
         function abrirJanelaRegras() { document.getElementById('fundoEscuro').classList.add('visivel'); document.getElementById('janelaRegras').classList.add('aberta'); gerenciarHistoricoJanelaAberta(); }
 
         function carregarListaNomes() {
@@ -856,38 +1047,65 @@
             else { fotoElement.style.display = 'none'; }
         }
 
+        // ===== FUNÇÃO VERIFICAR STATUS DO SISTEMA (BASEADO EM APROVADOS) =====
         function verificarStatusSistemaComDados(listaInscricoes) {
-            db.ref('configuracao/inscricoes_abertas').once('value').then(snap => {
-                var aberto = snap.val() !== null ? snap.val() : true;
-                var qtdConfirmados = listaInscricoes.filter(i => i && i.status === 'confirmado').length;
-                var alertaRapido = document.getElementById('alertaVagasRapidas');
-                var vagasRestantes = LIMITE_MAXIMO - qtdConfirmados;
+            // Conta APROVADOS (não confirmados)
+            var qtdAprovados = listaInscricoes.filter(i => i && i.status === 'aprovado').length;
+            var alertaRapido = document.getElementById('alertaVagasRapidas');
+            var vagasRestantes = LIMITE_MAXIMO - qtdAprovados;
 
-                if (aberto && qtdConfirmados >= 13 && qtdConfirmados < LIMITE_MAXIMO) {
-                    alertaRapido.innerText = `⚠️ ATENÇÃO: RESTAM SOMENTE ${vagasRestantes} VAGA${vagasRestantes === 1 ? '' : 'S'}!`;
-                    alertaRapido.style.display = "block";
-                } else {
-                    alertaRapido.style.display = "none";
-                }
+            // ALERTA DE VAGAS ACABANDO - quando atinge 13 APROVADOS
+            if (qtdAprovados >= 13 && qtdAprovados < LIMITE_MAXIMO) {
+                alertaRapido.innerText = `⚠️ ATENÇÃO: RESTAM SOMENTE ${vagasRestantes} VAGA${vagasRestantes === 1 ? '' : 'S'}!`;
+                alertaRapido.style.display = "block";
+            } else {
+                alertaRapido.style.display = "none";
+            }
 
-                if (!aberto || qtdConfirmados >= LIMITE_MAXIMO) {
-                    document.getElementById('botaoConfirmar').style.display = 'none';
-                    document.getElementById('botaoTelaEncerrado').style.display = 'block';
-                } else {
-                    document.getElementById('botaoConfirmar').style.display = 'block';
-                    document.getElementById('botaoTelaEncerrado').style.display = 'none';
-                }
+            // ENCERRAR INSCRIÇÕES - quando atinge 16 APROVADOS (mostra botão encerrado)
+            if (qtdAprovados >= LIMITE_MAXIMO) {
+                document.getElementById('botaoConfirmar').style.display = 'none';
+                document.getElementById('botaoTelaEncerrado').style.display = 'block';
+            } else {
+                document.getElementById('botaoConfirmar').style.display = 'block';
+                document.getElementById('botaoTelaEncerrado').style.display = 'none';
+            }
+        }
+
+        function buscarLinkPagamento(nome, dia, mes) {
+            return new Promise((resolve, reject) => {
+                db.ref('inscricoes').once('value', function(snap) {
+                    const inscricoes = snap.val() || [];
+                    let linkEncontrado = null;
+                    
+                    inscricoes.forEach((insc) => {
+                        if (insc && 
+                            insc.nome && 
+                            insc.nome.trim().toLowerCase() === nome.toLowerCase() &&
+                            String(insc.dia || "").padStart(2,'0') === String(dia).padStart(2,'0') &&
+                            String(insc.mes || "").padStart(2,'0') === String(mes).padStart(2,'0')) {
+                            linkEncontrado = insc.link_pagamento;
+                        }
+                    });
+                    
+                    resolve(linkEncontrado);
+                }, function(error) {
+                    reject(error);
+                });
             });
         }
 
+        // ===== FUNÇÃO CONFIRMAR INSCRIÇÃO =====
         function confirmarInscricao() {
             var nome = document.getElementById('ver_nome').value.trim();
             var dia = document.getElementById('ver_dia').value;
             var mes = document.getElementById('ver_mes').value;
             var msg = document.getElementById('msg_verificacao');
+            var loading = document.getElementById('loadingPagamento');
+            
             msg.style.display = 'none';
+            loading.style.display = 'none';
 
-            // Bloqueia envio se suspenso (segurança extra no lado do cliente)
             if (suspensosList.includes(nome.toLowerCase())) {
                 msg.className = 'resultado erro';
                 msg.innerText = '🟥 JOGADOR SUSPENSO! NÃO É POSSÍVEL SE INSCREVER.';
@@ -910,13 +1128,17 @@
 
             db.ref('inscricoes').once('value').then(snap => {
                 var inscricoes = snap.val() || [];
-                var qtdAtual = inscricoes.filter(i => i && i.status === 'confirmado').length;
+                
+                // Conta APROVADOS
+                var qtdAprovados = inscricoes.filter(i => i && i.status === 'aprovado').length;
 
-                if (qtdAtual >= LIMITE_MAXIMO) {
+                // Verifica se já atingiu o limite de APROVADOS
+                if (qtdAprovados >= LIMITE_MAXIMO) {
                     msg.className = 'resultado erro';
-                    msg.innerText = '❌ LIMITE DE 16 CONFIRMADOS ATINGIDO! Inscrições encerradas.';
+                    msg.innerText = '❌ LIMITE DE 16 APROVADOS ATINGIDO!';
                     msg.style.display = 'block';
                     verificarStatusSistemaComDados(inscricoes);
+                    setTimeout(() => { msg.style.display = 'none'; }, 3000);
                     return;
                 }
 
@@ -933,18 +1155,47 @@
 
                     db.ref('inscricoes').set(inscricoes).then(() => {
                         msg.innerText = '🎉 INSCRIÇÃO CONFIRMADA COM SUCESSO! ✅';
-                        setTimeout(() => { msg.style.display = 'none'; }, 3000);
-                        document.getElementById('ver_nome').value = '';
-                        document.getElementById('ver_dia').value = '';
-                        document.getElementById('ver_mes').value = '';
-                        document.getElementById('fotoUsuario').style.display = 'none';
-                        document.getElementById('avisoSuspenso').style.display = 'none';
-                        carregarListaNomes();
-                        verificarStatusSistemaComDados(inscricoes);
+                        msg.style.display = 'block';
+                        loading.style.display = 'block';
+                        
+                        buscarLinkPagamento(nome, dia, mes).then(linkPagamento => {
+                            setTimeout(() => {
+                                msg.style.display = 'none';
+                                loading.style.display = 'none';
+                                
+                                if (linkPagamento) {
+                                    window.location.href = linkPagamento;
+                                } else {
+                                    alert('⚠️ Link de pagamento não encontrado para este jogador. Entre em contato com a organização.');
+                                    document.getElementById('ver_nome').value = '';
+                                    document.getElementById('ver_dia').value = '';
+                                    document.getElementById('ver_mes').value = '';
+                                    document.getElementById('fotoUsuario').style.display = 'none';
+                                    document.getElementById('avisoSuspenso').style.display = 'none';
+                                    carregarListaNomes();
+                                    verificarStatusSistemaComDados(inscricoes);
+                                }
+                            }, 2000);
+                        }).catch(erro => {
+                            console.error('Erro ao buscar link de pagamento:', erro);
+                            setTimeout(() => {
+                                msg.style.display = 'none';
+                                loading.style.display = 'none';
+                                alert('⚠️ Erro ao buscar link de pagamento. Entre em contato com a organização.');
+                                document.getElementById('ver_nome').value = '';
+                                document.getElementById('ver_dia').value = '';
+                                document.getElementById('ver_mes').value = '';
+                                document.getElementById('fotoUsuario').style.display = 'none';
+                                document.getElementById('avisoSuspenso').style.display = 'none';
+                                carregarListaNomes();
+                                verificarStatusSistemaComDados(inscricoes);
+                            }, 2000);
+                        });
                     }).catch((erro) => {
                         msg.className = 'resultado erro';
                         msg.innerText = '❌ ERRO AO ENVIAR: ' + erro.message;
                         msg.style.display = 'block';
+                        loading.style.display = 'none';
                     });
                 } else {
                     msg.className = 'resultado erro';
