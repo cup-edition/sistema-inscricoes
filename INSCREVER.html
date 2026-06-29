@@ -1118,7 +1118,7 @@
 
             <div class="subtitulo-principal">📝INSCREVA-SE📝</div>
             
-            <p class="descricao">SELECIONE SEU NOME E DATA DE NASCIMENTO</p>
+            <p class="descricao">SELECIONE NOME / DATA E CONCLUA O PIX</p>
 
             <div class="grupo-campo">
                 <label>NOME:</label>
@@ -1785,14 +1785,24 @@
         function tratarAgendamentoLocal(agendamento) {
             agendamentoAtual = agendamento;
             const avisoEl = document.getElementById('avisoProximaInscricao');
-            if (!agendamento) { avisoEl.classList.remove('visivel'); if(intervaloRegressiva) clearInterval(intervaloRegressiva); return; }
+            if (!agendamento) { 
+                avisoEl.classList.remove('visivel'); 
+                if(intervaloRegressiva) clearInterval(intervaloRegressiva); 
+                return; 
+            }
 
             if (!agendamento.executado) {
-                avisoEl.classList.add('visivel');
+                // Só mostra visualmente se o botão encerrado estiver visível (verificamos na função de atualização)
+                // A classe 'visivel' será controlada pela função verificarStatusSistemaComDados
                 if (intervaloRegressiva) clearInterval(intervaloRegressiva);
                 function atualizarRegressiva() {
                     const diferenca = agendamento.timestamp - Date.now();
-                    if (diferenca <= 0) { document.getElementById('dataReinicioTexto').innerText = "Sistema reiniciando..."; clearInterval(intervaloRegressiva); executarREINICIO(); return; }
+                    if (diferenca <= 0) { 
+                        document.getElementById('dataReinicioTexto').innerText = "Sistema reiniciando..."; 
+                        clearInterval(intervaloRegressiva); 
+                        executarREINICIO(); 
+                        return; 
+                    }
                     const dias = Math.floor(diferenca / (1000 * 60 * 60 * 24));
                     const horas = Math.floor((diferenca % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
                     const minutes = Math.floor((diferenca % (1000 * 60 * 60)) / (1000 * 60));
@@ -1962,6 +1972,7 @@
         }
         function abrirJanelaRegras() { document.getElementById('fundoEscuro').classList.add('visivel'); document.getElementById('janelaRegras').classList.add('aberta'); gerenciarHistoricoJanelaAberta(); }
 
+        // ===== FUNÇÃO MODIFICADA COM CARACTERES UNICODE MENORES =====
         function carregarListaNomes() {
             var selectNome = document.getElementById('ver_nome');
             const valorAtual = selectNome.value;
@@ -1976,7 +1987,8 @@
                 const insc = listaCompletaInscricoes.find(i => i.nome === nome);
                 let statusText = '';
                 if (insc && insc.status === 'confirmado') {
-                    statusText = ' ⏳ AGUARDANDO PAGAMENTO';
+                    // Usando caracteres Unicode menores para "AGUARDANDO PAGAMENTO"
+                    statusText = ' ᵃᵍᵘᵃʳᵈᵃⁿᵈᵒ ᵖᵃᵍᵃᵐᵉⁿᵗᵒ';
                 }
                 opcao.textContent = nome + statusText;
                 selectNome.appendChild(opcao);
@@ -1998,6 +2010,7 @@
             else { fotoElement.style.display = 'none'; }
         }
 
+        // ===== FUNÇÃO MODIFICADA PARA CONTROLAR VISIBILIDADE DO AVISO PRÓXIMA INSCRIÇÃO =====
         function verificarStatusSistemaComDados(listaInscricoes) {
             var qtdAprovados = listaInscricoes.filter(i => i && i.status === 'aprovado').length;
             var alertaRapido = document.getElementById('alertaVagasRapidas');
@@ -2010,12 +2023,25 @@
                 alertaRapido.style.display = "none";
             }
 
+            // CONTROLE DO BOTÃO ENCERRADO
             if (qtdAprovados >= LIMITE_MAXIMO) {
                 document.getElementById('botaoConfirmar').style.display = 'none';
                 document.getElementById('botaoTelaEncerrado').style.display = 'block';
+                
+                // QUANDO O BOTÃO ENCERRADO ESTÁ VISÍVEL, MOSTRA O AVISO DE PRÓXIMA INSCRIÇÃO
+                const avisoProxima = document.getElementById('avisoProximaInscricao');
+                // Só mostra se houver agendamento e não estiver executado
+                if (agendamentoAtual && !agendamentoAtual.executado) {
+                    avisoProxima.classList.add('visivel');
+                } else {
+                    avisoProxima.classList.remove('visivel');
+                }
             } else {
                 document.getElementById('botaoConfirmar').style.display = 'block';
                 document.getElementById('botaoTelaEncerrado').style.display = 'none';
+                
+                // QUANDO O BOTÃO ENCERRADO NÃO ESTÁ VISÍVEL, ESCONDE O AVISO
+                document.getElementById('avisoProximaInscricao').classList.remove('visivel');
             }
         }
 
