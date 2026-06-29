@@ -339,11 +339,12 @@
         }
         .conteudo-janela {padding: 15px; overflow-y: auto; max-height: 70vh;}
         .item-inscrito {display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid #4a5568;}
-        .foto-inscrito {width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid #28a745; }
-        .foto-inscrito-aprovado {border: 2px solid #007bff; }
+        .foto-inscrito {width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid #007bff; }
         .dados-inscrito {flex: 1; text-align: left;}
         .nome-inscrito {font-weight: 600; color: #f7fafc; font-size: 15px;}
         .data-hora-inscrito {font-size: 12px; color: #cbd5e0; margin-top: 2px;}
+        .status-aprovado-azul {color: #007bff; font-weight: bold;}
+        .status-pendente-pix {color: #f39c12; font-weight: bold;}
         
         .fundo-escuro {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
@@ -375,71 +376,340 @@
             100% { opacity: 1; }
         }
 
-        /* Estilos para as abas */
-        .abas-container {
+        .titulo-lista-com-contador {
             display: flex;
-            border-bottom: 2px solid #4a5568;
-            margin-bottom: 15px;
-            position: relative;
-            overflow: hidden;
-        }
-        .aba {
-            flex: 1;
-            padding: 10px 5px;
-            text-align: center;
-            cursor: pointer;
-            color: #cbd5e0;
-            font-weight: bold;
-            font-size: 14px;
-            transition: all 0.3s;
-            border-bottom: 3px solid transparent;
-            position: relative;
-            user-select: none;
-            -webkit-user-select: none;
-            touch-action: pan-y;
-        }
-        .aba:hover {
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
             color: #f7fafc;
-            background-color: rgba(255,255,255,0.05);
+            font-weight: bold;
+            font-size: 16px;
+            padding: 0 5px;
         }
-        .aba.ativa {
-            color: #17a2b8;
-            border-bottom-color: #17a2b8;
-        }
-        .aba.ativa.inscritos-aba {
-            color: #28a745;
-            border-bottom-color: #28a745;
-        }
-        .aba.ativa.aprovados-aba {
-            color: #007bff;
-            border-bottom-color: #007bff;
-        }
-        
-        .aba .contador-aba {
-            display: inline-block;
-            background-color: rgba(255,255,255,0.15);
+        .titulo-lista-com-contador .contador-lista {
+            background-color: #007bff;
+            color: white;
             border-radius: 50%;
-            padding: 0 8px;
-            font-size: 11px;
-            margin-left: 4px;
-            min-width: 20px;
+            padding: 2px 12px;
+            font-size: 14px;
+            min-width: 28px;
             text-align: center;
-            line-height: 20px;
+            line-height: 26px;
         }
-        .aba.ativa.inscritos-aba .contador-aba {
-            background-color: rgba(40, 167, 69, 0.3);
-            color: #28a745;
+
+        /* ===== MODAL PIX ===== */
+        #modalPix {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.85);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 99999;
+            backdrop-filter: blur(5px);
+            animation: fadeIn 0.3s ease-out;
         }
-        .aba.ativa.aprovados-aba .contador-aba {
-            background-color: rgba(0, 123, 255, 0.3);
-            color: #007bff;
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
-        
-        .conteudo-aba {
+
+        .caixa-pix {
+            background: #1e2124;
+            border-radius: 20px;
+            padding: 22px 28px 28px 28px;
+            max-width: 460px;
+            width: 92%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+            border: 1px solid #2c3034;
+            text-align: center;
+        }
+
+        .caixa-pix h2 {
+            color: #2ecc71;
+            font-size: 24px;
+            margin-bottom: 4px;
+        }
+
+        .caixa-pix .subtitulo {
+            color: #a0aec0;
+            font-size: 13px;
+            margin-bottom: 12px;
+        }
+
+        .caixa-pix .valor-box {
+            background: #2c3034;
+            border-radius: 12px;
+            padding: 12px;
+            margin: 12px 0;
+            border: 1px solid #2ecc71;
+        }
+
+        .caixa-pix .valor-box .label {
+            color: #a0aec0;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .caixa-pix .valor-box .valor {
+            color: #2ecc71;
+            font-size: 28px;
+            font-weight: 900;
+        }
+
+        .caixa-pix .qr-container {
+            background: white;
+            border-radius: 16px;
+            padding: 18px;
+            margin: 12px 0;
+        }
+
+        .caixa-pix .qr-container img {
+            max-width: 200px;
+            width: 100%;
+            height: auto;
+        }
+
+        .caixa-pix .qr-container .dica {
+            color: #666;
+            font-size: 11px;
+            margin-top: 6px;
+            text-transform: none;
+        }
+
+        .caixa-pix .codigo-container {
+            background: #2c3034;
+            border-radius: 10px;
+            padding: 10px 12px;
+            margin: 10px 0;
+            border: 1px solid #3d4246;
+        }
+
+        .caixa-pix .codigo-container .label {
+            color: #a0aec0;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .caixa-pix .codigo-container .codigo {
+            color: #f8f9fa;
+            font-size: 11px;
+            word-break: break-all;
+            font-family: 'Courier New', monospace;
+            line-height: 1.5;
+            background: #1a1d20;
+            padding: 8px 10px;
+            border-radius: 4px;
+        }
+
+        .caixa-pix .status-pix {
+            padding: 10px 12px;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-weight: bold;
+            display: none;
+            font-size: 13px;
+        }
+
+        .caixa-pix .status-pendente {
+            background: #3a301e;
+            color: #ffeeba;
+            border: 1px solid #f39c12;
+            display: block;
+        }
+
+        .caixa-pix .status-aprovado {
+            background: #1a3327;
+            color: #d4edda;
+            border: 1px solid #2ecc71;
+            display: block;
+        }
+
+        .caixa-pix .status-erro {
+            background: #3a1e1e;
+            color: #f8d7da;
+            border: 1px solid #e74c3c;
+            display: block;
+        }
+
+        .caixa-pix .status-expirado {
+            background: #3a1e1e;
+            color: #f8d7da;
+            border: 1px solid #e74c3c;
+            display: block;
+        }
+
+        .caixa-pix .sucesso-gigante {
+            display: none;
+            background: linear-gradient(135deg, #1a3327, #2ecc71);
+            border: 3px solid #2ecc71;
+            border-radius: 14px;
+            padding: 22px 18px;
+            margin: 12px 0;
+            animation: pulseSuccess 1s ease-in-out infinite alternate;
+        }
+        .caixa-pix .sucesso-gigante .check {
+            font-size: 60px;
+            display: block;
+            margin-bottom: 6px;
+        }
+        .caixa-pix .sucesso-gigante .titulo {
+            color: #ffffff;
+            font-size: 28px;
+            font-weight: 900;
+            display: block;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        .caixa-pix .sucesso-gigante .subtitulo {
+            color: #d4edda;
+            font-size: 15px;
+            display: block;
+            margin-top: 5px;
+        }
+        .caixa-pix .sucesso-gigante .detalhe {
+            color: #a8e6c0;
+            font-size: 12px;
+            display: block;
+            margin-top: 4px;
+        }
+
+        @keyframes pulseSuccess {
+            0% { transform: scale(1); box-shadow: 0 0 20px rgba(46, 204, 113, 0.3); }
+            100% { transform: scale(1.02); box-shadow: 0 0 40px rgba(46, 204, 113, 0.6); }
+        }
+
+        .caixa-pix .botoes-pix {
+            display: flex;
+            gap: 10px;
+            margin: 12px 0;
+        }
+
+        .caixa-pix .botoes-pix button {
+            flex: 1;
+            padding: 11px;
+            font-size: 12px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+
+        .btn-copiar-pix {
+            background: #3498db !important;
+            color: white !important;
+        }
+        .btn-copiar-pix:hover {
+            background: #2980b9 !important;
+        }
+
+        .btn-fechar-pix {
+            background: #e74c3c !important;
+            color: white !important;
+        }
+        .btn-fechar-pix:hover {
+            background: #c0392b !important;
+        }
+
+        .caixa-pix .loading-pix {
+            padding: 18px;
+            color: #a0aec0;
             display: none;
         }
-        .conteudo-aba.ativa {
-            display: block;
+
+        .caixa-pix .loading-pix .spinner {
+            border: 4px solid #2c3034;
+            border-top: 4px solid #2ecc71;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 12px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .caixa-pix .alert-pix {
+            padding: 10px 14px;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-size: 13px;
+            text-transform: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 4px 8px;
+            min-height: 40px;
+        }
+
+        .caixa-pix .alert-warning {
+            background: #3a301e;
+            color: #ffeeba;
+            border: 1px solid #f39c12;
+        }
+
+        .caixa-pix .alert-success {
+            background: #1a3327;
+            color: #d4edda;
+            border: 1px solid #2ecc71;
+        }
+
+        .caixa-pix .alert-danger {
+            background: #3a1e1e;
+            color: #f8d7da;
+            border: 1px solid #e74c3c;
+        }
+
+        .caixa-pix .prazo {
+            color: #a0aec0;
+            font-size: 11px;
+            margin-top: 10px;
+            text-transform: none;
+        }
+
+        .alert-pix-nome {
+            font-weight: bold;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            display: inline;
+        }
+        .alert-pix-sub {
+            font-size: 12px;
+            opacity: 0.9;
+            display: inline;
+            text-transform: uppercase;
+        }
+
+        .campo-data-oculto {
+            display: none !important;
+        }
+
+        /* ===== SCROLL PERSONALIZADO ===== */
+        .caixa-pix::-webkit-scrollbar {
+            width: 4px;
+        }
+        .caixa-pix::-webkit-scrollbar-track {
+            background: #1a1d20;
+            border-radius: 4px;
+        }
+        .caixa-pix::-webkit-scrollbar-thumb {
+            background: #2ecc71;
+            border-radius: 4px;
         }
 
         @media (max-width: 480px) {
@@ -455,8 +725,23 @@
             .container select, .container input { font-size: 16px; }
             .container #botaoConfirmar, .container .botao-encerrado { font-size: 16px; }
             .janela-regras-cheia { width: 92%; height: 82vh; border-radius: 10px; border: 2px solid #dc3545; }
-            .aba { font-size: 12px; padding: 8px 5px; }
-            .aba .contador-aba { font-size: 10px; padding: 0 6px; min-width: 16px; line-height: 18px; }
+            
+            .caixa-pix { padding: 16px 18px 20px 18px; max-width: 98%; max-height: 88vh; }
+            .caixa-pix .valor-box .valor { font-size: 24px; }
+            .caixa-pix .sucesso-gigante .check { font-size: 44px; }
+            .caixa-pix .sucesso-gigante .titulo { font-size: 22px; }
+            .caixa-pix .botoes-pix button { font-size: 11px; padding: 9px; }
+            .caixa-pix h2 { font-size: 20px; }
+            .caixa-pix .qr-container img { max-width: 160px; }
+            .caixa-pix .qr-container { padding: 14px; }
+            .titulo-lista-com-contador { font-size: 14px; }
+            .titulo-lista-com-contador .contador-lista { font-size: 12px; padding: 1px 10px; min-width: 22px; line-height: 22px; }
+            .alert-pix-nome { font-size: 13px; }
+            .alert-pix-sub { font-size: 11px; }
+            .caixa-pix .alert-pix { padding: 8px 12px; font-size: 12px; min-height: 36px; }
+            .caixa-pix .codigo-container .codigo { font-size: 10px; padding: 6px 8px; }
+            .caixa-pix .status-pix { font-size: 12px; padding: 8px 10px; }
+            .caixa-pix .loading-pix .spinner { width: 32px; height: 32px; }
         }
     </style>
 
@@ -479,7 +764,7 @@
     </div>
 
     <button onclick="abrirJanelaRegras()" class="botao-regras">📄 REGRAS</button>
-    <button class="botao-lista" onclick="abrirJanelaLista()">✅LISTA DE INSCRITOS✅</button>
+    <button class="botao-lista" onclick="abrirJanelaLista()">✅LISTA DE APROVADOS✅</button>
 
     <div id="fundoEscuro" class="fundo-escuro" onclick="fecharTodasJanelasManual()"></div>
 
@@ -544,29 +829,15 @@
 
     <div id="janelaLista" class="janela-flutuante">
         <div class="cabecalho-janela">
-            <span id="tituloJanela">📋 LISTA DE INSCRITOS</span>
+            <span class="titulo-lista-com-contador">
+                <span>📋 LISTA DE APROVADOS</span>
+                <span class="contador-lista" id="contadorLista">0</span>
+            </span>
             <button class="fechar-janela" onclick="fecharTodasJanelasManual()">&times;</button>
         </div>
         <div class="conteudo-janela" id="conteudoLista">
-            <div class="abas-container" id="abasContainer">
-                <div class="aba inscritos-aba ativa" id="abaInscritos" onclick="trocarAba('inscritos')">
-                    ✅ INSCRITOS <span class="contador-aba" id="contadorInscritos">0</span>
-                </div>
-                <div class="aba aprovados-aba" id="abaAprovados" onclick="trocarAba('aprovados')">
-                    💰 APROVADOS <span class="contador-aba" id="contadorAprovados">0</span>
-                </div>
-            </div>
-            
-            <div class="conteudo-aba ativa" id="conteudoInscritos">
-                <div id="listaInscritos">
-                    <p style="text-align:center; color:#cbd5e0;">Carregando...</p>
-                </div>
-            </div>
-            
-            <div class="conteudo-aba" id="conteudoAprovados">
-                <div id="listaAprovados">
-                    <p style="text-align:center; color:#cbd5e0;">Carregando...</p>
-                </div>
+            <div id="listaAprovados">
+                <p style="text-align:center; color:#cbd5e0;">Carregando...</p>
             </div>
         </div>
     </div>
@@ -620,6 +891,59 @@
         </div>
     </div>
 
+    <!-- ===== MODAL PIX ===== -->
+    <div id="modalPix">
+        <div class="caixa-pix">
+            <h2>💰 PIX</h2>
+            <div class="subtitulo">CUP EDITION - Pagamento da Inscrição</div>
+
+            <div class="alert-pix alert-warning" id="alertaPix">
+                <span class="alert-pix-nome" id="alertPixNome">CARREGANDO...</span>
+                <span class="alert-pix-sub">FAÇA O PAGAMENTO PARA APROVAR SUA INSCRIÇÃO</span>
+            </div>
+
+            <div class="valor-box">
+                <div class="label">Valor a pagar</div>
+                <div class="valor">R$ 1,78</div>
+            </div>
+
+            <div class="loading-pix" id="loadingPix">
+                <div class="spinner"></div>
+                <p>⏳ Gerando PIX...</p>
+            </div>
+
+            <div class="status-pix" id="statusPix"></div>
+
+            <div class="sucesso-gigante" id="sucessoGigante">
+                <span class="check">✅</span>
+                <span class="titulo">PAGAMENTO CONFIRMADO!</span>
+                <span class="subtitulo">Sua inscrição foi aprovada com sucesso</span>
+                <span class="detalhe">💰 Você já está na lista de aprovados</span>
+            </div>
+
+            <div class="qr-container" id="qrContainer" style="display:none;">
+                <img id="qrImage" src="" alt="QR Code PIX">
+                <div class="dica">📱 Escaneie o QR Code com o app do seu banco</div>
+            </div>
+
+            <div class="codigo-container" id="codigoContainer" style="display:none;">
+                <span class="label">📋 Código PIX (copie e cole no app)</span>
+                <div class="codigo" id="codigoPIX">-</div>
+            </div>
+
+            <div class="botoes-pix">
+                <button class="btn-copiar-pix" id="btnCopiarPix" style="display:none;" onclick="copiarPIX()">
+                    📋 Copiar Código
+                </button>
+                <button class="btn-fechar-pix" onclick="fecharModalPix()" style="flex:1;">
+                    ✕ Fechar
+                </button>
+            </div>
+
+            <div class="prazo" id="prazoPix">⏰ Prazo para pagamento: 3 dias</div>
+        </div>
+    </div>
+
     <div class="container">
         <div id="avisoReiniciando" class="aviso-reiniciando">
             ⏰ REINICIANDO O SISTEMA... AGUARDE!
@@ -639,7 +963,7 @@
                 </select>
             </div>
 
-            <div class="grupo-campo">
+            <div class="grupo-campo" id="grupoDataNascimento">
                 <label>DATA DE NASCIMENTO:</label>
                 <div class="foto-container">
                     <div class="data-container">
@@ -697,18 +1021,21 @@
         firebase.initializeApp(firebaseConfig);
         var db = firebase.database();
         const LIMITE_MAXIMO = 16;
+        const PRAZO_PIX_MS = 3 * 24 * 60 * 60 * 1000;
         var listaCompletaInscricoes = [];
         var janelaAberta = false;
         var fotoReduzidaBase64 = "";
         var intervaloRegressiva = null;
         var agendamentoAtual = null;
-        var abaAtual = 'inscritos';
+        var abaAtual = 'aprovados';
 
-        // Variáveis para controle de swipe
-        var touchStartX = 0;
-        var touchEndX = 0;
-        var isSwiping = false;
-        var swipeThreshold = 50;
+        const API_URL = 'https://cup-edition-api.onrender.com';
+        const VALOR_PIX = 1.78;
+        let paymentId = null;
+        let intervaloVerificacaoPIX = null;
+        let nomeInscritoAtual = null;
+        let pagamentoConfirmado = false;
+        let inscricaoAtual = null;
 
         var suspensosList = [];
         db.ref('suspensos').on('value', function(snap) {
@@ -723,75 +1050,364 @@
             
             db.ref('inscricoes').on('value', function(snap) {
                 listaCompletaInscricoes = snap.val() || [];
-                if (janelaAberta) {
-                    atualizarListas();
-                }
+                if (janelaAberta) atualizarListas();
                 carregarListaNomes();
                 verificarStatusSistemaComDados(listaCompletaInscricoes);
             });
-            
-            // Inicializar eventos de touch para swipe
-            inicializarSwipe();
         };
 
-        // Função para inicializar os eventos de swipe
-        function inicializarSwipe() {
-            var janelaLista = document.getElementById('janelaLista');
-            var conteudoLista = document.getElementById('conteudoLista');
+        function abrirModalPix(nome, inscricao) {
+            nomeInscritoAtual = nome;
+            inscricaoAtual = inscricao;
+            pagamentoConfirmado = false;
+            const modal = document.getElementById('modalPix');
+            modal.style.display = 'flex';
             
-            // Eventos de touch no container de abas e conteúdo
-            var elementosSwipe = document.querySelectorAll('.abas-container, .conteudo-aba, #conteudoLista');
+            const nomeDisplay = nome ? nome.toUpperCase() : 'CARREGANDO...';
+            document.getElementById('alertaPix').className = 'alert-pix alert-warning';
+            document.getElementById('alertaPix').innerHTML = `
+                <span class="alert-pix-nome">${nomeDisplay}</span>
+                <span class="alert-pix-sub">FAÇA O PAGAMENTO PARA APROVAR SUA INSCRIÇÃO</span>
+            `;
             
-            elementosSwipe.forEach(function(el) {
-                el.addEventListener('touchstart', handleTouchStart, { passive: true });
-                el.addEventListener('touchmove', handleTouchMove, { passive: true });
-                el.addEventListener('touchend', handleTouchEnd, { passive: true });
-            });
-            
-            // Também adicionar ao container principal da janela
-            janelaLista.addEventListener('touchstart', handleTouchStart, { passive: true });
-            janelaLista.addEventListener('touchmove', handleTouchMove, { passive: true });
-            janelaLista.addEventListener('touchend', handleTouchEnd, { passive: true });
-        }
+            document.getElementById('qrContainer').style.display = 'none';
+            document.getElementById('codigoContainer').style.display = 'none';
+            document.getElementById('statusPix').style.display = 'none';
+            document.getElementById('btnCopiarPix').style.display = 'none';
+            document.getElementById('loadingPix').style.display = 'block';
+            document.getElementById('sucessoGigante').style.display = 'none';
+            document.getElementById('prazoPix').textContent = '⏰ Prazo para pagamento: 3 dias';
 
-        function handleTouchStart(e) {
-            touchStartX = e.changedTouches[0].screenX;
-            isSwiping = true;
-        }
+            if (inscricao && inscricao.pix_data && inscricao.pix_data.qr_code_base64) {
+                const pixData = inscricao.pix_data;
+                const dataGeracao = new Date(pixData.data_geracao).getTime();
+                const agora = Date.now();
+                const tempoDecorrido = agora - dataGeracao;
 
-        function handleTouchMove(e) {
-            if (!isSwiping) return;
-            touchEndX = e.changedTouches[0].screenX;
-            // Prevenir scroll durante o swipe
-            if (Math.abs(touchEndX - touchStartX) > 10) {
-                e.preventDefault();
-            }
-        }
-
-        function handleTouchEnd(e) {
-            if (!isSwiping) return;
-            isSwiping = false;
-            
-            // Verificar se foi um swipe significativo
-            if (touchStartX && touchEndX) {
-                var diff = touchStartX - touchEndX;
-                if (Math.abs(diff) > swipeThreshold) {
-                    if (diff > 0) {
-                        // Swipe para esquerda - vai para APROVADOS
-                        if (abaAtual === 'inscritos') {
-                            trocarAba('aprovados');
-                        }
+                if (tempoDecorrido < PRAZO_PIX_MS) {
+                    document.getElementById('loadingPix').style.display = 'none';
+                    document.getElementById('alertaPix').className = 'alert-pix alert-warning';
+                    document.getElementById('alertaPix').innerHTML = `
+                        <span class="alert-pix-nome">${nomeDisplay}</span>
+                        <span class="alert-pix-sub">FAÇA O PAGAMENTO PARA APROVAR SUA INSCRIÇÃO</span>
+                    `;
+                    
+                    document.getElementById('qrContainer').style.display = 'block';
+                    const qrImage = document.getElementById('qrImage');
+                    qrImage.src = pixData.qr_code_base64;
+                    qrImage.onerror = function() {
+                        console.log('Erro ao carregar QR Code salvo, gerando novo...');
+                        gerarPIX();
+                    };
+                    
+                    document.getElementById('codigoContainer').style.display = 'block';
+                    document.getElementById('codigoPIX').textContent = pixData.codigo_pix || 'Código não disponível';
+                    
+                    document.getElementById('btnCopiarPix').style.display = 'block';
+                    
+                    const statusDiv = document.getElementById('statusPix');
+                    statusDiv.className = 'status-pix status-pendente';
+                    statusDiv.textContent = `⏳ Aguardando pagamento de R$ ${VALOR_PIX.toFixed(2)}... ID: ${pixData.payment_id || 'N/A'}`;
+                    statusDiv.style.display = 'block';
+                    
+                    paymentId = pixData.payment_id;
+                    
+                    const tempoRestante = PRAZO_PIX_MS - tempoDecorrido;
+                    const horasRestantes = Math.floor(tempoRestante / (1000 * 60 * 60));
+                    const diasRestantes = Math.floor(tempoRestante / (1000 * 60 * 60 * 24));
+                    if (diasRestantes > 0) {
+                        document.getElementById('prazoPix').textContent = `⏰ Expira em ${diasRestantes} dias e ${horasRestantes % 24} horas`;
+                    } else if (horasRestantes > 0) {
+                        document.getElementById('prazoPix').textContent = `⏰ Expira em ${horasRestantes} horas`;
                     } else {
-                        // Swipe para direita - vai para INSCRITOS
-                        if (abaAtual === 'aprovados') {
-                            trocarAba('inscritos');
-                        }
+                        const minutosRestantes = Math.floor(tempoRestante / (1000 * 60));
+                        document.getElementById('prazoPix').textContent = `⏰ Expira em ${minutosRestantes} minutos`;
                     }
+                    
+                    iniciarVerificacaoPIX();
+                    return;
+                } else {
+                    document.getElementById('loadingPix').style.display = 'none';
+                    document.getElementById('alertaPix').className = 'alert-pix alert-danger';
+                    document.getElementById('alertaPix').innerHTML = `
+                        <span class="alert-pix-nome">${nomeDisplay}</span>
+                        <span class="alert-pix-sub">PIX EXPIRADO - GERANDO NOVO...</span>
+                    `;
+                    document.getElementById('statusPix').className = 'status-pix status-expirado';
+                    document.getElementById('statusPix').textContent = '⏳ Gerando novo PIX...';
+                    document.getElementById('statusPix').style.display = 'block';
+                    
+                    gerarPIX();
+                    return;
                 }
             }
+
+            gerarPIX();
+        }
+
+        function fecharModalPix() {
+            document.getElementById('modalPix').style.display = 'none';
+            if (intervaloVerificacaoPIX) {
+                clearInterval(intervaloVerificacaoPIX);
+                intervaloVerificacaoPIX = null;
+            }
+            db.ref('inscricoes').once('value', function(snap) {
+                listaCompletaInscricoes = snap.val() || [];
+                carregarListaNomes();
+                verificarStatusSistemaComDados(listaCompletaInscricoes);
+            });
+            if (pagamentoConfirmado) {
+                fecharTodasJanelasManual();
+            }
+        }
+
+        async function gerarPIX() {
+            try {
+                const nomeDisplay = nomeInscritoAtual ? nomeInscritoAtual.toUpperCase() : 'CARREGANDO...';
+                document.getElementById('loadingPix').style.display = 'block';
+                document.getElementById('alertaPix').className = 'alert-pix alert-warning';
+                document.getElementById('alertaPix').innerHTML = `
+                    <span class="alert-pix-nome">${nomeDisplay}</span>
+                    <span class="alert-pix-sub">GERANDO PIX...</span>
+                `;
+
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        nome: nomeInscritoAtual || 'Inscrição Cup Edition',
+                        valor: VALOR_PIX,
+                        email: 'pagamento@cupedition.com',
+                        cpf: '12345678909'
+                    })
+                });
+
+                const data = await response.json();
+                document.getElementById('loadingPix').style.display = 'none';
+
+                if (data.success) {
+                    paymentId = data.id;
+
+                    let qrBase64 = data.qr_code_base64;
+                    if (qrBase64 && !qrBase64.startsWith('data:image')) {
+                        qrBase64 = `data:image/png;base64,${qrBase64}`;
+                    }
+
+                    document.getElementById('qrContainer').style.display = 'block';
+                    document.getElementById('qrImage').src = qrBase64;
+
+                    document.getElementById('codigoContainer').style.display = 'block';
+                    document.getElementById('codigoPIX').textContent = data.qr_code;
+
+                    const statusDiv = document.getElementById('statusPix');
+                    statusDiv.className = 'status-pix status-pendente';
+                    statusDiv.textContent = `⏳ Aguardando pagamento de R$ ${VALOR_PIX.toFixed(2)}... ID: ${data.id}`;
+                    statusDiv.style.display = 'block';
+
+                    document.getElementById('btnCopiarPix').style.display = 'block';
+
+                    document.getElementById('alertaPix').className = 'alert-pix alert-warning';
+                    document.getElementById('alertaPix').innerHTML = `
+                        <span class="alert-pix-nome">${nomeDisplay}</span>
+                        <span class="alert-pix-sub">FAÇA O PAGAMENTO PARA APROVAR SUA INSCRIÇÃO</span>
+                    `;
+
+                    if (data.date_of_expiration) {
+                        const dataExp = new Date(data.date_of_expiration);
+                        document.getElementById('prazoPix').textContent = `⏰ Expira em: ${dataExp.toLocaleDateString('pt-BR')} às ${dataExp.toLocaleTimeString('pt-BR')}`;
+                    }
+
+                    await salvarPIXnoFirebase(nomeInscritoAtual, {
+                        payment_id: data.id,
+                        qr_code_base64: qrBase64,
+                        codigo_pix: data.qr_code,
+                        data_geracao: Date.now(),
+                        data_expiracao: data.date_of_expiration
+                    });
+
+                    iniciarVerificacaoPIX();
+
+                } else {
+                    document.getElementById('statusPix').className = 'status-pix status-erro';
+                    document.getElementById('statusPix').textContent = `❌ ${data.error || 'Erro ao gerar PIX'}`;
+                    document.getElementById('statusPix').style.display = 'block';
+                    document.getElementById('alertaPix').className = 'alert-pix alert-warning';
+                    document.getElementById('alertaPix').innerHTML = `
+                        <span class="alert-pix-nome">${nomeDisplay}</span>
+                        <span class="alert-pix-sub">❌ ERRO AO GERAR PIX</span>
+                    `;
+                }
+
+            } catch (error) {
+                document.getElementById('loadingPix').style.display = 'none';
+                document.getElementById('statusPix').className = 'status-pix status-erro';
+                document.getElementById('statusPix').textContent = `❌ Erro na conexão: ${error.message}`;
+                document.getElementById('statusPix').style.display = 'block';
+                document.getElementById('alertaPix').className = 'alert-pix alert-danger';
+                document.getElementById('alertaPix').innerHTML = `
+                    <span class="alert-pix-nome">${nomeInscritoAtual ? nomeInscritoAtual.toUpperCase() : 'CARREGANDO...'}</span>
+                    <span class="alert-pix-sub">❌ ERRO DE CONEXÃO</span>
+                `;
+            }
+        }
+
+        function salvarPIXnoFirebase(nome, pixData) {
+            return new Promise((resolve, reject) => {
+                db.ref('inscricoes').once('value').then(snap => {
+                    const inscricoes = snap.val() || [];
+                    let alterado = false;
+                    const novaLista = inscricoes.map(insc => {
+                        if (insc && insc.nome && insc.nome.trim().toLowerCase() === nome.toLowerCase()) {
+                            insc.pix_data = pixData;
+                            alterado = true;
+                        }
+                        return insc;
+                    });
+                    if (alterado) {
+                        db.ref('inscricoes').set(novaLista).then(() => {
+                            listaCompletaInscricoes = novaLista;
+                            resolve();
+                        }).catch(reject);
+                    } else {
+                        resolve();
+                    }
+                }).catch(reject);
+            });
+        }
+
+        function copiarPIX() {
+            const codigo = document.getElementById('codigoPIX').textContent;
+            if (codigo && codigo !== '-' && codigo !== 'Código não disponível') {
+                navigator.clipboard.writeText(codigo).then(() => {
+                    const btn = document.getElementById('btnCopiarPix');
+                    btn.textContent = '✅ Copiado!';
+                    setTimeout(() => { btn.textContent = '📋 Copiar Código'; }, 2000);
+                }).catch(() => {
+                    const input = document.createElement('input');
+                    input.value = codigo;
+                    document.body.appendChild(input);
+                    input.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(input);
+                    alert('✅ Código PIX copiado!');
+                });
+            } else {
+                alert('❌ Código PIX não disponível!');
+            }
+        }
+
+        async function verificarStatusPIX() {
+            if (!paymentId) {
+                console.log('⚠️ Nenhum paymentId disponível');
+                return;
+            }
+
+            const statusDiv = document.getElementById('statusPix');
+
+            try {
+                const response = await fetch(`${API_URL}/status/${paymentId}`);
+                const data = await response.json();
+
+                if (data.status === 'approved') {
+                    pagamentoConfirmado = true;
+                    
+                    document.getElementById('sucessoGigante').style.display = 'block';
+                    document.getElementById('qrContainer').style.display = 'none';
+                    document.getElementById('codigoContainer').style.display = 'none';
+                    document.getElementById('btnCopiarPix').style.display = 'none';
+                    document.getElementById('statusPix').style.display = 'none';
+                    document.getElementById('alertaPix').className = 'alert-pix alert-success';
+                    document.getElementById('alertaPix').innerHTML = `
+                        <span class="alert-pix-nome">${nomeInscritoAtual ? nomeInscritoAtual.toUpperCase() : 'CARREGANDO...'}</span>
+                        <span class="alert-pix-sub">✅ PAGAMENTO CONFIRMADO!</span>
+                    `;
+                    document.getElementById('prazoPix').textContent = '✅ Pagamento aprovado com sucesso!';
+                    
+                    await atualizarFirebasePagamento();
+                    
+                    if (intervaloVerificacaoPIX) {
+                        clearInterval(intervaloVerificacaoPIX);
+                        intervaloVerificacaoPIX = null;
+                    }
+
+                    setTimeout(() => {
+                        fecharModalPix();
+                    }, 5000);
+
+                } else if (data.status === 'pending') {
+                    statusDiv.className = 'status-pix status-pendente';
+                    statusDiv.textContent = `⏳ Aguardando pagamento...`;
+                } else if (data.status === 'expired') {
+                    statusDiv.className = 'status-pix status-expirado';
+                    statusDiv.textContent = `❌ PIX expirado!`;
+                    document.getElementById('alertaPix').className = 'alert-pix alert-danger';
+                    document.getElementById('alertaPix').innerHTML = `
+                        <span class="alert-pix-nome">${nomeInscritoAtual ? nomeInscritoAtual.toUpperCase() : 'CARREGANDO...'}</span>
+                        <span class="alert-pix-sub">❌ PIX EXPIRADO</span>
+                    `;
+                    document.getElementById('prazoPix').textContent = '❌ PIX expirado';
+                } else {
+                    statusDiv.className = 'status-pix status-erro';
+                    statusDiv.textContent = `❌ ${data.status}: ${data.status_detail || ''}`;
+                }
+                statusDiv.style.display = 'block';
+
+            } catch (error) {
+                console.log('Erro ao verificar status:', error);
+            }
+        }
+
+        function iniciarVerificacaoPIX() {
+            if (intervaloVerificacaoPIX) clearInterval(intervaloVerificacaoPIX);
             
-            touchStartX = 0;
-            touchEndX = 0;
+            intervaloVerificacaoPIX = setInterval(() => {
+                verificarStatusPIX();
+            }, 2000);
+
+            setTimeout(() => {
+                if (intervaloVerificacaoPIX) {
+                    clearInterval(intervaloVerificacaoPIX);
+                    intervaloVerificacaoPIX = null;
+                }
+            }, 180000);
+        }
+
+        function atualizarFirebasePagamento() {
+            return new Promise((resolve, reject) => {
+                if (!nomeInscritoAtual) {
+                    resolve();
+                    return;
+                }
+
+                db.ref('inscricoes').once('value').then(snap => {
+                    const inscricoes = snap.val() || [];
+                    let alterado = false;
+                    
+                    const novaLista = inscricoes.map(insc => {
+                        if (insc && insc.nome && insc.nome.trim().toLowerCase() === nomeInscritoAtual.toLowerCase()) {
+                            if (insc.status === 'confirmado' || insc.status === 'pendente') {
+                                insc.pagamento_aprovado = true;
+                                insc.status = 'aprovado';
+                                insc.data_pagamento = Date.now();
+                                alterado = true;
+                            }
+                        }
+                        return insc;
+                    });
+                    
+                    if (alterado) {
+                        db.ref('inscricoes').set(novaLista).then(() => {
+                            listaCompletaInscricoes = novaLista;
+                            carregarListaNomes();
+                            verificarStatusSistemaComDados(novaLista);
+                            if (janelaAberta) atualizarListas();
+                            resolve();
+                        }).catch(reject);
+                    } else {
+                        resolve();
+                    }
+                }).catch(reject);
+            });
         }
 
         window.addEventListener('popstate', function(event) {
@@ -815,81 +1431,25 @@
             janelaAberta = false;
         }
 
-        function trocarAba(aba) {
-            abaAtual = aba;
-            
-            document.querySelectorAll('.aba').forEach(el => el.classList.remove('ativa'));
-            document.querySelectorAll('.conteudo-aba').forEach(el => el.classList.remove('ativa'));
-            
-            if (aba === 'inscritos') {
-                document.getElementById('abaInscritos').classList.add('ativa');
-                document.getElementById('conteudoInscritos').classList.add('ativa');
-            } else {
-                document.getElementById('abaAprovados').classList.add('ativa');
-                document.getElementById('conteudoAprovados').classList.add('ativa');
-            }
-            
-            atualizarListas();
-        }
-
         function atualizarListas() {
-            atualizarListaInscritos();
             atualizarListaAprovados();
-            atualizarContadores();
+            atualizarContadorLista();
         }
 
-        function atualizarContadores() {
-            const totalInscritos = listaCompletaInscricoes.filter(insc => insc && (insc.status === 'confirmado' || insc.status === 'aprovado')).length;
+        function atualizarContadorLista() {
             const totalAprovados = listaCompletaInscricoes.filter(insc => insc && insc.status === 'aprovado').length;
-            
-            document.getElementById('contadorInscritos').textContent = totalInscritos;
-            document.getElementById('contadorAprovados').textContent = totalAprovados;
-        }
-
-        function atualizarListaInscritos() {
-            const conteudo = document.getElementById('listaInscritos');
-            
-            const inscritos = listaCompletaInscricoes
-                .filter(insc => insc && (insc.status === 'confirmado' || insc.status === 'aprovado'))
-                .sort((a, b) => (b.data_confirmacao || 0) - (a.data_confirmacao || 0));
-            
-            if (inscritos.length === 0) {
-                conteudo.innerHTML = '<p style="text-align:center; color:#cbd5e0;">Nenhum inscrito confirmado ainda.</p>';
-                return;
-            }
-            
-            let html = '';
-            inscritos.forEach(insc => {
-                const foto = insc.foto || 'https://via.placeholder.com/50?text=Sem+Foto';
-                let dataHora = 'Data não registrada';
-                if (insc.data_confirmacao) {
-                    const data = new Date(insc.data_confirmacao);
-                    dataHora = data.toLocaleString('pt-BR', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
-                }
-                
-                html += `<div class="item-inscrito">
-                    <img src="${foto}" class="foto-inscrito" alt="Foto">
-                    <div class="dados-inscrito">
-                        <div class="nome-inscrito">${insc.nome}</div>
-                        <div class="data-hora-inscrito">${dataHora} - <span class="status-confirmado">✅ CONFIRMADO</span></div>
-                    </div>
-                </div>`;
-            });
-            conteudo.innerHTML = html;
+            document.getElementById('contadorLista').textContent = totalAprovados;
         }
 
         function atualizarListaAprovados() {
             const conteudo = document.getElementById('listaAprovados');
-            
             const aprovados = listaCompletaInscricoes
                 .filter(insc => insc && insc.status === 'aprovado')
                 .sort((a, b) => (b.data_confirmacao || 0) - (a.data_confirmacao || 0));
-            
             if (aprovados.length === 0) {
                 conteudo.innerHTML = '<p style="text-align:center; color:#cbd5e0;">Nenhum jogador aprovado ainda.</p>';
                 return;
             }
-            
             let html = '';
             aprovados.forEach(insc => {
                 const foto = insc.foto || 'https://via.placeholder.com/50?text=Sem+Foto';
@@ -898,9 +1458,8 @@
                     const data = new Date(insc.data_confirmacao);
                     dataHora = data.toLocaleString('pt-BR', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
                 }
-                
                 html += `<div class="item-inscrito">
-                    <img src="${foto}" class="foto-inscrito foto-inscrito-aprovado" alt="Foto">
+                    <img src="${foto}" class="foto-inscrito" alt="Foto">
                     <div class="dados-inscrito">
                         <div class="nome-inscrito">${insc.nome}</div>
                         <div class="data-hora-inscrito">${dataHora} - <span class="status-aprovado-azul">💰 APROVADO</span></div>
@@ -1040,8 +1599,17 @@
 
         function mudouNome() {
             mostrarFotoSelecionado();
-            focarNoDia();
             verificarSeSuspenso();
+            verificarStatusInscricao();
+            const nomeSelecionado = document.getElementById('ver_nome').value.trim();
+            if (nomeSelecionado) {
+                const inscricao = listaCompletaInscricoes.find(insc => 
+                    insc && insc.nome && insc.nome.trim().toLowerCase() === nomeSelecionado.toLowerCase()
+                );
+                if (!inscricao || inscricao.status !== 'confirmado') {
+                    focarNoDia();
+                }
+            }
         }
 
         function verificarSeSuspenso() {
@@ -1054,6 +1622,9 @@
                 btnConfirmar.disabled = false;
                 btnConfirmar.style.opacity = '1';
                 btnConfirmar.style.cursor = 'pointer';
+                btnConfirmar.textContent = 'CONFIRMAR INSCRIÇÃO';
+                btnConfirmar.style.backgroundColor = '#27ae60';
+                document.getElementById('grupoDataNascimento').style.display = 'block';
                 return;
             }
 
@@ -1064,41 +1635,116 @@
                 btnConfirmar.disabled = true;
                 btnConfirmar.style.opacity = '0.4';
                 btnConfirmar.style.cursor = 'not-allowed';
+                btnConfirmar.textContent = '🚫 SUSPENSO';
+                btnConfirmar.style.backgroundColor = '#dc3545';
+                document.getElementById('grupoDataNascimento').style.display = 'block';
             } else {
                 aviso.style.display = 'none';
                 btnConfirmar.disabled = false;
                 btnConfirmar.style.opacity = '1';
                 btnConfirmar.style.cursor = 'pointer';
+                verificarStatusInscricao();
             }
         }
 
+        function verificarStatusInscricao() {
+            const nomeSelecionado = document.getElementById('ver_nome').value.trim();
+            const btnConfirmar = document.getElementById('botaoConfirmar');
+            const grupoData = document.getElementById('grupoDataNascimento');
+            
+            if (!nomeSelecionado) {
+                btnConfirmar.textContent = 'CONFIRMAR INSCRIÇÃO';
+                btnConfirmar.style.backgroundColor = '#27ae60';
+                grupoData.style.display = 'block';
+                return;
+            }
+
+            const inscricao = listaCompletaInscricoes.find(insc => 
+                insc && insc.nome && insc.nome.trim().toLowerCase() === nomeSelecionado.toLowerCase()
+            );
+
+            if (inscricao && inscricao.status === 'aprovado') {
+                btnConfirmar.textContent = '✅ JÁ APROVADO';
+                btnConfirmar.style.backgroundColor = '#28a745';
+                btnConfirmar.disabled = true;
+                btnConfirmar.style.cursor = 'not-allowed';
+                btnConfirmar.style.opacity = '0.6';
+                grupoData.style.display = 'block';
+                return;
+            }
+
+            if (inscricao && inscricao.status === 'confirmado') {
+                btnConfirmar.disabled = false;
+                btnConfirmar.style.opacity = '1';
+                btnConfirmar.style.cursor = 'pointer';
+                grupoData.style.display = 'none';
+                
+                if (inscricao.pix_data && inscricao.pix_data.qr_code_base64) {
+                    const dataGeracao = new Date(inscricao.pix_data.data_geracao).getTime();
+                    const tempoDecorrido = Date.now() - dataGeracao;
+                    if (tempoDecorrido < PRAZO_PIX_MS) {
+                        btnConfirmar.textContent = '👁️ VER PIX';
+                        btnConfirmar.style.backgroundColor = '#17a2b8';
+                    } else {
+                        btnConfirmar.textContent = '🔄 GERAR NOVO PIX';
+                        btnConfirmar.style.backgroundColor = '#f39c12';
+                    }
+                } else {
+                    btnConfirmar.textContent = '🔄 GERAR PIX';
+                    btnConfirmar.style.backgroundColor = '#17a2b8';
+                }
+                return;
+            }
+
+            grupoData.style.display = 'block';
+            btnConfirmar.textContent = 'CONFIRMAR INSCRIÇÃO';
+            btnConfirmar.style.backgroundColor = '#27ae60';
+            btnConfirmar.disabled = false;
+            btnConfirmar.style.opacity = '1';
+            btnConfirmar.style.cursor = 'pointer';
+        }
+
         function focarNoDia() {
-            if (document.getElementById('ver_nome').value !== "") setTimeout(() => { document.getElementById('ver_dia').focus(); }, 10);
+            if (document.getElementById('ver_nome').value !== "") {
+                setTimeout(() => { document.getElementById('ver_dia').focus(); }, 10);
+            }
         }
 
         function abrirJanelaCadastro() { document.getElementById('fundoEscuro').classList.add('visivel'); document.getElementById('janelaCadastro').classList.add('aberta'); gerenciarHistoricoJanelaAberta(); }
-        
         function abrirJanelaLista() { 
             document.getElementById('fundoEscuro').classList.add('visivel'); 
             document.getElementById('janelaLista').classList.add('aberta'); 
             janelaAberta = true; 
-            trocarAba(abaAtual);
+            atualizarListas();
             gerenciarHistoricoJanelaAberta(); 
         }
-        
         function abrirJanelaRegras() { document.getElementById('fundoEscuro').classList.add('visivel'); document.getElementById('janelaRegras').classList.add('aberta'); gerenciarHistoricoJanelaAberta(); }
 
         function carregarListaNomes() {
             var selectNome = document.getElementById('ver_nome');
             const valorAtual = selectNome.value;
             selectNome.innerHTML = '<option value="">-- Selecione seu nome --</option>';
-            var nomesUnicos = [...new Set(listaCompletaInscricoes.filter(insc => insc && insc.status === 'pendente').map(insc => insc.nome))].sort();
+            var nomesUnicos = [...new Set(listaCompletaInscricoes
+                .filter(insc => insc && insc.nome && (insc.status === 'pendente' || insc.status === 'confirmado'))
+                .map(insc => insc.nome))].sort();
+            
             nomesUnicos.forEach(nome => {
                 var opcao = document.createElement('option');
-                opcao.value = nome; opcao.textContent = nome;
+                opcao.value = nome; 
+                const insc = listaCompletaInscricoes.find(i => i.nome === nome);
+                let statusText = '';
+                if (insc && insc.status === 'confirmado') {
+                    statusText = ' ⏳ AGUARDANDO PAGAMENTO';
+                }
+                opcao.textContent = nome + statusText;
                 selectNome.appendChild(opcao);
             });
-            if(valorAtual) selectNome.value = valorAtual;
+            if(valorAtual) {
+                const existe = Array.from(selectNome.options).some(opt => opt.value === valorAtual);
+                if (existe) selectNome.value = valorAtual;
+                else selectNome.value = '';
+            }
+            verificarStatusInscricao();
         }
 
         function mostrarFotoSelecionado() {
@@ -1131,29 +1777,6 @@
             }
         }
 
-        function buscarLinkPagamento(nome, dia, mes) {
-            return new Promise((resolve, reject) => {
-                db.ref('inscricoes').once('value', function(snap) {
-                    const inscricoes = snap.val() || [];
-                    let linkEncontrado = null;
-                    
-                    inscricoes.forEach((insc) => {
-                        if (insc && 
-                            insc.nome && 
-                            insc.nome.trim().toLowerCase() === nome.toLowerCase() &&
-                            String(insc.dia || "").padStart(2,'0') === String(dia).padStart(2,'0') &&
-                            String(insc.mes || "").padStart(2,'0') === String(mes).padStart(2,'0')) {
-                            linkEncontrado = insc.link_pagamento;
-                        }
-                    });
-                    
-                    resolve(linkEncontrado);
-                }, function(error) {
-                    reject(error);
-                });
-            });
-        }
-
         function confirmarInscricao() {
             var nome = document.getElementById('ver_nome').value.trim();
             var dia = document.getElementById('ver_dia').value;
@@ -1172,16 +1795,44 @@
                 return;
             }
 
-            if (!nome || !dia || !mes) {
+            if (!nome) {
                 msg.className = 'resultado erro';
-                msg.innerText = '❌ Selecione o nome, dia e mês corretamente!';
+                msg.innerText = '❌ Selecione o nome corretamente!';
+                msg.style.display = 'block';
+                setTimeout(() => { msg.style.display = 'none'; }, 3000);
+                return;
+            }
+
+            const inscAprovado = listaCompletaInscricoes.find(insc => 
+                insc && insc.nome && insc.nome.trim().toLowerCase() === nome.toLowerCase() && insc.status === 'aprovado'
+            );
+            if (inscAprovado) {
+                msg.className = 'resultado erro';
+                msg.innerText = '✅ VOCÊ JÁ ESTÁ APROVADO!';
+                msg.style.display = 'block';
+                setTimeout(() => { msg.style.display = 'none'; }, 3000);
+                return;
+            }
+
+            const inscConfirmado = listaCompletaInscricoes.find(insc => 
+                insc && insc.nome && insc.nome.trim().toLowerCase() === nome.toLowerCase() && insc.status === 'confirmado'
+            );
+
+            if (inscConfirmado) {
+                abrirModalPix(nome, inscConfirmado);
+                return;
+            }
+
+            if (!dia || !mes) {
+                msg.className = 'resultado erro';
+                msg.innerText = '❌ Selecione o dia e mês corretamente!';
                 msg.style.display = 'block';
                 setTimeout(() => { msg.style.display = 'none'; }, 3000);
                 return;
             }
 
             msg.className = 'resultado sucesso';
-            msg.innerText = '⏳ ENVIANDO...';
+            msg.innerText = '⏳ CONFIRMANDO...';
             msg.style.display = 'block';
 
             db.ref('inscricoes').once('value').then(snap => {
@@ -1214,42 +1865,25 @@
                         msg.style.display = 'block';
                         loading.style.display = 'block';
                         
-                        buscarLinkPagamento(nome, dia, mes).then(linkPagamento => {
-                            setTimeout(() => {
-                                msg.style.display = 'none';
-                                loading.style.display = 'none';
-                                
-                                if (linkPagamento) {
-                                    window.location.href = linkPagamento;
-                                } else {
-                                    alert('⚠️ Link de pagamento não encontrado para este jogador. Entre em contato com a organização.');
-                                    document.getElementById('ver_nome').value = '';
-                                    document.getElementById('ver_dia').value = '';
-                                    document.getElementById('ver_mes').value = '';
-                                    document.getElementById('fotoUsuario').style.display = 'none';
-                                    document.getElementById('avisoSuspenso').style.display = 'none';
-                                    carregarListaNomes();
-                                    verificarStatusSistemaComDados(inscricoes);
-                                }
-                            }, 2000);
-                        }).catch(erro => {
-                            console.error('Erro ao buscar link de pagamento:', erro);
-                            setTimeout(() => {
-                                msg.style.display = 'none';
-                                loading.style.display = 'none';
-                                alert('⚠️ Erro ao buscar link de pagamento. Entre em contato com a organização.');
-                                document.getElementById('ver_nome').value = '';
-                                document.getElementById('ver_dia').value = '';
-                                document.getElementById('ver_mes').value = '';
-                                document.getElementById('fotoUsuario').style.display = 'none';
-                                document.getElementById('avisoSuspenso').style.display = 'none';
-                                carregarListaNomes();
-                                verificarStatusSistemaComDados(inscricoes);
-                            }, 2000);
-                        });
+                        const inscAtualizada = inscricoes[encontradoIndex];
+                        
+                        setTimeout(() => {
+                            msg.style.display = 'none';
+                            loading.style.display = 'none';
+                            
+                            abrirModalPix(nome, inscAtualizada);
+                            
+                            document.getElementById('ver_nome').value = '';
+                            document.getElementById('ver_dia').value = '';
+                            document.getElementById('ver_mes').value = '';
+                            document.getElementById('fotoUsuario').style.display = 'none';
+                            carregarListaNomes();
+                            verificarStatusSistemaComDados(inscricoes);
+                            
+                        }, 1500);
                     }).catch((erro) => {
                         msg.className = 'resultado erro';
-                        msg.innerText = '❌ ERRO AO ENVIAR: ' + erro.message;
+                        msg.innerText = '❌ ERRO AO CONFIRMAR: ' + erro.message;
                         msg.style.display = 'block';
                         loading.style.display = 'none';
                     });
