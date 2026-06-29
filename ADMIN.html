@@ -249,6 +249,53 @@
         .checkbox-pagamento input[type="checkbox"]:checked {
             accent-color: #2ecc71;
         }
+
+        /* ===== ESTILOS DO AGENDAMENTO SEMANAL ===== */
+        .grupo-dia-semana {
+            display: flex; flex-wrap: wrap; gap: 8px; margin-top: 5px;
+            justify-content: center;
+        }
+        .dia-semana-item {
+            display: flex; align-items: center; gap: 4px;
+            background: #2c3034; padding: 8px 12px; border-radius: 6px;
+            border: 1px solid #495057; cursor: pointer;
+            transition: all 0.2s;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .dia-semana-item:hover { border-color: #2ecc71; background: #1e2124; }
+        .dia-semana-item input[type="checkbox"] {
+            width: 16px; height: 16px; accent-color: #2ecc71;
+            transform: scale(1); margin: 0;
+        }
+        .dia-semana-item label { 
+            margin: 0; 
+            font-size: 12px; 
+            cursor: pointer;
+            color: #f8f9fa;
+            text-transform: uppercase;
+        }
+        .info-agendamento-semanal {
+            background: #1a3327; border: 1px solid #2ecc71; border-radius: 6px;
+            padding: 10px; margin-top: 10px; font-size: 12px;
+            color: #d4edda; text-align: center;
+        }
+        /* Estilo para campos desabilitados */
+        input[type="date"]:disabled, input[type="time"]:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background-color: #1e2124;
+        }
+        .hora-fixa-info, .data-auto-info {
+            font-size: 11px;
+            color: #2ecc71;
+            text-align: center;
+            margin-top: 4px;
+            font-weight: normal;
+        }
+        .data-auto-info {
+            color: #f39c12;
+        }
     </style>
 </head>
 <body>
@@ -299,16 +346,57 @@
         <div class="caixa-agendar">
             <h3>⏰ AGENDAR REINÍCIO AUTOMÁTICO</h3>
             <p style="text-align:center; font-size:12px; color:#adb5bd; margin-bottom:10px; font-weight: bold;">*FUNCIONA MESMO COM A PÁGINA FECHADA (GRATUITO)</p>
+            
+            <!-- NOVA OPÇÃO: AGENDAMENTO SEMANAL -->
+            <div class="grupo-campo">
+                <label>🔁 AGENDAMENTO SEMANAL (MARCAR DIAS DA SEMANA):</label>
+                <div class="grupo-dia-semana" id="diasSemanaContainer">
+                    <div class="dia-semana-item">
+                        <input type="checkbox" id="diaSegunda" value="1">
+                        <label for="diaSegunda">SEG</label>
+                    </div>
+                    <div class="dia-semana-item">
+                        <input type="checkbox" id="diaTerca" value="2">
+                        <label for="diaTerca">TER</label>
+                    </div>
+                    <div class="dia-semana-item">
+                        <input type="checkbox" id="diaQuarta" value="3">
+                        <label for="diaQuarta">QUA</label>
+                    </div>
+                    <div class="dia-semana-item">
+                        <input type="checkbox" id="diaQuinta" value="4">
+                        <label for="diaQuinta">QUI</label>
+                    </div>
+                    <div class="dia-semana-item">
+                        <input type="checkbox" id="diaSexta" value="5">
+                        <label for="diaSexta">SEX</label>
+                    </div>
+                    <div class="dia-semana-item">
+                        <input type="checkbox" id="diaSabado" value="6">
+                        <label for="diaSabado">SÁB</label>
+                    </div>
+                    <div class="dia-semana-item">
+                        <input type="checkbox" id="diaDomingo" value="0">
+                        <label for="diaDomingo">DOM</label>
+                    </div>
+                </div>
+                <div class="info-agendamento-semanal" id="infoSemanal" style="display:none;">
+                    ⏰ REINÍCIO PROGRAMADO PARA OS DIAS SELECIONADOS ÀS 00:00 (MEIA-NOITE)
+                </div>
+            </div>
+
             <div class="grupo-campo">
                 <label>DEFINA DATA E HORÁRIO PARA REINICIAR:</label>
                 <div class="grupo-data-hora">
                     <div>
                         <label>DATA:</label>
                         <input type="date" id="dataAgendamento" required>
+                        <div class="data-auto-info" id="dataAutoInfo" style="display:none;">📅 DATA AJUSTADA PARA O PRÓXIMO DIA SELECIONADO (BLOQUEADA)</div>
                     </div>
                     <div>
                         <label>HORA:</label>
-                        <input type="time" id="horaAgendamento" required>
+                        <input type="time" id="horaAgendamento" value="00:00" required>
+                        <div class="hora-fixa-info" id="horaFixaInfo">⚠️ AO MARCAR DIAS DA SEMANA, O HORÁRIO FIXA EM 00:00</div>
                     </div>
                 </div>
             </div>
@@ -680,49 +768,41 @@
             });
         }
 
-        // ===== FUNÇÃO PARA ALTERNAR PAGAMENTO (MODIFICADA) =====
-        function alternarPagamento(id) {
-            const checkbox = document.getElementById(`pagamento_${id}`);
-            if (!checkbox) return;
-            
-            const pago = checkbox.checked;
-            
-            db.ref('inscricoes').once('value').then(snap => {
-                var lista = snap.val() || [];
-                var alterado = false;
-                var nomeInscrito = '';
+        // ======= FUNÇÃO PARA ALTERAR PAGAMENTO (MODIFICADA) ======
+function alternarPagamento(id) {
+    const checkbox = document.getElementById(`pagamento_${id}`);
+    if (!checkbox) return;
+
+    const pago = checkbox.checked;
+
+    db.ref('inscricoes').once('value').then(snap => {
+        var lista = snap.val() || [];
+        var alterado = false;
+        
+        lista = lista.map(item => {
+            if(item && item.id === id){
+                // PERMITE MARCAR PAGAMENTO PARA QUALQUER CADASTRO
+                item.pagamento_aprovado = pago;
                 
-                lista = lista.map(item => {
-                    if(item && item.id === id){
-                        nomeInscrito = item.nome; // Guarda o nome para verificação
-                        
-                        // PERMITE MARCAR PAGAMENTO PARA O CADASTRO "ENDRIL" MESMO QUE ESTEJA PENDENTE
-                        // OU SE O STATUS NÃO FOR PENDENTE
-                        if (item.status !== 'pendente' || item.nome.toUpperCase() === 'ENDRIL') {
-                            item.pagamento_aprovado = pago;
-                            
-                            if(pago) {
-                                item.status = 'aprovado';
-                            } else {
-                                if(item.data_confirmacao) {
-                                    item.status = 'confirmado';
-                                } else {
-                                    item.status = 'pendente';
-                                }
-                            }
-                            alterado = true;
-                        } else {
-                            // SE FOR PENDENTE E NÃO FOR O "ENDRIL", FORÇA O CHECKBOX A FICAR DESMARCADO
-                            checkbox.checked = false;
-                            alert('⚠️ NÃO É PERMITIDO MARCAR PAGAMENTO DE UM INSCRITO PENDENTE! APENAS O CADASTRO "ENDRIL" PODE SER MARCADO COM STATUS PENDENTE.');
-                            alterado = false;
-                        }
+                if(pago) {
+                    item.status = 'aprovado';
+                } else {
+                    if(item.data_confirmação) {
+                        item.status = 'confirmado';
+                    } else {
+                        item.status = 'pendente';
                     }
-                    return item;
-                });
-                if(alterado){ db.ref('inscricoes').set(lista); }
-            });
+                }
+                alterado = true;
+            }
+            return item;
+        });
+        
+        if(alterado){ 
+            db.ref('inscricoes').set(lista); 
         }
+    });
+}
 
         /* ===== SUSPENSOS ===== */
         function abrirSuspensos() {
@@ -816,43 +896,208 @@
             }
         }
 
+        // ===== FUNÇÃO PARA CALCULAR PRÓXIMA OCORRÊNCIA DO DIA DA SEMANA =====
+        function calcularProximoDiaDaSemana(diaSemana) {
+            const agora = new Date();
+            const diaAtual = agora.getDay(); // 0=domingo, 1=segunda...
+            
+            let diasParaAdicionar = diaSemana - diaAtual;
+            
+            // Se o dia já passou ou é hoje, vai para a próxima semana
+            if (diasParaAdicionar <= 0) {
+                diasParaAdicionar += 7;
+            }
+            
+            const proximaData = new Date(agora);
+            proximaData.setDate(agora.getDate() + diasParaAdicionar);
+            proximaData.setHours(0, 0, 0, 0);
+            
+            return proximaData;
+        }
+
+        // ===== FUNÇÃO PARA BLOQUEAR/DESBLOQUEAR DATA E HORA =====
+        function bloquearCamposDataHora(bloquear) {
+            const dataInput = document.getElementById('dataAgendamento');
+            const horaInput = document.getElementById('horaAgendamento');
+            const dataInfo = document.getElementById('dataAutoInfo');
+            const horaInfo = document.getElementById('horaFixaInfo');
+            
+            if (bloquear) {
+                dataInput.disabled = true;
+                horaInput.disabled = true;
+                dataInfo.style.display = 'block';
+                // Muda a cor do texto do aviso de hora
+                horaInfo.textContent = '🔒 HORÁRIO FIXO EM 00:00 (BLOQUEADO)';
+                horaInfo.style.color = '#e74c3c';
+            } else {
+                dataInput.disabled = false;
+                horaInput.disabled = false;
+                dataInfo.style.display = 'none';
+                horaInfo.textContent = '⚠️ AO MARCAR DIAS DA SEMANA, O HORÁRIO FIXA EM 00:00';
+                horaInfo.style.color = '#2ecc71';
+            }
+        }
+
         /* ===== AGENDAMENTO ===== */
         function abrirAgendamento() {
             document.getElementById('modalAgendar').style.display = 'flex';
             const hoje = new Date();
             document.getElementById('dataAgendamento').min = `${hoje.getFullYear()}-${String(hoje.getMonth()+1).padStart(2,'0')}-${String(hoje.getDate()).padStart(2,'0')}`;
+            
+            // Carregar dados salvos
             db.ref('agendamento_reinicio').once('value').then(snap => {
                 const dados = snap.val();
-                if(dados && dados.timestamp) {
-                    const d = new Date(dados.timestamp);
-                    mostrarStatusAgendamento(`⏸️ AGENDADO PARA ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}H DE ${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`, 'agendado');
+                if(dados) {
+                    // Restaurar dias da semana selecionados
+                    if(dados.diasSemana && Array.isArray(dados.diasSemana) && dados.diasSemana.length > 0) {
+                        const diasMap = ['diaDomingo', 'diaSegunda', 'diaTerca', 'diaQuarta', 'diaQuinta', 'diaSexta', 'diaSabado'];
+                        dados.diasSemana.forEach(diaNum => {
+                            const el = document.getElementById(diasMap[diaNum]);
+                            if(el) el.checked = true;
+                        });
+                        document.getElementById('infoSemanal').style.display = 'block';
+                        // Se tem dias selecionados, fixar hora em 00:00 e BLOQUEAR campos
+                        document.getElementById('horaAgendamento').value = '00:00';
+                        bloquearCamposDataHora(true);
+                        
+                        // Calcular a próxima data do primeiro dia selecionado
+                        const primeiroDia = dados.diasSemana[0];
+                        const proximaData = calcularProximoDiaDaSemana(primeiroDia);
+                        document.getElementById('dataAgendamento').value = 
+                            `${proximaData.getFullYear()}-${String(proximaData.getMonth()+1).padStart(2,'0')}-${String(proximaData.getDate()).padStart(2,'0')}`;
+                    } else {
+                        document.getElementById('infoSemanal').style.display = 'none';
+                        bloquearCamposDataHora(false);
+                    }
+
+                    if(dados.timestamp) {
+                        const d = new Date(dados.timestamp);
+                        // Se não tiver dias semanais, restaura a data e hora salvas
+                        if(!dados.diasSemana || dados.diasSemana.length === 0) {
+                            document.getElementById('dataAgendamento').value = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+                            document.getElementById('horaAgendamento').value = `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+                        }
+                        mostrarStatusAgendamento(`⏸️ AGENDADO PARA ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}H DE ${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`, 'agendado');
+                    } else {
+                        document.getElementById('statusAgendamento').style.display = 'none';
+                    }
                 } else {
                     document.getElementById('statusAgendamento').style.display = 'none';
+                    bloquearCamposDataHora(false);
                 }
+            });
+
+            // Event listeners para os checkboxes de dia da semana
+            document.querySelectorAll('#diasSemanaContainer input[type="checkbox"]').forEach(cb => {
+                cb.onchange = function() {
+                    const algumMarcado = Array.from(document.querySelectorAll('#diasSemanaContainer input[type="checkbox"]')).some(c => c.checked);
+                    document.getElementById('infoSemanal').style.display = algumMarcado ? 'block' : 'none';
+                    
+                    // Se algum dia foi marcado, fixa a hora em 00:00 e BLOQUEIA os campos
+                    if(algumMarcado) {
+                        document.getElementById('horaAgendamento').value = '00:00';
+                        bloquearCamposDataHora(true);
+                        
+                        // Encontrar o primeiro dia da semana marcado (menor valor)
+                        const checkboxes = document.querySelectorAll('#diasSemanaContainer input[type="checkbox"]:checked');
+                        let menorDia = 7;
+                        checkboxes.forEach(c => {
+                            const val = parseInt(c.value);
+                            if(val < menorDia) menorDia = val;
+                        });
+                        
+                        if(menorDia !== 7) {
+                            const proximaData = calcularProximoDiaDaSemana(menorDia);
+                            document.getElementById('dataAgendamento').value = 
+                                `${proximaData.getFullYear()}-${String(proximaData.getMonth()+1).padStart(2,'0')}-${String(proximaData.getDate()).padStart(2,'0')}`;
+                        }
+                    } else {
+                        bloquearCamposDataHora(false);
+                        // Restaura a hora se não houver dias selecionados
+                        if(!document.getElementById('horaAgendamento').value || document.getElementById('horaAgendamento').value === '00:00') {
+                            const agora = new Date();
+                            document.getElementById('horaAgendamento').value = `${String(agora.getHours()).padStart(2,'0')}:${String(agora.getMinutes()).padStart(2,'0')}`;
+                        }
+                        // Restaura a data para hoje
+                        const hoje = new Date();
+                        document.getElementById('dataAgendamento').value = 
+                            `${hoje.getFullYear()}-${String(hoje.getMonth()+1).padStart(2,'0')}-${String(hoje.getDate()).padStart(2,'0')}`;
+                    }
+                };
             });
         }
 
         function salvarAgendamento() {
             const dataInput = document.getElementById('dataAgendamento').value;
-            const horaInput = document.getElementById('horaAgendamento').value;
+            let horaInput = document.getElementById('horaAgendamento').value;
+            
+            // Coletar dias da semana selecionados
+            const diasSelecionados = [];
+            const diaMap = {
+                'diaDomingo': 0,
+                'diaSegunda': 1,
+                'diaTerca': 2,
+                'diaQuarta': 3,
+                'diaQuinta': 4,
+                'diaSexta': 5,
+                'diaSabado': 6
+            };
+            
+            Object.keys(diaMap).forEach(id => {
+                const cb = document.getElementById(id);
+                if(cb && cb.checked) {
+                    diasSelecionados.push(diaMap[id]);
+                }
+            });
+
+            // Se tem dias selecionados, força a hora para 00:00
+            if(diasSelecionados.length > 0) {
+                horaInput = '00:00';
+            }
+
             if(!dataInput || !horaInput) { mostrarStatusAgendamento('❌ PREENCHA DATA E HORA!', 'erro'); return; }
+            
             const partes = dataInput.split('-');
             const dt = new Date(parseInt(partes[0]), parseInt(partes[1])-1, parseInt(partes[2]), parseInt(horaInput.split(':')[0]), parseInt(horaInput.split(':')[1]), 0);
-            if(dt.getTime() < Date.now()) { mostrarStatusAgendamento('❌ ESCOLHA UMA DATA/HORA FUTURA!', 'erro'); return; }
-            db.ref('agendamento_reinicio').set({ timestamp: dt.getTime(), executado: false }).then(() => {
-                mostrarStatusAgendamento('✅ AGENDAMENTO SALVO COM SUCESSO!', 'ativo');
+            
+            // Verifica se a data é futura (apenas para agendamento único)
+            if(dt.getTime() < Date.now() && diasSelecionados.length === 0) { 
+                mostrarStatusAgendamento('❌ ESCOLHA UMA DATA/HORA FUTURA!', 'erro'); 
+                return; 
+            }
+
+            const dadosAgendamento = { 
+                timestamp: dt.getTime(), 
+                executado: false,
+                diasSemana: diasSelecionados,
+                hora: horaInput
+            };
+
+            db.ref('agendamento_reinicio').set(dadosAgendamento).then(() => {
+                const msg = diasSelecionados.length > 0 
+                    ? `✅ AGENDAMENTO SEMANAL SALVO! ${diasSelecionados.length} dia(s) da semana programado(s) para 00:00 (MEIA-NOITE)`
+                    : '✅ AGENDAMENTO ÚNICO SALVO COM SUCESSO!';
+                mostrarStatusAgendamento(msg, 'ativo');
                 setTimeout(() => fecharAgendamento(), 2000);
             });
         }
 
         function cancelarAgendamento() {
+            // Limpar checkboxes
+            document.querySelectorAll('#diasSemanaContainer input[type="checkbox"]').forEach(cb => cb.checked = false);
+            document.getElementById('infoSemanal').style.display = 'none';
+            bloquearCamposDataHora(false);
+            
             db.ref('agendamento_reinicio').remove().then(() => {
                 mostrarStatusAgendamento('❌ AGENDAMENTO CANCELADO!', 'erro');
                 setTimeout(() => fecharAgendamento(), 1500);
             });
         }
 
-        function fecharAgendamento() { document.getElementById('modalAgendar').style.display = 'none'; document.getElementById('statusAgendamento').style.display = 'none'; }
+        function fecharAgendamento() { 
+            document.getElementById('modalAgendar').style.display = 'none'; 
+            document.getElementById('statusAgendamento').style.display = 'none'; 
+        }
 
         function mostrarStatusAgendamento(texto, tipo) {
             const status = document.getElementById('statusAgendamento');
@@ -1045,25 +1290,69 @@
             });
         }
 
+        // ===== FUNÇÃO DE VERIFICAÇÃO DE AGENDAMENTO SEMANAL =====
+        function verificarAgendamentoSemanal() {
+            db.ref('agendamento_reinicio').once('value').then(snap => {
+                const agendado = snap.val();
+                if(!agendado || agendado.executado) return;
+                
+                // Verificar se tem dias da semana configurados
+                if(agendado.diasSemana && Array.isArray(agendado.diasSemana) && agendado.diasSemana.length > 0) {
+                    const agora = new Date();
+                    const diaAtual = agora.getDay(); // 0=domingo, 1=segunda...
+                    
+                    // Verifica se hoje está na lista de dias agendados
+                    if(agendado.diasSemana.includes(diaAtual)) {
+                        // Extrair hora do agendamento (padrão 00:00)
+                        const horaStr = agendado.hora || '00:00';
+                        const [hora, minuto] = horaStr.split(':').map(Number);
+                        
+                        // Criar data de hoje com a hora agendada
+                        const hojeAgendado = new Date(agendado.timestamp);
+                        hojeAgendado.setHours(hora, minuto, 0, 0);
+                        
+                        // Verificar se já passou do horário agendado hoje
+                        if(agora.getTime() >= hojeAgendado.getTime()) {
+                            executarReinicio();
+                        }
+                    }
+                }
+            });
+        }
+
+        function executarReinicio() {
+            db.ref('inscricoes').once('value').then(snap => {
+                const lista = (snap.val() || []).map(insc => { 
+                    if(insc){ 
+                        insc.status='pendente'; 
+                        insc.data_confirmacao=null;
+                        insc.pagamento_aprovado = false;
+                    } 
+                    return insc; 
+                });
+                db.ref('inscricoes').set(lista);
+                db.ref('configuracao').set({inscricoes_abertas: true, ultimo_reinicio: Date.now()});
+                db.ref('agendamento_reinicio/executado').set(true);
+                console.log('✅ Reinício semanal executado!');
+            });
+        }
+
+        // Monitorar agendamento único
         db.ref('agendamento_reinicio').on('value', snap => {
             const agendado = snap.val();
             if(agendado && !agendado.executado && agendado.timestamp <= Date.now()) {
-                db.ref('inscricoes').once('value').then(snap => {
-                    const lista = (snap.val() || []).map(insc => { 
-                        if(insc){ 
-                            insc.status='pendente'; 
-                            insc.data_confirmacao=null;
-                            insc.pagamento_aprovado = false;
-                        } 
-                        return insc; 
-                    });
-                    db.ref('inscricoes').set(lista);
-                    db.ref('configuracao').set({inscricoes_abertas: true, ultimo_reinicio: Date.now()});
-                    db.ref('agendamento_reinicio/executado').set(true);
-                    alert('✅ Reinício automático realizado com sucesso!');
-                });
+                // Verifica se não é agendamento semanal (sem dias da semana ou array vazio)
+                if(!agendado.diasSemana || agendado.diasSemana.length === 0) {
+                    executarReinicio();
+                }
             }
         });
+
+        // Verificar agendamento semanal a cada 5 minutos
+        setInterval(verificarAgendamentoSemanal, 300000); // 5 minutos
+
+        // Verificar também ao carregar a página
+        setTimeout(verificarAgendamentoSemanal, 5000);
 
         /* ===== TRAVAMENTOS DE SEGURANÇA ===== */
         document.addEventListener('keydown', function(event) {
