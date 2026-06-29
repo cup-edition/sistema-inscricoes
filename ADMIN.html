@@ -680,7 +680,7 @@
             });
         }
 
-        // ===== FUNÇÃO PARA ALTERNAR PAGAMENTO =====
+        // ===== FUNÇÃO PARA ALTERNAR PAGAMENTO (MODIFICADA) =====
         function alternarPagamento(id) {
             const checkbox = document.getElementById(`pagamento_${id}`);
             if (!checkbox) return;
@@ -690,10 +690,15 @@
             db.ref('inscricoes').once('value').then(snap => {
                 var lista = snap.val() || [];
                 var alterado = false;
+                var nomeInscrito = '';
+                
                 lista = lista.map(item => {
                     if(item && item.id === id){
-                        // SÓ PERMITE ALTERAR O PAGAMENTO SE O STATUS NÃO FOR PENDENTE
-                        if (item.status !== 'pendente') {
+                        nomeInscrito = item.nome; // Guarda o nome para verificação
+                        
+                        // PERMITE MARCAR PAGAMENTO PARA O CADASTRO "ENDRIL" MESMO QUE ESTEJA PENDENTE
+                        // OU SE O STATUS NÃO FOR PENDENTE
+                        if (item.status !== 'pendente' || item.nome.toUpperCase() === 'ENDRIL') {
                             item.pagamento_aprovado = pago;
                             
                             if(pago) {
@@ -707,9 +712,9 @@
                             }
                             alterado = true;
                         } else {
-                            // SE FOR PENDENTE, FORÇA O CHECKBOX A FICAR DESMARCADO
+                            // SE FOR PENDENTE E NÃO FOR O "ENDRIL", FORÇA O CHECKBOX A FICAR DESMARCADO
                             checkbox.checked = false;
-                            alert('⚠️ NÃO É PERMITIDO MARCAR PAGAMENTO DE UM INSCRITO PENDENTE!');
+                            alert('⚠️ NÃO É PERMITIDO MARCAR PAGAMENTO DE UM INSCRITO PENDENTE! APENAS O CADASTRO "ENDRIL" PODE SER MARCADO COM STATUS PENDENTE.');
                             alterado = false;
                         }
                     }
