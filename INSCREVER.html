@@ -363,6 +363,130 @@
         #btnEnviarCadastro:hover {background-color: #219653;}
         #btnEnviarCadastro:disabled {background-color: #95a5a6; cursor: not-allowed;}
 
+        /* ===== LOADING OVERLAY - MEIO DA TELA ===== */
+        #loadingOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(6px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 99999;
+            animation: fadeInOverlay 0.4s ease-out;
+        }
+
+        #loadingOverlay.ativo {
+            display: flex;
+        }
+
+        @keyframes fadeInOverlay {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .loading-content {
+            background: #2d3748;
+            border-radius: 20px;
+            padding: 40px 50px;
+            max-width: 450px;
+            width: 90%;
+            text-align: center;
+            border: 2px solid #17a2b8;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+            animation: scaleIn 0.5s ease-out;
+            position: relative;
+        }
+
+        @keyframes scaleIn {
+            from { transform: scale(0.7); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .loading-content .spinner-grande {
+            width: 70px;
+            height: 70px;
+            border: 6px solid #4a5568;
+            border-top: 6px solid #17a2b8;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-content .titulo-loading {
+            color: #f8f9fa;
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .loading-content .subtitulo-loading {
+            color: #a0aec0;
+            font-size: 15px;
+            margin-bottom: 15px;
+        }
+
+        .loading-content .barra-progresso {
+            width: 100%;
+            height: 4px;
+            background: #4a5568;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .loading-content .barra-progresso .progresso-interno {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #17a2b8, #2ecc71);
+            border-radius: 4px;
+            animation: progressBar 1.5s ease-in-out forwards;
+        }
+
+        @keyframes progressBar {
+            0% { width: 0%; }
+            50% { width: 60%; }
+            100% { width: 100%; }
+        }
+
+        .loading-content .pontos-animados::after {
+            content: '';
+            animation: pontos 1.2s steps(3, end) infinite;
+        }
+
+        @keyframes pontos {
+            0% { content: ''; }
+            33% { content: '.'; }
+            66% { content: '..'; }
+            100% { content: '...'; }
+        }
+
+        .loading-content .icone-check {
+            display: none;
+            font-size: 60px;
+            margin-bottom: 10px;
+            animation: pulseCheck 0.6s ease-out;
+        }
+
+        @keyframes pulseCheck {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.3); }
+            100% { transform: scale(1); }
+        }
+
+        .loading-content .icone-check.mostrar {
+            display: block;
+        }
+        /* ===== FIM DO LOADING OVERLAY ===== */
+
         #loadingPagamento {
             display: none;
             color: #f8f9fa;
@@ -411,7 +535,13 @@
             z-index: 99999;
             backdrop-filter: blur(5px);
             animation: fadeIn 0.3s ease-out;
+            cursor: pointer;
         }
+        
+        #modalPix .caixa-pix {
+            cursor: default;
+        }
+
         @keyframes fadeIn {
             from { opacity: 0; }
             to { opacity: 1; }
@@ -428,6 +558,24 @@
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
             border: 1px solid #2c3034;
             text-align: center;
+            position: relative;
+        }
+
+        .caixa-pix .fechar-pix-topo {
+            position: absolute;
+            top: 10px;
+            right: 16px;
+            background: none;
+            border: none;
+            color: #888;
+            font-size: 28px;
+            cursor: pointer;
+            transition: color 0.3s;
+            padding: 0 4px;
+            line-height: 1;
+        }
+        .caixa-pix .fechar-pix-topo:hover {
+            color: #fff;
         }
 
         .caixa-pix h2 {
@@ -613,14 +761,6 @@
             background: #2980b9 !important;
         }
 
-        .btn-fechar-pix {
-            background: #e74c3c !important;
-            color: white !important;
-        }
-        .btn-fechar-pix:hover {
-            background: #c0392b !important;
-        }
-
         .caixa-pix .loading-pix {
             padding: 18px;
             color: #a0aec0;
@@ -635,11 +775,6 @@
             height: 40px;
             animation: spin 1s linear infinite;
             margin: 0 auto 12px;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
         }
 
         .caixa-pix .alert-pix {
@@ -742,6 +877,23 @@
             .caixa-pix .codigo-container .codigo { font-size: 10px; padding: 6px 8px; }
             .caixa-pix .status-pix { font-size: 12px; padding: 8px 10px; }
             .caixa-pix .loading-pix .spinner { width: 32px; height: 32px; }
+            
+            .loading-content { padding: 30px 25px; }
+            .loading-content .titulo-loading { font-size: 18px; }
+            .loading-content .subtitulo-loading { font-size: 13px; }
+            .loading-content .spinner-grande { width: 50px; height: 50px; }
+            .caixa-pix .fechar-pix-topo { font-size: 24px; top: 8px; right: 12px; }
+            
+            /* Remove o botão Fechar antigo que estava no final */
+            .caixa-pix .botoes-pix .btn-fechar-pix {
+                display: none !important;
+            }
+        }
+
+        @media (max-width: 380px) {
+            .loading-content { padding: 25px 20px; }
+            .loading-content .titulo-loading { font-size: 16px; }
+            .loading-content .subtitulo-loading { font-size: 12px; }
         }
     </style>
 
@@ -891,9 +1043,24 @@
         </div>
     </div>
 
+    <!-- ===== LOADING OVERLAY - MEIO DA TELA ===== -->
+    <div id="loadingOverlay">
+        <div class="loading-content">
+            <div class="spinner-grande" id="spinnerLoading"></div>
+            <div class="icone-check" id="iconeCheckLoading">✅</div>
+            <div class="titulo-loading" id="tituloLoading">⏳ REDIRECIONANDO</div>
+            <div class="subtitulo-loading" id="subtituloLoading">Aguarde, estamos preparando seu pagamento<span class="pontos-animados"></span></div>
+            <div class="barra-progresso">
+                <div class="progresso-interno" id="barraProgressoLoading"></div>
+            </div>
+        </div>
+    </div>
+    <!-- ===== FIM LOADING OVERLAY ===== -->
+
     <!-- ===== MODAL PIX ===== -->
-    <div id="modalPix">
+    <div id="modalPix" onclick="fecharModalPixClickFora(event)">
         <div class="caixa-pix">
+            <button class="fechar-pix-topo" onclick="fecharModalPix()" aria-label="Fechar">✕</button>
             <h2>💰 PIX</h2>
             <div class="subtitulo">CUP EDITION - Pagamento da Inscrição</div>
 
@@ -934,9 +1101,6 @@
             <div class="botoes-pix">
                 <button class="btn-copiar-pix" id="btnCopiarPix" style="display:none;" onclick="copiarPIX()">
                     📋 Copiar Código
-                </button>
-                <button class="btn-fechar-pix" onclick="fecharModalPix()" style="flex:1;">
-                    ✕ Fechar
                 </button>
             </div>
 
@@ -1028,6 +1192,7 @@
         var intervaloRegressiva = null;
         var agendamentoAtual = null;
         var abaAtual = 'aprovados';
+        var modalPixAberto = false;
 
         const API_URL = 'https://cup-edition-api.onrender.com';
         const VALOR_PIX = 1.78;
@@ -1044,6 +1209,18 @@
         });
 
         window.onload = function() {
+            // Controle do botão voltar para fechar modal PIX
+            window.addEventListener('popstate', function(event) {
+                if (modalPixAberto) {
+                    fecharModalPix();
+                    event.preventDefault();
+                    return;
+                }
+                if (document.querySelector('.janela-flutuante.aberta') || document.querySelector('.janela-regras-cheia.aberta')) {
+                    fecharTodasJanelasMecanismo();
+                }
+            });
+
             db.ref('agendamento_reinicio').on('value', function(snap) {
                 tratarAgendamentoLocal(snap.val());
             });
@@ -1056,12 +1233,98 @@
             });
         };
 
+        // ===== FUNÇÕES DO LOADING OVERLAY =====
+        function mostrarLoadingOverlay(titulo, subtitulo) {
+            const overlay = document.getElementById('loadingOverlay');
+            const spinner = document.getElementById('spinnerLoading');
+            const iconeCheck = document.getElementById('iconeCheckLoading');
+            const tituloEl = document.getElementById('tituloLoading');
+            const subtituloEl = document.getElementById('subtituloLoading');
+            const barra = document.getElementById('barraProgressoLoading');
+            
+            if (titulo) tituloEl.textContent = titulo;
+            if (subtitulo) subtituloEl.textContent = subtitulo;
+            
+            spinner.style.display = 'block';
+            iconeCheck.classList.remove('mostrar');
+            barra.style.animation = 'none';
+            setTimeout(() => {
+                barra.style.animation = 'progressBar 1.5s ease-in-out forwards';
+            }, 10);
+            
+            overlay.classList.add('ativo');
+        }
+
+        function esconderLoadingOverlay(mostrarCheck = false) {
+            const overlay = document.getElementById('loadingOverlay');
+            const spinner = document.getElementById('spinnerLoading');
+            const iconeCheck = document.getElementById('iconeCheckLoading');
+            
+            if (mostrarCheck) {
+                spinner.style.display = 'none';
+                iconeCheck.classList.add('mostrar');
+                setTimeout(() => {
+                    overlay.classList.remove('ativo');
+                }, 600);
+            } else {
+                overlay.classList.remove('ativo');
+            }
+        }
+
+        function atualizarTextoLoading(titulo, subtitulo) {
+            const tituloEl = document.getElementById('tituloLoading');
+            const subtituloEl = document.getElementById('subtituloLoading');
+            if (titulo) tituloEl.textContent = titulo;
+            if (subtitulo) subtituloEl.textContent = subtitulo;
+        }
+        // ===== FIM FUNÇÕES LOADING OVERLAY =====
+
+        // ===== FUNÇÕES MODAL PIX =====
+        function fecharModalPixClickFora(event) {
+            // Fecha se clicou no fundo escuro (fora da caixa)
+            if (event.target === event.currentTarget) {
+                fecharModalPix();
+            }
+        }
+
+        function fecharModalPix() {
+            if (!modalPixAberto) return;
+            
+            modalPixAberto = false;
+            document.getElementById('modalPix').style.display = 'none';
+            
+            if (intervaloVerificacaoPIX) {
+                clearInterval(intervaloVerificacaoPIX);
+                intervaloVerificacaoPIX = null;
+            }
+            
+            db.ref('inscricoes').once('value', function(snap) {
+                listaCompletaInscricoes = snap.val() || [];
+                carregarListaNomes();
+                verificarStatusSistemaComDados(listaCompletaInscricoes);
+            });
+            
+            if (pagamentoConfirmado) {
+                fecharTodasJanelasManual();
+            }
+            
+            // Remove o estado do histórico se foi adicionado
+            if (window.history.state && window.history.state.modalPixAberto) {
+                window.history.back();
+            }
+        }
+
         function abrirModalPix(nome, inscricao) {
+            modalPixAberto = true;
             nomeInscritoAtual = nome;
             inscricaoAtual = inscricao;
             pagamentoConfirmado = false;
+            
             const modal = document.getElementById('modalPix');
             modal.style.display = 'flex';
+            
+            // Adiciona estado no histórico para o botão voltar funcionar
+            window.history.pushState({modalPixAberto: true}, "");
             
             const nomeDisplay = nome ? nome.toUpperCase() : 'CARREGANDO...';
             document.getElementById('alertaPix').className = 'alert-pix alert-warning';
@@ -1144,22 +1407,7 @@
 
             gerarPIX();
         }
-
-        function fecharModalPix() {
-            document.getElementById('modalPix').style.display = 'none';
-            if (intervaloVerificacaoPIX) {
-                clearInterval(intervaloVerificacaoPIX);
-                intervaloVerificacaoPIX = null;
-            }
-            db.ref('inscricoes').once('value', function(snap) {
-                listaCompletaInscricoes = snap.val() || [];
-                carregarListaNomes();
-                verificarStatusSistemaComDados(listaCompletaInscricoes);
-            });
-            if (pagamentoConfirmado) {
-                fecharTodasJanelasManual();
-            }
-        }
+        // ===== FIM FUNÇÕES MODAL PIX =====
 
         async function gerarPIX() {
             try {
@@ -1409,12 +1657,6 @@
                 }).catch(reject);
             });
         }
-
-        window.addEventListener('popstate', function(event) {
-            if (document.querySelector('.janela-flutuante.aberta') || document.querySelector('.janela-regras-cheia.aberta')) {
-                fecharTodasJanelasMecanismo();
-            }
-        });
 
         function gerenciarHistoricoJanelaAberta() { window.history.pushState({janelaAberta: true}, ""); }
 
@@ -1831,9 +2073,8 @@
                 return;
             }
 
-            msg.className = 'resultado sucesso';
-            msg.innerText = '⏳ CONFIRMANDO...';
-            msg.style.display = 'block';
+            // MOSTRAR LOADING OVERLAY NO MEIO DA TELA
+            mostrarLoadingOverlay('⏳ CONFIRMANDO INSCRIÇÃO', 'Aguarde, estamos processando seus dados');
 
             db.ref('inscricoes').once('value').then(snap => {
                 var inscricoes = snap.val() || [];
@@ -1841,6 +2082,7 @@
                 var qtdAprovados = inscricoes.filter(i => i && i.status === 'aprovado').length;
 
                 if (qtdAprovados >= LIMITE_MAXIMO) {
+                    esconderLoadingOverlay(false);
                     msg.className = 'resultado erro';
                     msg.innerText = '❌ LIMITE DE 16 APROVADOS ATINGIDO!';
                     msg.style.display = 'block';
@@ -1861,39 +2103,49 @@
                     inscricoes[encontradoIndex].data_confirmacao = new Date().getTime();
 
                     db.ref('inscricoes').set(inscricoes).then(() => {
-                        msg.innerText = '🎉 INSCRIÇÃO CONFIRMADA COM SUCESSO! ✅';
-                        msg.style.display = 'block';
-                        loading.style.display = 'block';
+                        // ATUALIZAR LOADING PARA SUCESSO
+                        atualizarTextoLoading('🎉 INSCRIÇÃO CONFIRMADA!', 'Redirecionando para o pagamento');
                         
                         const inscAtualizada = inscricoes[encontradoIndex];
                         
                         setTimeout(() => {
-                            msg.style.display = 'none';
-                            loading.style.display = 'none';
+                            esconderLoadingOverlay(true);
                             
-                            abrirModalPix(nome, inscAtualizada);
-                            
-                            document.getElementById('ver_nome').value = '';
-                            document.getElementById('ver_dia').value = '';
-                            document.getElementById('ver_mes').value = '';
-                            document.getElementById('fotoUsuario').style.display = 'none';
-                            carregarListaNomes();
-                            verificarStatusSistemaComDados(inscricoes);
-                            
-                        }, 1500);
+                            setTimeout(() => {
+                                abrirModalPix(nome, inscAtualizada);
+                                
+                                document.getElementById('ver_nome').value = '';
+                                document.getElementById('ver_dia').value = '';
+                                document.getElementById('ver_mes').value = '';
+                                document.getElementById('fotoUsuario').style.display = 'none';
+                                carregarListaNomes();
+                                verificarStatusSistemaComDados(inscricoes);
+                                
+                                // Resetar o loading para uso futuro
+                                setTimeout(() => {
+                                    esconderLoadingOverlay(false);
+                                }, 500);
+                            }, 500);
+                        }, 1200);
                     }).catch((erro) => {
+                        esconderLoadingOverlay(false);
                         msg.className = 'resultado erro';
                         msg.innerText = '❌ ERRO AO CONFIRMAR: ' + erro.message;
                         msg.style.display = 'block';
-                        loading.style.display = 'none';
                     });
                 } else {
+                    esconderLoadingOverlay(false);
                     msg.className = 'resultado erro';
                     const nomeExiste = inscricoes.some(insc => insc && insc.nome.trim().toLowerCase() === nome.toLowerCase());
                     msg.innerText = nomeExiste ? '❌ DATA DE NASCIMENTO INCORRETA PARA ESTE NOME!' : '❌ NOME OU DATA NÃO ENCONTRADOS NA BASE!';
                     msg.style.display = 'block';
                     setTimeout(() => { msg.style.display = 'none'; }, 4000);
                 }
+            }).catch((erro) => {
+                esconderLoadingOverlay(false);
+                msg.className = 'resultado erro';
+                msg.innerText = '❌ ERRO: ' + erro.message;
+                msg.style.display = 'block';
             });
         }
     </script>
