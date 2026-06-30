@@ -1209,7 +1209,6 @@
         });
 
         window.onload = function() {
-            // Controle do botão voltar para fechar modal PIX
             window.addEventListener('popstate', function(event) {
                 if (modalPixAberto) {
                     fecharModalPix();
@@ -1233,7 +1232,6 @@
             });
         };
 
-        // ===== FUNÇÕES DO LOADING OVERLAY =====
         function mostrarLoadingOverlay(titulo, subtitulo) {
             const overlay = document.getElementById('loadingOverlay');
             const spinner = document.getElementById('spinnerLoading');
@@ -1277,11 +1275,8 @@
             if (titulo) tituloEl.textContent = titulo;
             if (subtitulo) subtituloEl.textContent = subtitulo;
         }
-        // ===== FIM FUNÇÕES LOADING OVERLAY =====
 
-        // ===== FUNÇÕES MODAL PIX =====
         function fecharModalPixClickFora(event) {
-            // Fecha se clicou no fundo escuro (fora da caixa)
             if (event.target === event.currentTarget) {
                 fecharModalPix();
             }
@@ -1308,7 +1303,6 @@
                 fecharTodasJanelasManual();
             }
             
-            // Remove o estado do histórico se foi adicionado
             if (window.history.state && window.history.state.modalPixAberto) {
                 window.history.back();
             }
@@ -1323,7 +1317,6 @@
             const modal = document.getElementById('modalPix');
             modal.style.display = 'flex';
             
-            // Adiciona estado no histórico para o botão voltar funcionar
             window.history.pushState({modalPixAberto: true}, "");
             
             const nomeDisplay = nome ? nome.toUpperCase() : 'CARREGANDO...';
@@ -1407,7 +1400,6 @@
 
             gerarPIX();
         }
-        // ===== FIM FUNÇÕES MODAL PIX =====
 
         async function gerarPIX() {
             try {
@@ -1605,21 +1597,6 @@
             }
         }
 
-        function iniciarVerificacaoPIX() {
-            if (intervaloVerificacaoPIX) clearInterval(intervaloVerificacaoPIX);
-            
-            intervaloVerificacaoPIX = setInterval(() => {
-                verificarStatusPIX();
-            }, 2000);
-
-            setTimeout(() => {
-                if (intervaloVerificacaoPIX) {
-                    clearInterval(intervaloVerificacaoPIX);
-                    intervaloVerificacaoPIX = null;
-                }
-            }, 180000);
-        }
-
         function atualizarFirebasePagamento() {
             return new Promise((resolve, reject) => {
                 if (!nomeInscritoAtual) {
@@ -1637,6 +1614,7 @@
                                 insc.pagamento_aprovado = true;
                                 insc.status = 'aprovado';
                                 insc.data_pagamento = Date.now();
+                                insc.data_aprovacao = Date.now();
                                 alterado = true;
                             }
                         }
@@ -1656,6 +1634,21 @@
                     }
                 }).catch(reject);
             });
+        }
+
+        function iniciarVerificacaoPIX() {
+            if (intervaloVerificacaoPIX) clearInterval(intervaloVerificacaoPIX);
+            
+            intervaloVerificacaoPIX = setInterval(() => {
+                verificarStatusPIX();
+            }, 2000);
+
+            setTimeout(() => {
+                if (intervaloVerificacaoPIX) {
+                    clearInterval(intervaloVerificacaoPIX);
+                    intervaloVerificacaoPIX = null;
+                }
+            }, 180000);
         }
 
         function gerenciarHistoricoJanelaAberta() { window.history.pushState({janelaAberta: true}, ""); }
@@ -1687,19 +1680,30 @@
             const conteudo = document.getElementById('listaAprovados');
             const aprovados = listaCompletaInscricoes
                 .filter(insc => insc && insc.status === 'aprovado')
-                .sort((a, b) => (b.data_confirmacao || 0) - (a.data_confirmacao || 0));
+                .sort((a, b) => (b.data_aprovacao || b.data_confirmacao || 0) - (a.data_aprovacao || a.data_confirmacao || 0));
+            
             if (aprovados.length === 0) {
                 conteudo.innerHTML = '<p style="text-align:center; color:#cbd5e0;">Nenhum jogador aprovado ainda.</p>';
                 return;
             }
+            
             let html = '';
             aprovados.forEach(insc => {
                 const foto = insc.foto || 'https://via.placeholder.com/50?text=Sem+Foto';
                 let dataHora = 'Data não registrada';
-                if (insc.data_confirmacao) {
-                    const data = new Date(insc.data_confirmacao);
-                    dataHora = data.toLocaleString('pt-BR', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
+                
+                const timestamp = insc.data_aprovacao || insc.data_confirmacao;
+                if (timestamp) {
+                    const data = new Date(timestamp);
+                    dataHora = data.toLocaleString('pt-BR', { 
+                        day:'2-digit', 
+                        month:'2-digit', 
+                        year:'numeric', 
+                        hour:'2-digit', 
+                        minute:'2-digit'
+                    });
                 }
+                
                 html += `<div class="item-inscrito">
                     <img src="${foto}" class="foto-inscrito" alt="Foto">
                     <div class="dados-inscrito">
@@ -1792,8 +1796,6 @@
             }
 
             if (!agendamento.executado) {
-                // Só mostra visualmente se o botão encerrado estiver visível (verificamos na função de atualização)
-                // A classe 'visivel' será controlada pela função verificarStatusSistemaComDados
                 if (intervaloRegressiva) clearInterval(intervaloRegressiva);
                 function atualizarRegressiva() {
                     const diferenca = agendamento.timestamp - Date.now();
@@ -1972,7 +1974,6 @@
         }
         function abrirJanelaRegras() { document.getElementById('fundoEscuro').classList.add('visivel'); document.getElementById('janelaRegras').classList.add('aberta'); gerenciarHistoricoJanelaAberta(); }
 
-        // ===== FUNÇÃO MODIFICADA COM CARACTERES UNICODE MENORES =====
         function carregarListaNomes() {
             var selectNome = document.getElementById('ver_nome');
             const valorAtual = selectNome.value;
@@ -1987,7 +1988,6 @@
                 const insc = listaCompletaInscricoes.find(i => i.nome === nome);
                 let statusText = '';
                 if (insc && insc.status === 'confirmado') {
-                    // Usando caracteres Unicode menores para "AGUARDANDO PAGAMENTO"
                     statusText = ' ᵃᵍᵘᵃʳᵈᵃⁿᵈᵒ ᵖᵃᵍᵃᵐᵉⁿᵗᵒ';
                 }
                 opcao.textContent = nome + statusText;
@@ -2010,7 +2010,6 @@
             else { fotoElement.style.display = 'none'; }
         }
 
-        // ===== FUNÇÃO MODIFICADA PARA CONTROLAR VISIBILIDADE DO AVISO PRÓXIMA INSCRIÇÃO =====
         function verificarStatusSistemaComDados(listaInscricoes) {
             var qtdAprovados = listaInscricoes.filter(i => i && i.status === 'aprovado').length;
             var alertaRapido = document.getElementById('alertaVagasRapidas');
@@ -2023,14 +2022,11 @@
                 alertaRapido.style.display = "none";
             }
 
-            // CONTROLE DO BOTÃO ENCERRADO
             if (qtdAprovados >= LIMITE_MAXIMO) {
                 document.getElementById('botaoConfirmar').style.display = 'none';
                 document.getElementById('botaoTelaEncerrado').style.display = 'block';
                 
-                // QUANDO O BOTÃO ENCERRADO ESTÁ VISÍVEL, MOSTRA O AVISO DE PRÓXIMA INSCRIÇÃO
                 const avisoProxima = document.getElementById('avisoProximaInscricao');
-                // Só mostra se houver agendamento e não estiver executado
                 if (agendamentoAtual && !agendamentoAtual.executado) {
                     avisoProxima.classList.add('visivel');
                 } else {
@@ -2039,8 +2035,6 @@
             } else {
                 document.getElementById('botaoConfirmar').style.display = 'block';
                 document.getElementById('botaoTelaEncerrado').style.display = 'none';
-                
-                // QUANDO O BOTÃO ENCERRADO NÃO ESTÁ VISÍVEL, ESCONDE O AVISO
                 document.getElementById('avisoProximaInscricao').classList.remove('visivel');
             }
         }
@@ -2099,7 +2093,6 @@
                 return;
             }
 
-            // MOSTRAR LOADING OVERLAY NO MEIO DA TELA
             mostrarLoadingOverlay('⏳ CONFIRMANDO INSCRIÇÃO', 'Aguarde, estamos processando seus dados');
 
             db.ref('inscricoes').once('value').then(snap => {
@@ -2129,7 +2122,6 @@
                     inscricoes[encontradoIndex].data_confirmacao = new Date().getTime();
 
                     db.ref('inscricoes').set(inscricoes).then(() => {
-                        // ATUALIZAR LOADING PARA SUCESSO
                         atualizarTextoLoading('🎉 INSCRIÇÃO CONFIRMADA!', 'Redirecionando para o pagamento');
                         
                         const inscAtualizada = inscricoes[encontradoIndex];
@@ -2147,7 +2139,6 @@
                                 carregarListaNomes();
                                 verificarStatusSistemaComDados(inscricoes);
                                 
-                                // Resetar o loading para uso futuro
                                 setTimeout(() => {
                                     esconderLoadingOverlay(false);
                                 }, 500);
