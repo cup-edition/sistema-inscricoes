@@ -96,6 +96,42 @@
             }
         }
 
+        .alerta-inscricoes-abertas {
+            position: absolute !important;
+            top: 75px !important;
+            left: 50% !important;
+            transform: translateX(-50%) !important;
+            width: 90%;
+            max-width: 450px;
+            background-color: rgba(30, 158, 79, 0.45);
+            color: #f8f9fa;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+            border: 2px solid rgba(197, 255, 216, 0.6);
+            padding: 10px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 16px;
+            text-align: center;
+            z-index: 10;
+            display: none;
+            animation: piscarVerde 0.6s infinite alternate;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            backdrop-filter: blur(4px);
+        }
+
+        @keyframes piscarVerde {
+            0% {
+                background-color: rgba(30, 158, 79, 0.40);
+                border-color: rgba(20, 130, 65, 0.5);
+            }
+            100% {
+                background-color: rgba(39, 174, 96, 0.75);
+                border-color: rgba(212, 237, 218, 0.9);
+                color: #000000;
+                text-shadow: none;
+            }
+        }
+
         .aviso-proxima-inscricao {
             position: absolute !important;
             top: 78px !important;
@@ -255,6 +291,16 @@
             border: 2px solid #dc3545;
             display: none;
             box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+
+        .texto-aguardando-pagamento {
+            display: none;
+            flex: 1;
+            color: #ffc107;
+            font-size: 12px;
+            font-weight: 600;
+            line-height: 1.4;
+            text-align: left;
         }
 
         .botao-lista {
@@ -851,6 +897,7 @@
             .botao-regras, .botao-lista { font-size: 11px; padding: 6px 10px; }
             .botao-cadastrar { top: 10px !important; font-size: 12px; padding: 8px 12px; }
             .alerta-vagas-piscando { top: 52px !important; font-size: 16px !important; padding: 10px; width: 94%; height: 40px; }
+            .alerta-inscricoes-abertas { top: 52px !important; font-size: 16px !important; padding: 10px; width: 94%; height: 40px; }
             .aviso-proxima-inscricao { top: 52px !important; font-size: 14px !important; padding: 10px; width: 94%; height: 40px; }
             .container { top: 105px !important; width: 94% !important; max-width: 94% !important; padding: 12px 20px 20px 20px; }
             .container .imagem-campim { max-width: 290px; margin: 0 auto 8px auto !important; }
@@ -910,6 +957,7 @@
     <button class="botao-cadastrar" onclick="abrirJanelaCadastro()">SOU NOVO, QUERO ME CADASTRAR😎</button>
 
     <div id="alertaVagasRapidas" class="alerta-vagas-piscando"></div>
+    <div id="alertaInscricoesAbertas" class="alerta-inscricoes-abertas">✍🏻INSCRIÇÕES ABERTAS</div>
 
     <div id="avisoProximaInscricao" class="aviso-proxima-inscricao">
         ⏳ PRÓXIMA INSCRIÇÃO EM: <span id="dataReinicioTexto">Carregando...</span>
@@ -1128,9 +1176,10 @@
             </div>
 
             <div class="grupo-campo" id="grupoDataNascimento">
-                <label>DATA DE NASCIMENTO:</label>
                 <div class="foto-container">
-                    <div class="data-container">
+                    <div id="camposDataSelects">
+                        <label>DATA DE NASCIMENTO:</label>
+                        <div class="data-container">
                         <select id="ver_dia" onkeydown="avancarCampo(event, 'ver_mes')" onchange="pularParaMes()">
                             <option value="">Dia</option>
                             <option value="01">01</option> <option value="02">02</option> <option value="03">03</option>
@@ -1153,7 +1202,9 @@
                             <option value="07">JULHO</option> <option value="08">AGOSTO</option> <option value="09">SETEMBRO</option>
                             <option value="10">OUTUBRO</option> <option value="11">NOVEMBRO</option> <option value="12">DEZEMBRO</option>
                         </select>
+                        </div>
                     </div>
+                    <div id="textoAguardandoPagamento" class="texto-aguardando-pagamento">AGORA FALTA SÓ CONCLUIR O PAGAMENTO USANDO O BOTÃO ABAIXO (👁️ VER PIX) PARA APROVAR SUA INSCRIÇÃO NA CUP EDITION CAMPIM FC</div>
                     <img id="fotoUsuario" class="foto-preview" alt="Foto do usuário">
                 </div>
             </div>
@@ -1193,6 +1244,8 @@
         var agendamentoAtual = null;
         var abaAtual = 'aprovados';
         var modalPixAberto = false;
+        var inscricoesAbertas = false;
+        var qtdAprovadosAtual = 0;
 
         const API_URL = 'https://cup-edition-api.onrender.com';
         const VALOR_PIX = 1.78;
@@ -1223,6 +1276,11 @@
             db.ref('agendamento_reinicio').on('value', function(snap) {
                 tratarAgendamentoLocal(snap.val());
             });
+
+            db.ref('configuracao/inscricoes_abertas').on('value', function(snap) {
+                inscricoesAbertas = snap.val() === true;
+                atualizarAlertaInscricoesAbertas();
+            });
             
             db.ref('inscricoes').on('value', function(snap) {
                 listaCompletaInscricoes = snap.val() || [];
@@ -1231,6 +1289,15 @@
                 verificarStatusSistemaComDados(listaCompletaInscricoes);
             });
         };
+
+        function atualizarAlertaInscricoesAbertas() {
+            var alertaAbertas = document.getElementById('alertaInscricoesAbertas');
+            if (inscricoesAbertas && qtdAprovadosAtual < 13) {
+                alertaAbertas.style.display = "block";
+            } else {
+                alertaAbertas.style.display = "none";
+            }
+        }
 
         function mostrarLoadingOverlay(titulo, subtitulo) {
             const overlay = document.getElementById('loadingOverlay');
@@ -1879,6 +1946,8 @@
                 btnConfirmar.textContent = 'CONFIRMAR INSCRIÇÃO';
                 btnConfirmar.style.backgroundColor = '#27ae60';
                 document.getElementById('grupoDataNascimento').style.display = 'block';
+                document.getElementById('camposDataSelects').style.display = 'block';
+                document.getElementById('textoAguardandoPagamento').style.display = 'none';
                 return;
             }
 
@@ -1892,6 +1961,8 @@
                 btnConfirmar.textContent = '🚫 SUSPENSO';
                 btnConfirmar.style.backgroundColor = '#dc3545';
                 document.getElementById('grupoDataNascimento').style.display = 'block';
+                document.getElementById('camposDataSelects').style.display = 'block';
+                document.getElementById('textoAguardandoPagamento').style.display = 'none';
             } else {
                 aviso.style.display = 'none';
                 btnConfirmar.disabled = false;
@@ -1910,6 +1981,8 @@
                 btnConfirmar.textContent = 'CONFIRMAR INSCRIÇÃO';
                 btnConfirmar.style.backgroundColor = '#27ae60';
                 grupoData.style.display = 'block';
+                document.getElementById('camposDataSelects').style.display = 'block';
+                document.getElementById('textoAguardandoPagamento').style.display = 'none';
                 return;
             }
 
@@ -1924,6 +1997,8 @@
                 btnConfirmar.style.cursor = 'not-allowed';
                 btnConfirmar.style.opacity = '0.6';
                 grupoData.style.display = 'block';
+                document.getElementById('camposDataSelects').style.display = 'block';
+                document.getElementById('textoAguardandoPagamento').style.display = 'none';
                 return;
             }
 
@@ -1931,7 +2006,9 @@
                 btnConfirmar.disabled = false;
                 btnConfirmar.style.opacity = '1';
                 btnConfirmar.style.cursor = 'pointer';
-                grupoData.style.display = 'none';
+                grupoData.style.display = 'block';
+                document.getElementById('camposDataSelects').style.display = 'none';
+                document.getElementById('textoAguardandoPagamento').style.display = 'block';
                 
                 if (inscricao.pix_data && inscricao.pix_data.qr_code_base64) {
                     const dataGeracao = new Date(inscricao.pix_data.data_geracao).getTime();
@@ -1951,6 +2028,8 @@
             }
 
             grupoData.style.display = 'block';
+            document.getElementById('camposDataSelects').style.display = 'block';
+            document.getElementById('textoAguardandoPagamento').style.display = 'none';
             btnConfirmar.textContent = 'CONFIRMAR INSCRIÇÃO';
             btnConfirmar.style.backgroundColor = '#27ae60';
             btnConfirmar.disabled = false;
@@ -2012,6 +2091,7 @@
 
         function verificarStatusSistemaComDados(listaInscricoes) {
             var qtdAprovados = listaInscricoes.filter(i => i && i.status === 'aprovado').length;
+            qtdAprovadosAtual = qtdAprovados;
             var alertaRapido = document.getElementById('alertaVagasRapidas');
             var vagasRestantes = LIMITE_MAXIMO - qtdAprovados;
 
@@ -2021,6 +2101,8 @@
             } else {
                 alertaRapido.style.display = "none";
             }
+
+            atualizarAlertaInscricoesAbertas();
 
             if (qtdAprovados >= LIMITE_MAXIMO) {
                 document.getElementById('botaoConfirmar').style.display = 'none';
