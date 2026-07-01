@@ -1237,7 +1237,7 @@
 
             if (inscricoes.length === 0 || !inscricoes[0]) {
                 tabela.innerHTML = '<tr><td colspan="8" style="text-align: center; color: #adb5bd;">NENHUMA INSCRIÇÃO CADASTRADA AINDA.</td></tr>';
-                document.getElementById('contadorAprovados').innerText = `💰 0 APROVADOS | RESTAM 16 VAGAS (LIMITE: 16)`;
+                document.getElementById('contadorAprovados').innerText = `💰 0 APROVADOS | RESTAM 16 VAGAS`;
                 verificarLimiteAprovados(0);
                 return;
             }
@@ -1259,7 +1259,7 @@
             var qtdAprovados = listaOrdenada.filter(i => i.status === 'aprovado').length;
             var vagasRestantes = LIMITE_MAXIMO - qtdAprovados;
 
-            document.getElementById('contadorAprovados').innerText = `💰 ${qtdAprovados} APROVADOS | RESTAM ${vagasRestantes} VAGAS (LIMITE: 16)`;
+            document.getElementById('contadorAprovados').innerText = `💰 ${qtdAprovados} APROVADOS | RESTAM ${vagasRestantes} VAGAS`;
             verificarLimiteAprovados(qtdAprovados);
 
             tabela.innerHTML = '';
