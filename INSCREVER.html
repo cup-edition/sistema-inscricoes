@@ -1288,7 +1288,65 @@
                 carregarListaNomes();
                 verificarStatusSistemaComDados(listaCompletaInscricoes);
             });
+
+            // ===== VERIFICA UMA VEZ AO ABRIR A PÁGINA =====
+            verificarPagamentosConfirmados();
+            // =============================================
         };
+
+        // ===== FUNÇÃO: VERIFICA SE OS CONFIRMADOS PAGARAM =====
+        async function verificarPagamentosConfirmados() {
+            try {
+                const snap = await db.ref('inscricoes').once('value');
+                const inscricoes = snap.val() || [];
+                let alterado = false;
+                
+                for (let i = 0; i < inscricoes.length; i++) {
+                    const insc = inscricoes[i];
+                    
+                    // Só verifica quem está com status 'confirmado'
+                    if (insc && insc.status === 'confirmado' && insc.pix_data && insc.pix_data.payment_id) {
+                        
+                        // Verifica se o PIX expirou (3 dias)
+                        const tempoDecorrido = Date.now() - insc.pix_data.data_geracao;
+                        if (tempoDecorrido > PRAZO_PIX_MS) {
+                            insc.status = 'expirado';
+                            alterado = true;
+                            continue;
+                        }
+                        
+                        // Consulta a API para ver se pagou
+                        try {
+                            const response = await fetch(`${API_URL}/status/${insc.pix_data.payment_id}`);
+                            const data = await response.json();
+                            
+                            if (data.status === 'approved') {
+                                // PAGOU! Atualiza para aprovado
+                                insc.status = 'aprovado';
+                                insc.pagamento_aprovado = true;
+                                insc.data_pagamento = Date.now();
+                                insc.data_aprovacao = Date.now();
+                                alterado = true;
+                                console.log(`✅ ${insc.nome} pagou e foi aprovado!`);
+                            }
+                        } catch (error) {
+                            // Ignora erro na API e continua
+                        }
+                    }
+                }
+                
+                // Se alguém pagou, salva no Firebase e atualiza a interface
+                if (alterado) {
+                    await db.ref('inscricoes').set(inscricoes);
+                    listaCompletaInscricoes = inscricoes;
+                    carregarListaNomes();
+                    verificarStatusSistemaComDados(inscricoes);
+                    if (janelaAberta) atualizarListas();
+                }
+            } catch (error) {
+                console.error('Erro na verificação:', error);
+            }
+        }
 
         function atualizarAlertaInscricoesAbertas() {
             var alertaAbertas = document.getElementById('alertaInscricoesAbertas');
@@ -1706,9 +1764,11 @@
         function iniciarVerificacaoPIX() {
             if (intervaloVerificacaoPIX) clearInterval(intervaloVerificacaoPIX);
             
+            // ===== VERIFICAÇÃO DO MODAL - CONTINUA ATIVA =====
             intervaloVerificacaoPIX = setInterval(() => {
                 verificarStatusPIX();
             }, 2000);
+            // =================================================
 
             setTimeout(() => {
                 if (intervaloVerificacaoPIX) {
