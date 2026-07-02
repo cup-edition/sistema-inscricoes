@@ -138,14 +138,6 @@
         .erro {background-color: #3a1e1e; color: #e74c3c; border: 1px solid #e74c3c;}
         
         /* ===== TABELA COM CABEÇALHO STICKY ===== */
-        /* CORREÇÃO: removido "overflow-x: auto" fixo daqui, pois qualquer
-           overflow neste container cria um novo contexto de scroll e faz o
-           "position: sticky" do cabeçalho passar a ser relativo a ELE
-           (que não tem altura limitada), e não à página — por isso o
-           cabeçalho nunca "grudava" ao rolar. Agora o scroll horizontal só
-           é ativado em telas pequenas (ver media query abaixo), e em telas
-           normais o sticky usa o scroll da própria página, funcionando
-           como em sites modernos. */
         .tabela-wrapper {
             overflow-y: visible;
             border-radius: 8px;
@@ -169,7 +161,6 @@
             border-right: none !important;
         }
 
-        /* CABEÇALHO STICKY - FUNCIONA COM SCROLL DA PÁGINA */
         thead {
             position: sticky;
             top: 0;
@@ -213,7 +204,6 @@
             box-shadow: 0 2px 8px rgba(0,0,0,0.5);
         }
 
-        /* LINHAS VERTICAIS APENAS ENTRE COLUNAS */
         th:not(:first-child)::before,
         td:not(:first-child)::before {
             content: '';
@@ -653,10 +643,8 @@
                 for (let i = 0; i < inscricoes.length; i++) {
                     const insc = inscricoes[i];
                     
-                    // Só verifica quem está com status 'confirmado'
                     if (insc && insc.status === 'confirmado' && insc.pix_data && insc.pix_data.payment_id) {
                         
-                        // Verifica se o PIX expirou (3 dias)
                         const tempoDecorrido = Date.now() - insc.pix_data.data_geracao;
                         if (tempoDecorrido > 3 * 24 * 60 * 60 * 1000) {
                             insc.status = 'expirado';
@@ -665,13 +653,11 @@
                             continue;
                         }
                         
-                        // Consulta a API para ver se pagou
                         try {
                             const response = await fetch(`https://cup-edition-api.onrender.com/status/${insc.pix_data.payment_id}`);
                             const data = await response.json();
                             
                             if (data.status === 'approved') {
-                                // PAGOU! Atualiza para aprovado
                                 insc.status = 'aprovado';
                                 insc.pagamento_aprovado = true;
                                 insc.data_pagamento = Date.now();
@@ -680,12 +666,11 @@
                                 console.log(`✅ ${insc.nome} pagou e foi aprovado!`);
                             }
                         } catch (error) {
-                            // Ignora erro na API e continua
+                            // Ignora erro na API
                         }
                     }
                 }
                 
-                // Se alguém pagou, salva no Firebase e atualiza a interface
                 if (alterado) {
                     await db.ref('inscricoes').set(inscricoes);
                     console.log('✅ Pagamentos verificados e atualizados!');
@@ -1072,6 +1057,9 @@
             db.ref('agendamento_reinicio').once('value').then(snap => {
                 const dados = snap.val();
                 if(dados) {
+                    // Primeiro, limpa todos os checkboxes
+                    document.querySelectorAll('#diasSemanaContainer input[type="checkbox"]').forEach(cb => cb.checked = false);
+                    
                     if(dados.diasSemana && Array.isArray(dados.diasSemana) && dados.diasSemana.length > 0) {
                         const diasMap = ['diaDomingo', 'diaSegunda', 'diaTerca', 'diaQuarta', 'diaQuinta', 'diaSexta', 'diaSabado'];
                         dados.diasSemana.forEach(diaNum => {
@@ -1082,20 +1070,33 @@
                         document.getElementById('horaAgendamento').value = '00:00';
                         bloquearCamposDataHora(true);
                         
-                        const primeiroDia = dados.diasSemana[0];
-                        const proximaData = calcularProximoDiaDaSemana(primeiroDia);
-                        document.getElementById('dataAgendamento').value = 
-                            `${proximaData.getFullYear()}-${String(proximaData.getMonth()+1).padStart(2,'0')}-${String(proximaData.getDate()).padStart(2,'0')}`;
+                        // Só calcula o próximo dia se NÃO estiver executado
+                        if(!dados.executado) {
+                            const primeiroDia = dados.diasSemana[0];
+                            const proximaData = calcularProximoDiaDaSemana(primeiroDia);
+                            document.getElementById('dataAgendamento').value = 
+                                `${proximaData.getFullYear()}-${String(proximaData.getMonth()+1).padStart(2,'0')}-${String(proximaData.getDate()).padStart(2,'0')}`;
+                        } else {
+                            // Se já foi executado, usa o timestamp atual
+                            if(dados.timestamp) {
+                                const d = new Date(dados.timestamp);
+                                document.getElementById('dataAgendamento').value = 
+                                    `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+                            }
+                        }
                     } else {
                         document.getElementById('infoSemanal').style.display = 'none';
                         bloquearCamposDataHora(false);
                     }
 
-                    if(dados.timestamp) {
+                    // Mostra status APENAS se NÃO estiver executado
+                    if(dados.timestamp && !dados.executado) {
                         const d = new Date(dados.timestamp);
                         if(!dados.diasSemana || dados.diasSemana.length === 0) {
-                            document.getElementById('dataAgendamento').value = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-                            document.getElementById('horaAgendamento').value = `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+                            document.getElementById('dataAgendamento').value = 
+                                `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+                            document.getElementById('horaAgendamento').value = 
+                                `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
                         }
                         mostrarStatusAgendamento(`⏸️ AGENDADO PARA ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}H DE ${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`, 'agendado');
                     } else {
@@ -1397,8 +1398,69 @@
                 else { badge.style.display = 'none'; }
             });
 
-            // ===== VERIFICA UMA VEZ AO ABRIR O PAINEL =====
             verificarPagamentosConfirmados();
+        }
+
+        // ===== FUNÇÃO CORRIGIDA: EXECUTA REINÍCIO E REAGENDA AUTOMATICAMENTE =====
+        function executarReinicio() {
+            db.ref('inscricoes').once('value').then(snap => {
+                const lista = (snap.val() || []).map(insc => { 
+                    if(insc){ 
+                        insc.status='pendente'; 
+                        insc.data_confirmacao=null;
+                        insc.pagamento_aprovado = false;
+                        insc.data_aprovacao = null;
+                    } 
+                    return insc; 
+                });
+                db.ref('inscricoes').set(lista);
+                db.ref('configuracao').set({inscricoes_abertas: true, ultimo_reinicio: Date.now()});
+                
+                // 🔥 REAGENDAMENTO AUTOMÁTICO PARA PRÓXIMO DIA DA SEMANA
+                db.ref('agendamento_reinicio').once('value').then(snapAgend => {
+                    const agendado = snapAgend.val();
+                    if(agendado && agendado.diasSemana && agendado.diasSemana.length > 0) {
+                        const agora = new Date();
+                        const diaAtual = agora.getDay();
+                        
+                        // Encontra o próximo dia da semana disponível (considerando TODOS os dias marcados)
+                        let proximoDia = null;
+                        let menorDiferenca = 8;
+                        
+                        agendado.diasSemana.forEach(dia => {
+                            let diff = dia - diaAtual;
+                            if(diff <= 0) diff += 7;
+                            if(diff < menorDiferenca) {
+                                menorDiferenca = diff;
+                                proximoDia = dia;
+                            }
+                        });
+                        
+                        if(proximoDia !== null && menorDiferenca < 8) {
+                            // Calcula a data do próximo dia
+                            const proximaData = new Date(agora);
+                            proximaData.setDate(agora.getDate() + menorDiferenca);
+                            proximaData.setHours(0, 0, 0, 0);
+                            
+                            // Atualiza o timestamp para o próximo dia e reseta executado
+                            db.ref('agendamento_reinicio').update({
+                                timestamp: proximaData.getTime(),
+                                executado: false
+                            });
+                            
+                            console.log(`🔄 Reagendado automaticamente para ${proximaData.toLocaleString()}`);
+                        } else {
+                            // Se não encontrou próximo dia, mantém como executado
+                            db.ref('agendamento_reinicio/executado').set(true);
+                        }
+                    } else {
+                        // Se não tem dias da semana, apenas marca como executado
+                        db.ref('agendamento_reinicio/executado').set(true);
+                    }
+                });
+                
+                console.log('✅ Reinício executado e reagendado automaticamente!');
+            });
         }
 
         function verificarAgendamentoSemanal() {
@@ -1425,33 +1487,18 @@
             });
         }
 
-        function executarReinicio() {
-            db.ref('inscricoes').once('value').then(snap => {
-                const lista = (snap.val() || []).map(insc => { 
-                    if(insc){ 
-                        insc.status='pendente'; 
-                        insc.data_confirmacao=null;
-                        insc.pagamento_aprovado = false;
-                        insc.data_aprovacao = null;
-                    } 
-                    return insc; 
-                });
-                db.ref('inscricoes').set(lista);
-                db.ref('configuracao').set({inscricoes_abertas: true, ultimo_reinicio: Date.now()});
-                db.ref('agendamento_reinicio/executado').set(true);
-                console.log('✅ Reinício semanal executado!');
-            });
-        }
-
+        // Listener para agendamento único (quando o timestamp chega)
         db.ref('agendamento_reinicio').on('value', snap => {
             const agendado = snap.val();
             if(agendado && !agendado.executado && agendado.timestamp <= Date.now()) {
+                // Verifica se é agendamento semanal ou único
                 if(!agendado.diasSemana || agendado.diasSemana.length === 0) {
                     executarReinicio();
                 }
             }
         });
 
+        // Verifica a cada 5 minutos
         setInterval(verificarAgendamentoSemanal, 300000);
         setTimeout(verificarAgendamentoSemanal, 5000);
 
