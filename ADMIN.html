@@ -1501,6 +1501,22 @@
         setInterval(verificarAgendamentoSemanal, 300000);
         setTimeout(verificarAgendamentoSemanal, 5000);
 
+        // ===== VERIFICA AO VOLTAR PARA A ABA =====
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden) {
+                // Você voltou para o painel
+                console.log('👀 Painel ativado - verificando pagamentos...');
+                
+                // Executa a verificação
+                verificarPagamentosConfirmados().then(() => {
+                    // Atualiza a lista de inscrições
+                    db.ref('inscricoes').once('value', function(snap) {
+                        processarLista(snap.val() || []);
+                    });
+                });
+            }
+        });
+
         document.addEventListener('keydown', function(event) {
             if (event.key === 'Escape') {
                 ocultarCadastro(); fecharEdicao(); fecharAgendamento(); fecharAprovacao(); fecharSuspensos();
