@@ -1291,6 +1291,14 @@
 
             // ===== VERIFICA UMA VEZ AO ABRIR A PÁGINA =====
             verificarPagamentosConfirmados();
+
+            // ===== VERIFICA AO VOLTAR PARA A ABA =====
+            document.addEventListener('visibilitychange', function() {
+                if (!document.hidden) {
+                    console.log('👀 Página de inscrição ativada - verificando pagamentos...');
+                    verificarPagamentosConfirmados();
+                }
+            });
             // =============================================
         };
 
@@ -2103,15 +2111,31 @@
             }
         }
 
-        function abrirJanelaCadastro() { document.getElementById('fundoEscuro').classList.add('visivel'); document.getElementById('janelaCadastro').classList.add('aberta'); gerenciarHistoricoJanelaAberta(); }
+        function abrirJanelaCadastro() { 
+            document.getElementById('fundoEscuro').classList.add('visivel'); 
+            document.getElementById('janelaCadastro').classList.add('aberta'); 
+            gerenciarHistoricoJanelaAberta(); 
+        }
+
         function abrirJanelaLista() { 
             document.getElementById('fundoEscuro').classList.add('visivel'); 
             document.getElementById('janelaLista').classList.add('aberta'); 
             janelaAberta = true; 
-            atualizarListas();
+            
+            // ===== VERIFICA PAGAMENTOS AO ABRIR A LISTA =====
+            verificarPagamentosConfirmados().then(() => {
+                atualizarListas();
+            });
+            // ================================================
+            
             gerenciarHistoricoJanelaAberta(); 
         }
-        function abrirJanelaRegras() { document.getElementById('fundoEscuro').classList.add('visivel'); document.getElementById('janelaRegras').classList.add('aberta'); gerenciarHistoricoJanelaAberta(); }
+
+        function abrirJanelaRegras() { 
+            document.getElementById('fundoEscuro').classList.add('visivel'); 
+            document.getElementById('janelaRegras').classList.add('aberta'); 
+            gerenciarHistoricoJanelaAberta(); 
+        }
 
         function carregarListaNomes() {
             var selectNome = document.getElementById('ver_nome');
