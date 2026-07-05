@@ -1235,7 +1235,9 @@
 
         firebase.initializeApp(firebaseConfig);
         var db = firebase.database();
-        const LIMITE_MAXIMO = 16;
+        const LIMITE_MAXIMO_PADRAO = 16;
+        let limiteAtual = LIMITE_MAXIMO_PADRAO;
+        let limiteDinamicoAtivado = false;
         const PRAZO_PIX_MS = 3 * 24 * 60 * 60 * 1000;
         var listaCompletaInscricoes = [];
         var janelaAberta = false;
@@ -1260,6 +1262,44 @@
             const dados = snap.val() || {};
             suspensosList = Object.values(dados).map(s => s.nome.trim().toLowerCase());
         });
+
+        // ===== FUNÇÃO: VERIFICA E ATIVA LIMITE DINÂMICO =====
+        function verificarAtivarLimiteDinamico(qtdAprovados) {
+            if (limiteDinamicoAtivado) return;
+            
+            const agora = new Date();
+            const diaSemana = agora.getDay();
+            const hora = agora.getHours();
+            
+            // Sexta-feira a partir das 20h
+            if (diaSemana === 5 && hora >= 20) {
+                if (qtdAprovados < 12) {
+                    limiteAtual = 12;
+                    limiteDinamicoAtivado = true;
+                    console.log(`🔁 LIMITE DINÂMICO ATIVADO: novo limite = ${limiteAtual}`);
+                    
+                    if (qtdAprovados >= 12) {
+                        db.ref('configuracao').set({ inscricoes_abertas: false });
+                        document.getElementById('botaoConfirmar').style.display = 'none';
+                        document.getElementById('botaoTelaEncerrado').style.display = 'block';
+                    }
+                }
+            }
+        }
+
+        // ===== FUNÇÃO: VERIFICA LIMITE DINÂMICO PERIODICAMENTE =====
+        function verificarLimiteDinamicoPeriodicamente() {
+            db.ref('inscricoes').once('value', snap => {
+                const lista = snap.val() || [];
+                const qtdAprovados = lista.filter(i => i && i.status === 'aprovado').length;
+                verificarAtivarLimiteDinamico(qtdAprovados);
+                verificarStatusSistemaComDados(lista);
+            });
+        }
+
+        // Chama a verificação a cada 1 minuto
+        setInterval(verificarLimiteDinamicoPeriodicamente, 60000);
+        setTimeout(verificarLimiteDinamicoPeriodicamente, 3000);
 
         window.onload = function() {
             window.addEventListener('popstate', function(event) {
@@ -1289,17 +1329,14 @@
                 verificarStatusSistemaComDados(listaCompletaInscricoes);
             });
 
-            // ===== VERIFICA UMA VEZ AO ABRIR A PÁGINA =====
             verificarPagamentosConfirmados();
 
-            // ===== VERIFICA AO VOLTAR PARA A ABA =====
             document.addEventListener('visibilitychange', function() {
                 if (!document.hidden) {
                     console.log('👀 Página de inscrição ativada - verificando pagamentos...');
                     verificarPagamentosConfirmados();
                 }
             });
-            // =============================================
         };
 
         // ===== FUNÇÃO: VERIFICA SE OS CONFIRMADOS PAGARAM =====
@@ -1312,10 +1349,8 @@
                 for (let i = 0; i < inscricoes.length; i++) {
                     const insc = inscricoes[i];
                     
-                    // Só verifica quem está com status 'confirmado'
                     if (insc && insc.status === 'confirmado' && insc.pix_data && insc.pix_data.payment_id) {
                         
-                        // Verifica se o PIX expirou (3 dias)
                         const tempoDecorrido = Date.now() - insc.pix_data.data_geracao;
                         if (tempoDecorrido > PRAZO_PIX_MS) {
                             insc.status = 'expirado';
@@ -1323,13 +1358,11 @@
                             continue;
                         }
                         
-                        // Consulta a API para ver se pagou
                         try {
                             const response = await fetch(`${API_URL}/status/${insc.pix_data.payment_id}`);
                             const data = await response.json();
                             
                             if (data.status === 'approved') {
-                                // PAGOU! Atualiza para aprovado
                                 insc.status = 'aprovado';
                                 insc.pagamento_aprovado = true;
                                 insc.data_pagamento = Date.now();
@@ -1338,12 +1371,11 @@
                                 console.log(`✅ ${insc.nome} pagou e foi aprovado!`);
                             }
                         } catch (error) {
-                            // Ignora erro na API e continua
+                            // Ignora erro na API
                         }
                     }
                 }
                 
-                // Se alguém pagou, salva no Firebase e atualiza a interface
                 if (alterado) {
                     await db.ref('inscricoes').set(inscricoes);
                     listaCompletaInscricoes = inscricoes;
@@ -1356,9 +1388,16 @@
             }
         }
 
+        // ===== FUNÇÃO: ATUALIZA ALERTA "INSCRIÇÕES ABERTAS" =====
         function atualizarAlertaInscricoesAbertas() {
             var alertaAbertas = document.getElementById('alertaInscricoesAbertas');
-            if (inscricoesAbertas && qtdAprovadosAtual < 13) {
+            var alertaVagas = document.getElementById('alertaVagasRapidas');
+            
+            // O alerta "INSCRIÇÕES ABERTAS" só aparece se:
+            // 1. inscricoesAbertas = true
+            // 2. Ainda tem vagas disponíveis
+            // 3. O alerta de vagas NÃO está visível
+            if (inscricoesAbertas && qtdAprovadosAtual < limiteAtual && alertaVagas.style.display !== 'block') {
                 alertaAbertas.style.display = "block";
             } else {
                 alertaAbertas.style.display = "none";
@@ -1772,11 +1811,9 @@
         function iniciarVerificacaoPIX() {
             if (intervaloVerificacaoPIX) clearInterval(intervaloVerificacaoPIX);
             
-            // ===== VERIFICAÇÃO DO MODAL - CONTINUA ATIVA =====
             intervaloVerificacaoPIX = setInterval(() => {
                 verificarStatusPIX();
             }, 2000);
-            // =================================================
 
             setTimeout(() => {
                 if (intervaloVerificacaoPIX) {
@@ -2122,11 +2159,9 @@
             document.getElementById('janelaLista').classList.add('aberta'); 
             janelaAberta = true; 
             
-            // ===== VERIFICA PAGAMENTOS AO ABRIR A LISTA =====
             verificarPagamentosConfirmados().then(() => {
                 atualizarListas();
             });
-            // ================================================
             
             gerenciarHistoricoJanelaAberta(); 
         }
@@ -2176,10 +2211,20 @@
         function verificarStatusSistemaComDados(listaInscricoes) {
             var qtdAprovados = listaInscricoes.filter(i => i && i.status === 'aprovado').length;
             qtdAprovadosAtual = qtdAprovados;
+            
+            // Verifica se deve ativar limite dinâmico
+            verificarAtivarLimiteDinamico(qtdAprovados);
+            
             var alertaRapido = document.getElementById('alertaVagasRapidas');
-            var vagasRestantes = LIMITE_MAXIMO - qtdAprovados;
+            var vagasRestantes = limiteAtual - qtdAprovados;
 
-            if (qtdAprovados >= 13 && qtdAprovados < LIMITE_MAXIMO) {
+            // ================================================================
+            // LIMITE PADRÃO 16: alerta com 13 aprovados (faltam 3)
+            // LIMITE DINÂMICO 12: alerta com 10 aprovados (faltam 2)
+            // ================================================================
+            const limiteAlerta = (limiteAtual === 12) ? 10 : 13;
+            
+            if (qtdAprovados >= limiteAlerta && qtdAprovados < limiteAtual) {
                 alertaRapido.innerText = `⚠️ ATENÇÃO: RESTAM SOMENTE ${vagasRestantes} VAGA${vagasRestantes === 1 ? '' : 'S'}!`;
                 alertaRapido.style.display = "block";
             } else {
@@ -2188,7 +2233,7 @@
 
             atualizarAlertaInscricoesAbertas();
 
-            if (qtdAprovados >= LIMITE_MAXIMO) {
+            if (qtdAprovados >= limiteAtual) {
                 document.getElementById('botaoConfirmar').style.display = 'none';
                 document.getElementById('botaoTelaEncerrado').style.display = 'block';
                 
@@ -2266,10 +2311,13 @@
                 
                 var qtdAprovados = inscricoes.filter(i => i && i.status === 'aprovado').length;
 
-                if (qtdAprovados >= LIMITE_MAXIMO) {
+                // Verifica limite dinâmico
+                verificarAtivarLimiteDinamico(qtdAprovados);
+
+                if (qtdAprovados >= limiteAtual) {
                     esconderLoadingOverlay(false);
                     msg.className = 'resultado erro';
-                    msg.innerText = '❌ LIMITE DE 16 APROVADOS ATINGIDO!';
+                    msg.innerText = `❌ LIMITE DE ${limiteAtual} APROVADOS ATINGIDO!`;
                     msg.style.display = 'block';
                     verificarStatusSistemaComDados(inscricoes);
                     setTimeout(() => { msg.style.display = 'none'; }, 3000);
