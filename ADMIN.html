@@ -378,6 +378,31 @@
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.7); text-transform: uppercase;
         }
         #avisoNovaConfirmacao h2 { color: #2ecc71; font-size: 24px; margin-bottom: 20px; justify-content: center; padding-right: 0; }
+
+        /* ===== POPUP DE APROVAÇÃO (AZUL) ===== */
+        #avisoNovaAprovacao {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0); display: none;
+            align-items: center; justify-content: center; z-index: 999999;
+            backdrop-filter: blur(5px); animation: fadeIn 0.3s ease-out;
+        }
+        #avisoNovaAprovacao > div {
+            background: #212529; border: 3px solid #3498db; border-radius: 20px;
+            padding: 40px; text-align: center; max-width: 400px; width: 90%;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.7); text-transform: uppercase;
+        }
+        #avisoNovaAprovacao h2 { 
+            color: #3498db; 
+            font-size: 24px; 
+            margin-bottom: 20px; 
+            justify-content: center; 
+            padding-right: 0; 
+        }
+        #avisoNovaAprovacao .sub-mensagem {
+            color: #3498db;
+            font-size: 16px; 
+            margin-top: 15px;
+        }
     </style>
 </head>
 <body>
@@ -527,6 +552,7 @@
         </div>
     </div>
 
+    <!-- POPUP DE CONFIRMAÇÃO -->
     <div id="avisoNovaConfirmacao">
         <div>
             <h2>🎉 INSCRIÇÃO CONFIRMADA!</h2>
@@ -535,6 +561,15 @@
         </div>
     </div>
 
+    <!-- POPUP DE APROVAÇÃO (AZUL) -->
+    <div id="avisoNovaAprovacao">
+        <div>
+            <h2>💰 INSCRIÇÃO APROVADA!</h2>
+            <div id="popupAprovadoFotoContainer" style="margin-bottom: 20px;"></div>
+            <div id="popupAprovadoNome" style="font-size: 22px; color: #f8f9fa; font-weight: bold; word-break: break-word;"></div>
+            <p class="sub-mensagem">✅ PAGAMENTO CONFIRMADO!</p>
+        </div>
+    </div>
 
     <div id="conteudoPrincipal">
         <h1>🔐 PAINEL ADMINISTRATIVO CUP EDITION ⚽</h1>
@@ -608,6 +643,14 @@
         </div>
     </div>
 
+    <!-- ÁUDIO (OPCIONAL) -->
+    <audio id="somConfirmacao" preload="auto">
+        <source src="https://cup-edition.github.io/sistema-inscricoes/confirmado.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="somAprovacao" preload="auto">
+        <source src="https://cup-edition.github.io/sistema-inscricoes/aprovado.mp3" type="audio/mpeg">
+    </audio>
+
     <script>
         var firebaseConfig = {
           apiKey: "AIzaSyAR--VWkuPUBzKtJlEHPXnwBwbapB8JY_w",
@@ -623,6 +666,8 @@
         var db = firebase.database();
         var dataVisivel = true;
         const LIMITE_MAXIMO = 16;
+        let limiteAtual = LIMITE_MAXIMO; // 16 (padrão)
+        let limiteDinamicoAtivado = false; // controle para não ativar múltiplas vezes
         let quantidadeAnterior = 0;
         let idEmEdicao = null;
         let listaAnterior = [];
@@ -632,7 +677,7 @@
             if (snap.val() !== true) { firebase.database().goOnline(); }
         });
 
-        // ===== FUNÇÃO ADICIONADA: VERIFICA SE OS CONFIRMADOS PAGARAM =====
+        // ===== FUNÇÃO: VERIFICA SE OS CONFIRMADOS PAGARAM =====
         async function verificarPagamentosConfirmados() {
             try {
                 const snap = await db.ref('inscricoes').once('value');
@@ -679,6 +724,109 @@
             }
         }
 
+        // ===== FUNÇÃO: VERIFICA E ATIVA LIMITE DINÂMICO =====
+        function verificarAtivarLimiteDinamico(qtdAprovados) {
+            if (limiteDinamicoAtivado) return; // já foi ativado
+            
+            const agora = new Date();
+            const diaSemana = agora.getDay(); // 5 = sexta-feira
+            const hora = agora.getHours();
+            
+            // Verifica se é sexta-feira a partir das 20h (ou após)
+            if (diaSemana === 5 && hora >= 20) {
+                // Se tiver MENOS de 12 aprovados, ativa limite 12
+                if (qtdAprovados < 12) {
+                    limiteAtual = 12;
+                    limiteDinamicoAtivado = true;
+                    console.log(`🔁 LIMITE DINÂMICO ATIVADO: novo limite = ${limiteAtual} (menos de 12 aprovados na sexta 20h)`);
+                    
+                    // Se já tiver 12 ou mais aprovados, fecha automaticamente
+                    if (qtdAprovados >= 12) {
+                        db.ref('configuracao').set({ inscricoes_abertas: false });
+                        document.getElementById('avisoLimite').style.display = 'block';
+                        document.getElementById('avisoLimite').innerText = 
+                            `⚠️ LIMITE DE ${limiteAtual} APROVADOS ATINGIDO! INSCRIÇÕES ENCERRADAS AUTOMATICAMENTE.`;
+                    }
+                } else {
+                    // Se já tem 12 ou mais, mantém 16 e avisa
+                    console.log(`ℹ️ Já há ${qtdAprovados} aprovados, mantendo limite 16.`);
+                }
+            }
+        }
+
+        // ===== FUNÇÃO: VERIFICA LIMITE DINÂMICO PERIODICAMENTE =====
+        function verificarLimiteDinamicoPeriodicamente() {
+            db.ref('inscricoes').once('value', snap => {
+                const lista = snap.val() || [];
+                const qtdAprovados = lista.filter(i => i && i.status === 'aprovado').length;
+                verificarAtivarLimiteDinamico(qtdAprovados);
+                verificarLimiteAprovados(qtdAprovados);
+            });
+        }
+
+        // ===== FUNÇÃO: VERIFICA LIMITE DE APROVADOS =====
+        function verificarLimiteAprovados(qtd) {
+            const aviso = document.getElementById('avisoLimite');
+            
+            // Verifica se o limite dinâmico deve ser ativado
+            verificarAtivarLimiteDinamico(qtd);
+            
+            // Usa o limite atual (pode ser 16 ou 12)
+            if (limiteAtual - qtd === 0) {
+                db.ref('configuracao').set({ inscricoes_abertas: false });
+                aviso.style.display = 'block';
+                aviso.innerText = `⚠️ LIMITE DE ${limiteAtual} APROVADOS ATINGIDO! INSCRIÇÕES ENCERRADAS AUTOMATICAMENTE.`;
+            } else {
+                // Só reabre se o limite atual não foi atingido
+                if (qtd < limiteAtual) {
+                    db.ref('configuracao').set({ inscricoes_abertas: true });
+                }
+                aviso.style.display = 'none';
+            }
+            
+            // Atualiza o contador com o limite atual
+            const vagasRestantes = limiteAtual - qtd;
+            document.getElementById('contadorAprovados').innerText = 
+                `💰 ${qtd} APROVADOS | RESTAM ${vagasRestantes} VAGAS (LIMITE: ${limiteAtual})`;
+        }
+
+        // Chama a verificação a cada 1 minuto
+        setInterval(verificarLimiteDinamicoPeriodicamente, 60000);
+        
+        // Também verifica ao iniciar
+        setTimeout(verificarLimiteDinamicoPeriodicamente, 3000);
+
+        // ===== FUNÇÕES DE POPUP =====
+        function mostrarAvisoNovaConfirmacao(inscricao) {
+            const aviso = document.getElementById('avisoNovaConfirmacao');
+            const fotoContainer = document.getElementById('popupConfirmadoFotoContainer');
+            const nomeContainer = document.getElementById('popupConfirmadoNome');
+            const som = document.getElementById('somConfirmacao');
+            
+            fotoContainer.innerHTML = inscricao.foto
+                ? `<img src="${inscricao.foto}" style="width:140px;height:140px;border-radius:50%;object-fit:cover;border:4px solid #2ecc71;box-shadow:0 4px 15px rgba(0,0,0,0.5);">`
+                : `<div style="font-size:80px;line-height:140px;width:140px;height:140px;background:#2c3034;border-radius:50%;margin:0 auto;border:4px solid #2ecc71;">📄</div>`;
+            nomeContainer.innerText = inscricao.nome;
+            aviso.style.display = 'flex';
+            if (som) { som.currentTime = 0; som.load(); som.play().catch(e => console.log("Erro ao tocar áudio:", e)); }
+            setTimeout(() => { aviso.style.display = 'none'; }, 4000);
+        }
+
+        function mostrarAvisoNovaAprovacao(inscricao) {
+            const aviso = document.getElementById('avisoNovaAprovacao');
+            const fotoContainer = document.getElementById('popupAprovadoFotoContainer');
+            const nomeContainer = document.getElementById('popupAprovadoNome');
+            const som = document.getElementById('somAprovacao');
+            
+            fotoContainer.innerHTML = inscricao.foto
+                ? `<img src="${inscricao.foto}" style="width:140px;height:140px;border-radius:50%;object-fit:cover;border:4px solid #3498db;box-shadow:0 4px 15px rgba(0,0,0,0.5);">`
+                : `<div style="font-size:80px;line-height:140px;width:140px;height:140px;background:#2c3034;border-radius:50%;margin:0 auto;border:4px solid #3498db;">📄</div>`;
+            nomeContainer.innerText = inscricao.nome;
+            aviso.style.display = 'flex';
+            if (som) { som.currentTime = 0; som.load(); som.play().catch(e => console.log("Erro ao tocar áudio:", e)); }
+            setTimeout(() => { aviso.style.display = 'none'; }, 4000);
+        }
+
         function alternarMenuFlutuante() {
             const menu = document.getElementById('menuFlutuante');
             const btn = document.getElementById('btnMenu');
@@ -703,8 +851,12 @@
             if (document.getElementById('modalAprovacao') && event.target === document.getElementById('modalAprovacao')) fecharAprovacao();
             if (document.getElementById('fundoCadastro') && event.target === document.getElementById('fundoCadastro')) ocultarCadastro();
             if (document.getElementById('modalSuspensos') && event.target === document.getElementById('modalSuspensos')) fecharSuspensos();
+            
             const avisoNovaConfirmacao = document.getElementById('avisoNovaConfirmacao');
             if (avisoNovaConfirmacao && avisoNovaConfirmacao.style.display === 'flex') avisoNovaConfirmacao.style.display = 'none';
+            
+            const avisoNovaAprovacao = document.getElementById('avisoNovaAprovacao');
+            if (avisoNovaAprovacao && avisoNovaAprovacao.style.display === 'flex') avisoNovaAprovacao.style.display = 'none';
         });
 
         function mostrarCadastro() { document.getElementById('fundoCadastro').style.display = 'flex'; }
@@ -748,17 +900,6 @@
                     document.getElementById('senhaLogin').value = '';
                 }
             }).catch(erro => { alert("❌ Problema ao conectar à base de dados."); console.error(erro); });
-        }
-
-        function verificarLimiteAprovados(qtd) {
-            const aviso = document.getElementById('avisoLimite');
-            if (LIMITE_MAXIMO - qtd === 0) {
-                db.ref('configuracao').set({inscricoes_abertas: false});
-                aviso.style.display = 'block';
-            } else {
-                db.ref('configuracao').set({inscricoes_abertas: true});
-                aviso.style.display = 'none';
-            }
         }
 
         function lerFotoComoTexto(arquivo, callback) {
@@ -1056,7 +1197,6 @@
             db.ref('agendamento_reinicio').once('value').then(snap => {
                 const dados = snap.val();
                 if(dados) {
-                    // Primeiro, limpa todos os checkboxes
                     document.querySelectorAll('#diasSemanaContainer input[type="checkbox"]').forEach(cb => cb.checked = false);
                     
                     if(dados.diasSemana && Array.isArray(dados.diasSemana) && dados.diasSemana.length > 0) {
@@ -1069,14 +1209,12 @@
                         document.getElementById('horaAgendamento').value = '00:00';
                         bloquearCamposDataHora(true);
                         
-                        // Só calcula o próximo dia se NÃO estiver executado
                         if(!dados.executado) {
                             const primeiroDia = dados.diasSemana[0];
                             const proximaData = calcularProximoDiaDaSemana(primeiroDia);
                             document.getElementById('dataAgendamento').value = 
                                 `${proximaData.getFullYear()}-${String(proximaData.getMonth()+1).padStart(2,'0')}-${String(proximaData.getDate()).padStart(2,'0')}`;
                         } else {
-                            // Se já foi executado, usa o timestamp atual
                             if(dados.timestamp) {
                                 const d = new Date(dados.timestamp);
                                 document.getElementById('dataAgendamento').value = 
@@ -1088,7 +1226,6 @@
                         bloquearCamposDataHora(false);
                     }
 
-                    // Mostra status APENAS se NÃO estiver executado
                     if(dados.timestamp && !dados.executado) {
                         const d = new Date(dados.timestamp);
                         if(!dados.diasSemana || dados.diasSemana.length === 0) {
@@ -1280,8 +1417,15 @@
             if (listaAnterior.length > 0) {
                 listaAtual.forEach(item => {
                     const anterior = listaAnterior.find(a => a.id === item.id);
-                    if (anterior && anterior.status === 'pendente' && item.status === 'confirmado' && item.data_confirmacao) {
-                        mostrarAvisoNovaConfirmacao(item);
+                    if (anterior) {
+                        // Verifica mudança de PENDENTE para CONFIRMADO
+                        if (anterior.status === 'pendente' && item.status === 'confirmado' && item.data_confirmacao) {
+                            mostrarAvisoNovaConfirmacao(item);
+                        }
+                        // Verifica mudança de CONFIRMADO para APROVADO
+                        if (anterior.status === 'confirmado' && item.status === 'aprovado' && item.data_aprovacao) {
+                            mostrarAvisoNovaAprovacao(item);
+                        }
                     }
                 });
             }
@@ -1289,7 +1433,6 @@
 
             if (inscricoes.length === 0 || !inscricoes[0]) {
                 tabela.innerHTML = '<tr><td colspan="8" style="text-align: center; color: #adb5bd;">NENHUMA INSCRIÇÃO CADASTRADA AINDA.</td></tr>';
-                document.getElementById('contadorAprovados').innerText = `💰 0 APROVADOS | RESTAM 16 VAGAS`;
                 verificarLimiteAprovados(0);
                 return;
             }
@@ -1309,9 +1452,6 @@
             });
 
             var qtdAprovados = listaOrdenada.filter(i => i.status === 'aprovado').length;
-            var vagasRestantes = LIMITE_MAXIMO - qtdAprovados;
-
-            document.getElementById('contadorAprovados').innerText = `💰 ${qtdAprovados} APROVADOS | RESTAM ${vagasRestantes} VAGAS`;
             verificarLimiteAprovados(qtdAprovados);
 
             tabela.innerHTML = '';
@@ -1372,21 +1512,6 @@
             aplicarVisibilidadeData();
         }
 
-        function mostrarAvisoNovaConfirmacao(inscricao) {
-            const aviso = document.getElementById('avisoNovaConfirmacao');
-            const fotoContainer = document.getElementById('popupConfirmadoFotoContainer');
-            const nomeContainer = document.getElementById('popupConfirmadoNome');
-            const som = document.getElementById('somConfirmacao');
-            
-            fotoContainer.innerHTML = inscricao.foto
-                ? `<img src="${inscricao.foto}" style="width:140px;height:140px;border-radius:50%;object-fit:cover;border:4px solid #2ecc71;box-shadow:0 4px 15px rgba(0,0,0,0.5);">`
-                : `<div style="font-size:80px;line-height:140px;width:140px;height:140px;background:#2c3034;border-radius:50%;margin:0 auto;border:4px solid #2ecc71;">📄</div>`;
-            nomeContainer.innerText = inscricao.nome;
-            aviso.style.display = 'flex';
-            if (som) { som.currentTime = 0; som.load(); som.play().catch(e => console.log("Erro ao tocar áudio:", e)); }
-            setTimeout(() => { aviso.style.display = 'none'; }, 4000);
-        }
-
         function iniciarAtualizacaoAutomatica() {
             db.ref('inscricoes').on('value', function(dados) { atualizarLista(dados); });
             db.ref('pedidos_cadastro').on('value', function(snap) { atualizarListaPedidos(snap.val() || {}); });
@@ -1400,7 +1525,7 @@
             verificarPagamentosConfirmados();
         }
 
-        // ===== FUNÇÃO CORRIGIDA: EXECUTA REINÍCIO E REAGENDA AUTOMATICAMENTE =====
+        // ===== FUNÇÃO: EXECUTA REINÍCIO E REAGENDA AUTOMATICAMENTE =====
         function executarReinicio() {
             db.ref('inscricoes').once('value').then(snap => {
                 const lista = (snap.val() || []).map(insc => { 
@@ -1415,14 +1540,12 @@
                 db.ref('inscricoes').set(lista);
                 db.ref('configuracao').set({inscricoes_abertas: true, ultimo_reinicio: Date.now()});
                 
-                // 🔥 REAGENDAMENTO AUTOMÁTICO PARA PRÓXIMO DIA DA SEMANA
                 db.ref('agendamento_reinicio').once('value').then(snapAgend => {
                     const agendado = snapAgend.val();
                     if(agendado && agendado.diasSemana && agendado.diasSemana.length > 0) {
                         const agora = new Date();
                         const diaAtual = agora.getDay();
                         
-                        // Encontra o próximo dia da semana disponível (considerando TODOS os dias marcados)
                         let proximoDia = null;
                         let menorDiferenca = 8;
                         
@@ -1436,12 +1559,10 @@
                         });
                         
                         if(proximoDia !== null && menorDiferenca < 8) {
-                            // Calcula a data do próximo dia
                             const proximaData = new Date(agora);
                             proximaData.setDate(agora.getDate() + menorDiferenca);
                             proximaData.setHours(0, 0, 0, 0);
                             
-                            // Atualiza o timestamp para o próximo dia e reseta executado
                             db.ref('agendamento_reinicio').update({
                                 timestamp: proximaData.getTime(),
                                 executado: false
@@ -1449,11 +1570,9 @@
                             
                             console.log(`🔄 Reagendado automaticamente para ${proximaData.toLocaleString()}`);
                         } else {
-                            // Se não encontrou próximo dia, mantém como executado
                             db.ref('agendamento_reinicio/executado').set(true);
                         }
                     } else {
-                        // Se não tem dias da semana, apenas marca como executado
                         db.ref('agendamento_reinicio/executado').set(true);
                     }
                 });
@@ -1486,30 +1605,22 @@
             });
         }
 
-        // Listener para agendamento único (quando o timestamp chega)
         db.ref('agendamento_reinicio').on('value', snap => {
             const agendado = snap.val();
             if(agendado && !agendado.executado && agendado.timestamp <= Date.now()) {
-                // Verifica se é agendamento semanal ou único
                 if(!agendado.diasSemana || agendado.diasSemana.length === 0) {
                     executarReinicio();
                 }
             }
         });
 
-        // Verifica a cada 5 minutos
         setInterval(verificarAgendamentoSemanal, 300000);
         setTimeout(verificarAgendamentoSemanal, 5000);
 
-        // ===== VERIFICA AO VOLTAR PARA A ABA =====
         document.addEventListener('visibilitychange', function() {
             if (!document.hidden) {
-                // Você voltou para o painel
                 console.log('👀 Painel ativado - verificando pagamentos...');
-                
-                // Executa a verificação
                 verificarPagamentosConfirmados().then(() => {
-                    // Atualiza a lista de inscrições
                     db.ref('inscricoes').once('value', function(snap) {
                         processarLista(snap.val() || []);
                     });
@@ -1521,6 +1632,7 @@
             if (event.key === 'Escape') {
                 ocultarCadastro(); fecharEdicao(); fecharAgendamento(); fecharAprovacao(); fecharSuspensos();
                 document.getElementById('avisoNovaConfirmacao').style.display = 'none';
+                document.getElementById('avisoNovaAprovacao').style.display = 'none';
                 const menu = document.getElementById('menuFlutuante');
                 const btn = document.getElementById('btnMenu');
                 menu.style.display = 'none'; btn.classList.remove('aberto');
