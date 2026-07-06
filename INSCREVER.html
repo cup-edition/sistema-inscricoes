@@ -1257,6 +1257,28 @@
         let pagamentoConfirmado = false;
         let inscricaoAtual = null;
 
+        // ===== ÁUDIOS =====
+        const audioConfirmado = new Audio('https://cup-edition.github.io/sistema-inscricoes/confirmado.mp3');
+        const audioAprovado = new Audio('https://cup-edition.github.io/sistema-inscricoes/aprovado.mp3');
+
+        // Pré-carrega os áudios
+        audioConfirmado.load();
+        audioAprovado.load();
+
+        function tocarAudioConfirmado() {
+            try {
+                audioConfirmado.currentTime = 0;
+                audioConfirmado.play().catch(e => console.log('Audio play error:', e));
+            } catch(e) { console.log('Audio error:', e); }
+        }
+
+        function tocarAudioAprovado() {
+            try {
+                audioAprovado.currentTime = 0;
+                audioAprovado.play().catch(e => console.log('Audio play error:', e));
+            } catch(e) { console.log('Audio error:', e); }
+        }
+
         var suspensosList = [];
         db.ref('suspensos').on('value', function(snap) {
             const dados = snap.val() || {};
@@ -1363,6 +1385,9 @@
                             const data = await response.json();
                             
                             if (data.status === 'approved') {
+                                // Toca o áudio de aprovado quando o pagamento for confirmado
+                                tocarAudioAprovado();
+                                
                                 insc.status = 'aprovado';
                                 insc.pagamento_aprovado = true;
                                 insc.data_pagamento = Date.now();
@@ -1722,6 +1747,9 @@
 
                 if (data.status === 'approved') {
                     pagamentoConfirmado = true;
+                    
+                    // Toca o áudio de aprovado
+                    tocarAudioAprovado();
                     
                     document.getElementById('sucessoGigante').style.display = 'block';
                     document.getElementById('qrContainer').style.display = 'none';
@@ -2336,6 +2364,9 @@
                     inscricoes[encontradoIndex].data_confirmacao = new Date().getTime();
 
                     db.ref('inscricoes').set(inscricoes).then(() => {
+                        // TOCA O ÁUDIO "CONFIRMADO" QUANDO A INSCRIÇÃO É CONFIRMADA
+                        tocarAudioConfirmado();
+                        
                         atualizarTextoLoading('🎉 INSCRIÇÃO CONFIRMADA!', 'Redirecionando para o pagamento');
                         
                         const inscAtualizada = inscricoes[encontradoIndex];
