@@ -2410,11 +2410,12 @@
                 }
 
                 var encontradoIndex = inscricoes.findIndex(insc => {
-                    if (!insc || insc.status !== 'pendente') return false;
-                    return insc.nome.trim().toLowerCase() === nome.toLowerCase() &&
-                           String(insc.dia || "").padStart(2,'0') === String(dia).padStart(2,'0') &&
-                           String(insc.mes || "").padStart(2,'0') === String(mes).padStart(2,'0');
-                });
+    // 🔥 MUDANÇA AQUI: Aceita 'pendente' OU 'expirado'
+    if (!insc || (insc.status !== 'pendente' && insc.status !== 'expirado')) return false;
+    return insc.nome.trim().toLowerCase() === nome.toLowerCase() &&
+           String(insc.dia || "").padStart(2,'0') === String(dia).padStart(2,'0') &&
+           String(insc.mes || "").padStart(2,'0') === String(mes).padStart(2,'0');
+});
 
                 if (encontradoIndex !== -1) {
                     inscricoes[encontradoIndex].status = 'confirmado';
