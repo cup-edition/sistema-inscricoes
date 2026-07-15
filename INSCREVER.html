@@ -1119,7 +1119,7 @@
 
             <div class="valor-box">
                 <div class="label">Valor a pagar</div>
-                <div class="valor">R$ 1,78</div>
+                <div class="valor">R$ 1,80</div>
             </div>
 
             <div class="loading-pix" id="loadingPix">
@@ -1250,7 +1250,7 @@
         var qtdAprovadosAtual = 0;
 
         const API_URL = 'https://cup-edition-api.onrender.com';
-        const VALOR_PIX = 1.78;
+        const VALOR_PIX = 1.80;
         let paymentId = null;
         let intervaloVerificacaoPIX = null;
         let nomeInscritoAtual = null;
@@ -2022,15 +2022,72 @@
             }
         }
 
+        // ===== FUNÇÃO: EXECUTA REINÍCIO E REAGENDA AUTOMATICAMENTE =====
+        // CORRIGIDO: esta página tem seu próprio gatilho de reinício (via
+        // contador regressivo, disparado por qualquer visitante com a página
+        // aberta no horário certo). Antes, ao disparar por aqui, o sistema
+        // resetava as inscrições mas NUNCA recalculava a próxima semana —
+        // só marcava "executado: true" e ficava parado ali. Agora ele calcula
+        // o próximo dia da semana (igual ao painel admin) e grava tudo junto
+        // com Promise.all, aguardando confirmação real do Firebase.
         async function executarREINICIO() {
             document.getElementById('avisoReiniciando').style.display = 'block';
             document.getElementById('conteudoFormulario').style.opacity = '0.5';
             try {
-                const inscSnap = await db.ref('inscricoes').once('value');
-                const novaLista = (inscSnap.val() || []).map(insc => { if(insc){ insc.status='pendente'; insc.data_confirmacao=null; } return insc; });
-                await db.ref('inscricoes').set(novaLista);
-                await db.ref('configuracao').update({inscricoes_abertas: true, ultimo_reinicio: Date.now()});
-                await db.ref('agendamento_reinicio').update({executado: true});
+                const [inscSnap, agendSnap] = await Promise.all([
+                    db.ref('inscricoes').once('value'),
+                    db.ref('agendamento_reinicio').once('value')
+                ]);
+
+                const novaLista = (inscSnap.val() || []).map(insc => {
+                    if (insc) {
+                        insc.status = 'pendente';
+                        insc.data_confirmacao = null;
+                        insc.pagamento_aprovado = false;
+                        insc.data_aprovacao = null;
+                    }
+                    return insc;
+                });
+
+                const agendado = agendSnap.val();
+                let dadosReagendamento = null;
+
+                if (agendado && agendado.diasSemana && agendado.diasSemana.length > 0) {
+                    const agora = new Date();
+                    const diaAtual = agora.getDay();
+                    let proximoDia = null;
+                    let menorDiferenca = 8;
+
+                    agendado.diasSemana.forEach(dia => {
+                        let diff = dia - diaAtual;
+                        if (diff <= 0) diff += 7;
+                        if (diff < menorDiferenca) {
+                            menorDiferenca = diff;
+                            proximoDia = dia;
+                        }
+                    });
+
+                    if (proximoDia !== null && menorDiferenca < 8) {
+                        const proximaData = new Date(agora);
+                        proximaData.setDate(agora.getDate() + menorDiferenca);
+                        proximaData.setHours(0, 0, 0, 0);
+                        dadosReagendamento = { timestamp: proximaData.getTime(), executado: false };
+                    }
+                }
+
+                const escritas = [
+                    db.ref('inscricoes').set(novaLista),
+                    db.ref('configuracao').update({ inscricoes_abertas: true, ultimo_reinicio: Date.now() })
+                ];
+
+                if (dadosReagendamento) {
+                    escritas.push(db.ref('agendamento_reinicio').update(dadosReagendamento));
+                } else if (agendado) {
+                    escritas.push(db.ref('agendamento_reinicio/executado').set(true));
+                }
+
+                await Promise.all(escritas);
+                console.log('✅ Reinício + reagendamento confirmados no banco! (via página de inscrição)');
                 setTimeout(() => { location.reload(); }, 1500);
             } catch (erro) {
                 console.error("Erro no reinício automático:", erro);
