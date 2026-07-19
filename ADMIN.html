@@ -1410,25 +1410,63 @@
         }
 
         function processarLista(inscricoes) {
-            var tabela = document.getElementById('lista_inscricoes');
-            inscritosCache = inscricoes.filter(Boolean);
-
-            const listaAtual = inscricoes.filter(Boolean);
-            if (listaAnterior.length > 0) {
-                listaAtual.forEach(item => {
-                    const anterior = listaAnterior.find(a => a.id === item.id);
-                    if (anterior) {
-                        // Verifica mudança de PENDENTE para CONFIRMADO
-                        if (anterior.status === 'pendente' && item.status === 'confirmado' && item.data_confirmacao) {
-                            mostrarAvisoNovaConfirmacao(item);
-                        }
-                        // Verifica mudança de CONFIRMADO para APROVADO
-                        if (anterior.status === 'confirmado' && item.status === 'aprovado' && item.data_aprovacao) {
-                            mostrarAvisoNovaAprovacao(item);
-                        }
-                    }
-                });
+    var tabela = document.getElementById('lista_inscricoes');
+    
+    // ===== CORREÇÃO: Verifica se tem data_confirmacao =====
+    let precisaSalvar = false;
+    inscricoes = inscricoes.map(item => {
+        if(item && item.data_confirmacao) {
+            // Se tem data_confirmacao, NUNCA pode ser pendente ou expirado
+            if (item.status === 'pendente' || item.status === 'expirado') {
+                item.status = 'confirmado';
+                precisaSalvar = true;
+                console.log(`🔧 Corrigindo ${item.nome} de ${item.status} para CONFIRMADO`);
             }
+        }
+        
+        // Se pagamento_aprovado é false e status é aprovado, volta para confirmado
+        if(item && item.pagamento_aprovado === false && item.status === 'aprovado') {
+            if(item.data_confirmacao) {
+                item.status = 'confirmado';
+                item.data_aprovacao = null;
+                precisaSalvar = true;
+                console.log(`🔧 Corrigindo ${item.nome} de APROVADO para CONFIRMADO`);
+            }
+        }
+        
+        // Se pagamento_aprovado é true e status não é aprovado, corrige
+        if(item && item.pagamento_aprovado === true && item.status !== 'aprovado') {
+            if(item.data_confirmacao) {
+                item.status = 'aprovado';
+                item.data_aprovacao = Date.now();
+                precisaSalvar = true;
+                console.log(`🔧 Corrigindo ${item.nome} de ${item.status} para APROVADO`);
+            }
+        }
+        return item;
+    });
+    
+    if(precisaSalvar) {
+        db.ref('inscricoes').set(inscricoes).then(() => {
+            console.log('✅ Correções salvas no Firebase!');
+        });
+    }
+    inscritosCache = inscricoes.filter(Boolean);
+
+    const listaAtual = inscricoes.filter(Boolean);
+    if (listaAnterior.length > 0) {
+        listaAtual.forEach(item => {
+            const anterior = listaAnterior.find(a => a.id === item.id);
+            if (anterior) {
+                if (anterior.status === 'pendente' && item.status === 'confirmado' && item.data_confirmacao) {
+                    mostrarAvisoNovaConfirmacao(item);
+                }
+                if (anterior.status === 'confirmado' && item.status === 'aprovado' && item.data_aprovacao) {
+                    mostrarAvisoNovaAprovacao(item);
+                }
+            }
+        });
+    }
             listaAnterior = JSON.parse(JSON.stringify(listaAtual));
 
             if (inscricoes.length === 0 || !inscricoes[0]) {
