@@ -1,0 +1,1540 @@
+<!INSCRICAO html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>INSCRIÇÃO CUP EDITION</title>
+    <link rel="icon" type="image/png" href="https://cup-edition.github.io/sistema-inscricoes/CUP%20EDITION.png">
+    
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase.js"></script>
+    <style>
+        * {margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif;}
+        body {
+            background-color: #343a40;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start; 
+            min-height: 100vh;
+            padding: 20px;
+            position: relative;
+        }
+        
+        .aviso-topo {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+            padding: 15px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 16px;
+            text-align: center;
+            width: 100%;
+            max-width: 450px;
+            margin-bottom: 10px;
+            display: none;
+        }
+
+        .botao-cadastrar {
+            position: absolute !important;
+            top: 20px !important;
+            left: 50% !important;
+            transform: translateX(-50%) !important;
+            background-color: #17a2b8;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            width: auto;
+            font-weight: normal;
+            z-index: 99;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            white-space: nowrap;
+            text-align: center;
+            line-height: 1.4;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .botao-cadastrar:hover {background-color: #138496; color: white; text-decoration: none;}
+
+        .alerta-vagas-piscando {
+            position: absolute !important;
+            top: 75px !important;
+            left: 50% !important;
+            transform: translateX(-50%) !important;
+            width: 90%;
+            max-width: 450px;
+            background-color: rgba(211, 158, 0, 0.45);
+            color: #f8f9fa;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+            border: 2px solid rgba(255, 238, 186, 0.6);
+            padding: 10px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 16px;
+            text-align: center;
+            z-index: 10;
+            display: none;
+            animation: piscar 0.6s infinite alternate;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            backdrop-filter: blur(4px);
+        }
+
+        @keyframes piscar {
+            0 {
+                background-color: rgba(211, 158, 0, 0.40);
+                border-color: rgba(181, 135, 0, 0.5);
+            }
+            100% {
+                background-color: rgba(255, 193, 7, 0.75);
+                border-color: rgba(255, 243, 205, 0.9);
+                color: #000000;
+                text-shadow: none;
+            }
+        }
+
+        .alerta-inscricoes-abertas {
+            position: absolute !important;
+            top: 75px !important;
+            left: 50% !important;
+            transform: translateX(-50%) !important;
+            width: 90%;
+            max-width: 450px;
+            background-color: rgba(30, 158, 79, 0.45);
+            color: #f8f9fa;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+            border: 2px solid rgba(197, 255, 216, 0.6);
+            padding: 10px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 16px;
+            text-align: center;
+            z-index: 10;
+            display: none;
+            animation: piscarVerde 0.6s infinite alternate;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            backdrop-filter: blur(4px);
+        }
+
+        @keyframes piscarVerde {
+            0% {
+                background-color: rgba(30, 158, 79, 0.40);
+                border-color: rgba(20, 130, 65, 0.5);
+            }
+            100% {
+                background-color: rgba(39, 174, 96, 0.75);
+                border-color: rgba(212, 237, 218, 0.9);
+                color: #000000;
+                text-shadow: none;
+            }
+        }
+
+        .aviso-proxima-inscricao {
+            position: absolute !important;
+            top: 78px !important;
+            left: 50% !important;
+            transform: translateX(-50%) !important;
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+            padding: 10px 15px;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 16px;
+            width: 100%;
+            max-width: 450px;
+            text-align: center;
+            height: 44px;
+            z-index: 5;
+            opacity: 0;
+            visibility: hidden;
+            transition: none;
+        }
+        .aviso-proxima-inscricao.visivel {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .segundos-vermelho { color: #dc3545; }
+
+        .container {
+            background: #2d3748;
+            padding: 15px 30px 30px 30px; 
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            width: 100%;
+            max-width: 450px;
+            text-align: center;
+            border: 2px solid #dc3545;
+            position: absolute !important;
+            top: 140px !important;
+            left: 50% !important;
+            transform: translateX(-50%) !important;
+            margin: 0 !important;
+        }
+        
+        .imagem-campim {
+            width: 100%;
+            max-width: 340px;
+            margin: 0 auto 15px auto !important;
+            display: block;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        .subtitulo-principal {
+            color: #f8f9fa;
+            font-size: 19px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            letter-spacing: 1px;
+            text-align: center;
+            width: 100%;
+            display: block;
+        }
+        
+        p.descricao {
+            color: #cbd5e0;
+            margin-bottom: 25px;
+            font-size: 14px;
+            text-align: center;
+            width: 100%;
+            padding: 0 5px;
+            line-height: 1.5;
+        }
+        
+        .aviso-reiniciando {background-color: #f39c12; color: #fff; border: 1px solid #e67e22; padding: 12px; border-radius: 6px; font-weight: bold; font-size: 15px; margin-bottom: 15px; display: none;}
+        .grupo-campo {margin-bottom: 15px; text-align: left;}
+        label {display: block; margin-bottom: 6px; font-weight: bold; color: #e2e8f0;}
+        select, input {width: 100%; padding: 12px; border: 1px solid #4a5568; border-radius: 6px; font-size: 16px; background-color: #1a202c; color: #f7fafc;}
+        
+        .data-container {
+            display: flex;
+            gap: 4%;
+            width: 100%;
+        }
+        .data-container select:first-child { width: 35%; }
+        .data-container select:last-child { width: 61%; }
+        
+        #botaoConfirmar {
+            background-color: #27ae60; color: white; border: none; padding: 14px; border-radius: 6px; cursor: pointer; font-size: 16px; width: 100%; margin-top: 10px; font-weight: bold; transition: background 0.3s;
+        }
+        #botaoConfirmar:hover {background-color: #219653;}
+
+        .botao-encerrado {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 6px;
+            font-size: 16px;
+            width: 100%;
+            margin-top: 10px;
+            font-weight: bold;
+            text-transform: uppercase;
+            display: none;
+            cursor: not-allowed;
+        }
+
+        /* ===== AVISO DE SUSPENSO ===== */
+        #avisoSuspenso {
+            display: none;
+            background-color: #3d0000;
+            border: 2px solid #dc3545;
+            border-radius: 8px;
+            padding: 8px 16px;
+            margin-top: 10px;
+            text-align: center;
+            animation: pulsarVermelho 1.2s infinite;
+        }
+        #avisoSuspenso .suspenso-icone {
+            font-size: 20px;
+            display: block;
+            margin-bottom: 2px;
+        }
+        #avisoSuspenso .suspenso-titulo {
+            color: #ff4d4d;
+            font-size: 13px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            display: block;
+            margin-bottom: 2px;
+        }
+        #avisoSuspenso .suspenso-subtitulo {
+            color: #ffaaaa;
+            font-size: 11px;
+            font-weight: normal;
+            display: block;
+        }
+        @keyframes pulsarVermelho {
+            0%   { box-shadow: 0 0 0px rgba(220, 53, 69, 0); border-color: #dc3545; }
+            50%  { box-shadow: 0 0 12px rgba(220, 53, 69, 0.7); border-color: #ff6b6b; }
+            100% { box-shadow: 0 0 0px rgba(220, 53, 69, 0); border-color: #dc3545; }
+        }
+        /* ============================= */
+        
+        .resultado {margin-top: 20px; padding: 15px; border-radius: 6px; font-weight: bold; font-size: 15px; display: none;}
+        .sucesso {background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb;}
+        .erro {background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb;}
+        
+        .foto-container {
+            display: flex; align-items: center; justify-content: space-between;
+            gap: 12px;
+        }
+        
+        .foto-preview {
+            width: 100px; height: 100px;
+            border-radius: 50%; object-fit: cover; 
+            border: 2px solid #dc3545;
+            display: none;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+
+        .botao-lista {
+            position: fixed; bottom: 20px; right: 20px;
+            background-color: #17a2b8;
+            color: white; border: none;
+            padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; width: auto;
+            font-weight: normal; z-index: 99;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        .botao-lista:hover {background-color: #138496; color: white; text-decoration: none;}
+
+        .botao-regras {
+            position: fixed; bottom: 20px; left: 20px;
+            background-color: #17a2b8; color: white; border: none;
+            padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; width: auto;
+            font-weight: normal; z-index: 99;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            text-decoration: none;
+        }
+        .botao-regras:hover {background-color: #138496; color: white; text-decoration: none;}
+
+        .janela-flutuante {
+            position: fixed;
+            top: 50%; left: 50%; 
+            transform: translate(-50%, -50%) scale(0.7);
+            background: #2d3748;
+            width: 90%; max-width: 400px; max-height: 85vh;
+            border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            z-index: 1000; overflow: hidden;
+            border: 2px solid #dc3545;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease-in-out;
+        }
+
+        .janela-regras-cheia {
+            position: fixed;
+            top: 50%; left: 50%; 
+            transform: translate(-50%, -50%) scale(0.7);
+            background: #2d3748;
+            width: 95%; height: 90vh; max-width: 600px;
+            border-radius: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.5);
+            z-index: 1011; overflow: hidden;
+            border: 2px solid #dc3545;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease-in-out;
+        }
+
+        .janela-flutuante.aberta, .janela-regras-cheia.aberta {
+            opacity: 1;
+            visibility: visible;
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .conteudo-regras-texto {
+            padding: 20px; overflow-y: auto; height: calc(100% - 48px);
+            color: #f7fafc; text-align: left; font-size: 15px; line-height: 1.6;
+        }
+        .conteudo-regras-texto .regra-item {
+            margin-bottom: 18px; padding-bottom: 12px; border-bottom: 1px solid #4a5568;
+        }
+        .conteudo-regras-texto .regra-item:last-child { border-bottom: none; }
+        .conteudo-regras-texto h3 { color: #17a2b8; font-size: 15px; margin-bottom: 4px; font-weight: bold; }
+        .conteudo-regras-texto p { color: #cbd5e0; font-size: 14px; }
+        .conteudo-regras-texto .destaque-regra { color: #ffc107; font-weight: bold; }
+        .rodape-regras-box {
+            background-color: #1a202c; padding: 12px; border-radius: 6px;
+            text-align: center; margin-top: 15px; border: 1px solid #dc3545;
+        }
+        .rodape-regras-box p { color: #ffffff; font-size: 13px; margin-bottom: 5px; }
+
+        .cabecalho-janela {
+            background-color: #1a202c; color: white; padding: 12px;
+            font-weight: bold; font-size: 16px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .fechar-janela {
+            background: none; border: none; color: white;
+            font-size: 20px; cursor: pointer; width: auto; padding: 0; margin: 0;
+        }
+        .conteudo-janela {padding: 15px; overflow-y: auto; max-height: 70vh;}
+        .item-inscrito {display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid #4a5568;}
+        .foto-inscrito {width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid #28a745; }
+        .dados-inscrito {flex: 1; text-align: left;}
+        .nome-inscrito {font-weight: 600; color: #f7fafc; font-size: 15px;}
+        .data-hora-inscrito {font-size: 12px; color: #cbd5e0; margin-top: 2px;}
+        .status-aprovado-azul {color: #28a745; font-weight: bold;}
+
+        .fundo-escuro {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.6); z-index: 999;
+            opacity: 0; visibility: hidden; transition: all 0.3s ease-in-out;
+        }
+        .fundo-escuro.visivel { opacity: 1; visibility: visible; }
+
+        .grupo-foto {margin: 10px 0;}
+        .foto-perfil-preview {width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 2px solid #dc3545; margin: 10px auto; display: block; box-shadow: 0 4px 10px rgba(0,0,0,0.3);}
+        .aviso-obrigatorio {color: #dc3545; font-size: 13px; margin: 5px 0; display: none;}
+
+        #btnEnviarCadastro {
+            background-color: #27ae60; color: white; border: none; padding: 14px; border-radius: 6px; cursor: pointer; font-size: 16px; width: 100%; margin-top: 10px; font-weight: bold; transition: background 0.3s;
+        }
+        #btnEnviarCadastro:hover {background-color: #219653;}
+        #btnEnviarCadastro:disabled {background-color: #95a5a6; cursor: not-allowed;}
+
+        /* ===== LOADING OVERLAY - MEIO DA TELA ===== */
+        #loadingOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(6px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 99999;
+            animation: fadeInOverlay 0.4s ease-out;
+        }
+
+        #loadingOverlay.ativo {
+            display: flex;
+        }
+
+        @keyframes fadeInOverlay {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .loading-content {
+            background: #2d3748;
+            border-radius: 20px;
+            padding: 40px 50px;
+            max-width: 450px;
+            width: 90%;
+            text-align: center;
+            border: 2px solid #17a2b8;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+            animation: scaleIn 0.5s ease-out;
+            position: relative;
+        }
+
+        @keyframes scaleIn {
+            from { transform: scale(0.7); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .loading-content .spinner-grande {
+            width: 70px;
+            height: 70px;
+            border: 6px solid #4a5568;
+            border-top: 6px solid #17a2b8;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-content .titulo-loading {
+            color: #f8f9fa;
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .loading-content .subtitulo-loading {
+            color: #a0aec0;
+            font-size: 15px;
+            margin-bottom: 15px;
+        }
+
+        .loading-content .barra-progresso {
+            width: 100%;
+            height: 4px;
+            background: #4a5568;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .loading-content .barra-progresso .progresso-interno {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #17a2b8, #2ecc71);
+            border-radius: 4px;
+            animation: progressBar 1.5s ease-in-out forwards;
+        }
+
+        @keyframes progressBar {
+            0% { width: 0%; }
+            50% { width: 60%; }
+            100% { width: 100%; }
+        }
+
+        .loading-content .pontos-animados::after {
+            content: '';
+            animation: pontos 1.2s steps(3, end) infinite;
+        }
+
+        @keyframes pontos {
+            0% { content: ''; }
+            33% { content: '.'; }
+            66% { content: '..'; }
+            100% { content: '...'; }
+        }
+
+        .loading-content .icone-check {
+            display: none;
+            font-size: 60px;
+            margin-bottom: 10px;
+            animation: pulseCheck 0.6s ease-out;
+        }
+
+        @keyframes pulseCheck {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.3); }
+            100% { transform: scale(1); }
+        }
+
+        .loading-content .icone-check.mostrar {
+            display: block;
+        }
+        /* ===== FIM DO LOADING OVERLAY ===== */
+
+        .titulo-lista-com-contador {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            color: #f7fafc;
+            font-weight: bold;
+            font-size: 16px;
+            padding: 0 5px;
+        }
+        .titulo-lista-com-contador .contador-lista {
+            background-color: #28a745;
+            color: white;
+            border-radius: 50%;
+            padding: 2px 12px;
+            font-size: 14px;
+            min-width: 28px;
+            text-align: center;
+            line-height: 26px;
+        }
+
+        .campo-data-oculto {
+            display: none !important;
+        }
+
+        @media (max-width: 480px) {
+            .botao-regras, .botao-lista { font-size: 11px; padding: 6px 10px; }
+            .botao-cadastrar { top: 10px !important; font-size: 12px; padding: 8px 12px; }
+            .alerta-vagas-piscando { top: 52px !important; font-size: 16px !important; padding: 10px; width: 94%; height: 40px; }
+            .alerta-inscricoes-abertas { top: 52px !important; font-size: 16px !important; padding: 10px; width: 94%; height: 40px; }
+            .aviso-proxima-inscricao { top: 52px !important; font-size: 14px !important; padding: 10px; width: 94%; height: 40px; }
+            .container { top: 105px !important; width: 94% !important; max-width: 94% !important; padding: 12px 20px 20px 20px; }
+            .container .imagem-campim { max-width: 290px; margin: 0 auto 8px auto !important; }
+            .container label { font-size: 16px; }
+            .container .subtitulo-principal { font-size: 19px; }
+            .container p.descricao { font-size: 14px; }
+            .container select, .container input { font-size: 16px; }
+            .container #botaoConfirmar, .container .botao-encerrado { font-size: 16px; }
+            .janela-regras-cheia { width: 92%; height: 82vh; border-radius: 10px; border: 2px solid #dc3545; }
+            
+            .titulo-lista-com-contador { font-size: 14px; }
+            .titulo-lista-com-contador .contador-lista { font-size: 12px; padding: 1px 10px; min-width: 22px; line-height: 22px; }
+            
+            .loading-content { padding: 30px 25px; }
+            .loading-content .titulo-loading { font-size: 18px; }
+            .loading-content .subtitulo-loading { font-size: 13px; }
+            .loading-content .spinner-grande { width: 50px; height: 50px; }
+        }
+
+        @media (max-width: 380px) {
+            .loading-content { padding: 25px 20px; }
+            .loading-content .titulo-loading { font-size: 16px; }
+            .loading-content .subtitulo-loading { font-size: 12px; }
+        }
+
+    </style>
+
+    <script>
+        document.addEventListener('contextmenu', function(e) { e.preventDefault(); return false; });
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'F12' || e.keyCode === 123) { e.preventDefault(); return false; }
+            if (e.ctrlKey && (e.key === 'u' || e.key === 'U' || e.key === 's' || e.key === 'S' || e.key === 'c' || e.key === 'C' || e.key === 'V' || e.key === 'v' || (e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'i' || e.key === 'j')))) { e.preventDefault(); return false; }
+        });
+    </script>
+</head>
+<body>
+
+    <button class="botao-cadastrar" onclick="abrirJanelaCadastro()">SOU NOVO, QUERO ME CADASTRAR😎</button>
+
+    <div id="alertaVagasRapidas" class="alerta-vagas-piscando"></div>
+    <div id="alertaInscricoesAbertas" class="alerta-inscricoes-abertas">✍🏻INSCRIÇÕES ABERTAS✍🏻</div>
+
+    <div id="avisoProximaInscricao" class="aviso-proxima-inscricao">
+        ⏳ PRÓXIMA INSCRIÇÃO EM: <span id="dataReinicioTexto">Carregando...</span>
+    </div>
+
+    <button onclick="abrirJanelaRegras()" class="botao-regras">📄 REGRAS</button>
+    <button class="botao-lista" onclick="abrirJanelaLista()">✅LISTA DE CONFIRMADOS✅</button>
+
+    <div id="fundoEscuro" class="fundo-escuro" onclick="fecharTodasJanelasManual()"></div>
+
+    <div id="janelaRegras" class="janela-regras-cheia">
+        <div class="cabecalho-janela">
+            <span>📄 REGRAS CUP EDITION CAMPIM FC ⚽</span>
+            <button class="fechar-janela" onclick="fecharTodasJanelasManual()">&times;</button>
+        </div>
+        <div class="conteudo-regras-texto">
+            <div class="regra-item">
+                <h3>1-DURAÇÃO DO JOGO:</h3>
+                <p>8 minutos, divididos em dois tempos de 4 minutos, com troca de lado do campo. <span class="destaque-regra">(Prorrogação de 4 minutos e pênaltis apenas na final, caso haja empate no tempo normal)</span></p>
+            </div>
+            <div class="regra-item">
+                <h3>2-GOL DE GOLEIRO:</h3>
+                <p>Apenas se for chute a gol de primeira, mais de 1 toque na bola invalidará o gol.</p>
+            </div>
+            <div class="regra-item">
+                <h3>3-MÃO COM BRAÇO ABERTO:</h3>
+                <p>É proibido o uso das mãos para manipular a bola depois do meio de campo, exceto pelo goleiro dentro de sua área. <span class="destaque-regra">(Será cobrado uma falta direta sem barreira atrás da linha do pênalti)</span></p>
+            </div>
+            <div class="regra-item">
+                <h3>4-FALTAS LEVES:</h3>
+                <p>Será cobrado uma falta não direta por quem sofreu a falta e o adversário terá que dar pelo menos um passo de distância.</p>
+            </div>
+            <div class="regra-item">
+                <h3>5-FALTAS AGRESSIVAS:</h3>
+                <p>Agressões físicas no adversário, como chutes, carrinho, voadora, murro, cotoveladas, tapas. <span class="destaque-regra">(Será cobrado uma falta direta sem barreira atrás da linha do pênalti | 8 passos)</span></p>
+            </div>
+            <div class="regra-item">
+                <h3>6-FALTAS COM LESÃO GRAVE E BRIGAS:</h3>
+                <p>Será suspenso de uma ou até duas edições de Cup Edition.</p>
+            </div>
+            <div class="regra-item">
+                <h3>7-PÊNALTI:</h3>
+                <p>É concedido dentro da área quando um toque de mão é cometido pelo jogador defensor contra o time atacante. <span class="destaque-regra">(6 passos)</span></p>
+            </div>
+            <div class="regra-item">
+                <h3>8-RECUADA:</h3>
+                <p>O goleiro não pode segurar a bola recuada com as mãos mais de uma vez por lance de jogo, só podendo pegar com as mãos se o último toque for do time adversário e ficar com ela nas mãos por no máximo por 8 segundos. <span class="destaque-regra">(Será cobrado uma falta direta sem barreira atrás da linha do pênalti caso descumpra a regra | 8 passos)</span></p>
+            </div>
+            <div class="regra-item">
+                <h3>9-ABANDONO:</h3>
+                <p>Se o jogador abandonar a partida sem motivo contundente, seu time será desqualificado.</p>
+            </div>
+            <div class="regra-item">
+                <h3>10-ATRASO PRO JOGO:</h3>
+                <p>Se chegar atrasado pro jogo e tiver jogador sem time no campo, você poderá perder sua vaga.</p>
+            </div>
+            <div class="regra-item">
+                <h3>11-ARBITRAGEM:</h3>
+                <p>O jogador que confrontar quem estiver apitando o jogo será suspenso de uma edição de copinha.</p>
+            </div>
+            <div class="rodape-regras-box">
+                <p>📌 <b>INSCRIÇÃO DO NOME PELO SITE, DISPONÍVEL TODA QUINTA-FEIRA MEIA-NOITE.</b>
+                <p>📌 <b>SORTEIO DE TIMES SEXTA-FEIRA ÀS 20:00 HORAS PELO GOOGLE MEET NO SITE.</b>
+                <p style="color: #17a2b8; margin-top: 8px; font-weight: bold; font-size: 12px;">ARBITRAGEM - ADM e de sua escolha</p>
+                <p style="color: #cbd5e0; font-size: 11px;">(RYAN, JUNIOR, VICTOR, DAVI OU PAULO ANDRÉ)</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="janelaLista" class="janela-flutuante">
+        <div class="cabecalho-janela">
+            <span class="titulo-lista-com-contador">
+                <span>📋 LISTA DE CONFIRMADOS</span>
+                <span class="contador-lista" id="contadorLista">0</span>
+            </span>
+            <button class="fechar-janela" onclick="fecharTodasJanelasManual()">&times;</button>
+        </div>
+        <div class="conteudo-janela" id="conteudoLista">
+            <div id="listaAprovados">
+                <p style="text-align:center; color:#cbd5e0;">Carregando...</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="janelaCadastro" class="janela-flutuante">
+        <div class="cabecalho-janela">
+            <span>📝 NOVO CADASTRO</span>
+            <button class="fechar-janela" onclick="fecharTodasJanelasManual()">&times;</button>
+        </div>
+        <div class="conteudo-janela">
+            <div class="grupo-campo">
+                <label>NOME / APELIDO: *</label>
+                <input type="text" id="novoNome" placeholder="Digite seu nome" oninput="this.value = this.value.toUpperCase()">
+                <div class="aviso-obrigatorio" id="avisoNome">Campo obrigatório</div>
+            </div>
+            <div class="grupo-campo">
+                <label>DATA DE NASCIMENTO: *</label>
+                <div class="data-container">
+                    <select id="novoDia">
+                        <option value="">Dia</option>
+                        <option value="01">01</option> <option value="02">02</option> <option value="03">03</option>
+                        <option value="04">04</option> <option value="05">05</option> <option value="06">06</option>
+                        <option value="07">07</option> <option value="08">08</option> <option value="09">09</option>
+                        <option value="10">10</option> <option value="11">11</option> <option value="12">12</option>
+                        <option value="13">13</option> <option value="14">14</option> <option value="15">15</option>
+                        <option value="16">16</option> <option value="17">17</option> <option value="18">18</option>
+                        <option value="19">19</option> <option value="20">20</option> <option value="21">21</option>
+                        <option value="22">22</option> <option value="23">23</option> <option value="24">24</option>
+                        <option value="25">25</option> <option value="26">26</option> <option value="27">27</option>
+                        <option value="28">28</option> <option value="29">29</option> <option value="30">30</option>
+                        <option value="31">31</option>
+                    </select>
+                    <select id="novoMes">
+                        <option value="">Mês</option>
+                        <option value="01">JANEIRO</option> <option value="02">FEVEREIRO</option> <option value="03">MARÇO</option>
+                        <option value="04">ABRIL</option> <option value="05">MAIO</option> <option value="06">JUNHO</option>
+                        <option value="07">JULHO</option> <option value="08">AGOSTO</option> <option value="09">SETEMBRO</option>
+                        <option value="10">OUTUBRO</option> <option value="11">NOVEMBRO</option> <option value="12">DEZEMBRO</option>
+                    </select>
+                </div>
+                <div class="aviso-obrigatorio" id="avisoData">Dia e mês obrigatórios</div>
+            </div>
+            <div class="grupo-campo grupo-foto">
+                <label>FOTO DE PERFIL: *</label>
+                <input type="file" id="novaFoto" accept="image/*" onchange="previsualizarETemperarFoto(event)">
+                <img id="previewFoto" class="foto-perfil-preview" src="https://via.placeholder.com/120?text=SEM+FOTO" alt="Prévia da foto">
+                <div class="aviso-obrigatorio" id="avisoFoto">Envie uma foto</div>
+            </div>
+            <button onclick="enviarCadastro()" id="btnEnviarCadastro">ENVIAR PARA ANÁLISE</button>
+            <div id="msgCadastro" class="resultado"></div>
+        </div>
+    </div>
+
+    <!-- ===== LOADING OVERLAY - MEIO DA TELA ===== -->
+    <div id="loadingOverlay">
+        <div class="loading-content">
+            <div class="spinner-grande" id="spinnerLoading"></div>
+            <div class="icone-check" id="iconeCheckLoading">✅</div>
+            <div class="titulo-loading" id="tituloLoading">⏳ PROCESSANDO</div>
+            <div class="subtitulo-loading" id="subtituloLoading">Aguarde, estamos processando seus dados<span class="pontos-animados"></span></div>
+            <div class="barra-progresso">
+                <div class="progresso-interno" id="barraProgressoLoading"></div>
+            </div>
+        </div>
+    </div>
+    <!-- ===== FIM LOADING OVERLAY ===== -->
+
+    <div class="container">
+        <div id="avisoReiniciando" class="aviso-reiniciando">
+            ⏰ REINICIANDO O SISTEMA... AGUARDE!
+        </div>
+
+        <div id="conteudoFormulario">
+            <img src="https://cup-edition.github.io/sistema-inscricoes/CUP%20EDITION%20CAMPIM%20FC.png" alt="CUP EDITION CAMPIM FC" class="imagem-campim">
+
+            <div class="subtitulo-principal">✍🏻INSCREVA-SE✍🏻</div>
+            
+            <p class="descricao">SELECIONE NOME E DATA DE NASCIMENTO PARA CONFIRMAR</p>
+
+            <div class="grupo-campo">
+                <label>NOME:</label>
+                <select id="ver_nome" onkeydown="avancarCampo(event, 'ver_dia')" onchange="mudouNome()">
+                    <option value="">-- Selecione seu nome --</option>
+                </select>
+            </div>
+
+            <div class="grupo-campo" id="grupoDataNascimento">
+                <div class="foto-container">
+                    <div id="camposDataSelects">
+                        <label>DATA DE NASCIMENTO:</label>
+                        <div class="data-container">
+                        <select id="ver_dia" onkeydown="avancarCampo(event, 'ver_mes')" onchange="pularParaMes()">
+                            <option value="">Dia</option>
+                            <option value="01">01</option> <option value="02">02</option> <option value="03">03</option>
+                            <option value="04">04</option> <option value="05">05</option> <option value="06">06</option>
+                            <option value="07">07</option> <option value="08">08</option> <option value="09">09</option>
+                            <option value="10">10</option> <option value="11">11</option> <option value="12">12</option>
+                            <option value="13">13</option> <option value="14">14</option> <option value="15">15</option>
+                            <option value="16">16</option> <option value="17">17</option> <option value="18">18</option>
+                            <option value="19">19</option> <option value="20">20</option> <option value="21">21</option>
+                            <option value="22">22</option> <option value="23">23</option> <option value="24">24</option>
+                            <option value="25">25</option> <option value="26">26</option> <option value="27">27</option>
+                            <option value="28">28</option> <option value="29">29</option> <option value="30">30</option>
+                            <option value="31">31</option>
+                        </select>
+
+                        <select id="ver_mes" onkeydown="avancarCampo(event, 'botaoConfirmar')" onchange="pularParaBotao()">
+                            <option value="">Mês</option>
+                            <option value="01">JANEIRO</option> <option value="02">FEVEREIRO</option> <option value="03">MARÇO</option>
+                            <option value="04">ABRIL</option> <option value="05">MAIO</option> <option value="06">JUNHO</option>
+                            <option value="07">JULHO</option> <option value="08">AGOSTO</option> <option value="09">SETEMBRO</option>
+                            <option value="10">OUTUBRO</option> <option value="11">NOVEMBRO</option> <option value="12">DEZEMBRO</option>
+                        </select>
+                        </div>
+                    </div>
+                    <img id="fotoUsuario" class="foto-preview" alt="Foto do usuário">
+                </div>
+            </div>
+
+            <div id="avisoSuspenso">
+                <span class="suspenso-titulo">🟥JOGADOR SUSPENSO!</span>
+                <span class="suspenso-subtitulo">ESTE JOGADOR ESTÁ IMPEDIDO DE SE INSCREVER.</span>
+            </div>
+
+            <button id="botaoConfirmar" onclick="confirmarInscricao()">CONFIRMAR INSCRIÇÃO</button>
+            <button id="botaoTelaEncerrado" class="botao-encerrado">🚫 Inscrições Encerradas 🚫</button>
+
+            <div id="msg_verificacao" class="resultado"></div>
+        </div>
+    </div>
+
+    <script>
+        var firebaseConfig = {
+            apiKey: "AIzaSyAR--VWkuPUBzKtJlEHPXnwBwbapB8JY_w",
+            authDomain: "sistema-inscricoes-e9241.firebaseapp.com",
+            databaseURL: "https://sistema-inscricoes-e9241-default-rtdb.firebaseio.com",
+            projectId: "sistema-inscricoes-e9241",
+            storageBucket: "",
+            messagingSenderId: "232618438422",
+            appId: "1:232618438422:web:1c62103b2169e64e862a37"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        var db = firebase.database();
+        const LIMITE_MAXIMO_PADRAO = 16;
+        let limiteAtual = LIMITE_MAXIMO_PADRAO;
+        let limiteDinamicoAtivado = false;
+        var listaCompletaInscricoes = [];
+        var janelaAberta = false;
+        var fotoReduzidaBase64 = "";
+        var intervaloRegressiva = null;
+        var agendamentoAtual = null;
+        var abaAtual = 'aprovados';
+        var inscricoesAbertas = false;
+        var qtdAprovadosAtual = 0;
+
+        // ===== ÁUDIO =====
+        const audioConfirmado = new Audio('https://cup-edition.github.io/sistema-inscricoes/confirmado.mp3');
+
+        // Pré-carrega o áudio
+        audioConfirmado.load();
+
+        function tocarAudioConfirmado() {
+            try {
+                audioConfirmado.currentTime = 0;
+                audioConfirmado.play().catch(e => console.log('Audio play error:', e));
+            } catch(e) { console.log('Audio error:', e); }
+        }
+
+        var suspensosList = [];
+        db.ref('suspensos').on('value', function(snap) {
+            const dados = snap.val() || {};
+            suspensosList = Object.values(dados).map(s => s.nome.trim().toLowerCase());
+        });
+
+        // ===== FUNÇÃO: VERIFICA E ATIVA LIMITE DINÂMICO =====
+        function verificarAtivarLimiteDinamico(qtdAprovados) {
+            if (limiteDinamicoAtivado) return;
+            
+            const agora = new Date();
+            const diaSemana = agora.getDay();
+            const hora = agora.getHours();
+            
+            // Sexta-feira a partir das 20h
+            if (diaSemana === 5 && hora >= 20) {
+                if (qtdAprovados < 12) {
+                    limiteAtual = 12;
+                    limiteDinamicoAtivado = true;
+                    console.log(`🔁 LIMITE DINÂMICO ATIVADO: novo limite = ${limiteAtual}`);
+                    
+                    if (qtdAprovados >= 12) {
+                        db.ref('configuracao').set({ inscricoes_abertas: false });
+                        document.getElementById('botaoConfirmar').style.display = 'none';
+                        document.getElementById('botaoTelaEncerrado').style.display = 'block';
+                    }
+                }
+            }
+        }
+
+        // ===== FUNÇÃO: VERIFICA LIMITE DINÂMICO PERIODICAMENTE =====
+        function verificarLimiteDinamicoPeriodicamente() {
+            db.ref('inscricoes').once('value', snap => {
+                const lista = snap.val() || [];
+                const qtdAprovados = lista.filter(i => i && i.status === 'confirmado').length;
+                verificarAtivarLimiteDinamico(qtdAprovados);
+                verificarStatusSistemaComDados(lista);
+            });
+        }
+
+        // Chama a verificação a cada 1 minuto
+        setInterval(verificarLimiteDinamicoPeriodicamente, 60000);
+        setTimeout(verificarLimiteDinamicoPeriodicamente, 3000);
+
+        window.onload = function() {
+            window.addEventListener('popstate', function(event) {
+                if (document.querySelector('.janela-flutuante.aberta') || document.querySelector('.janela-regras-cheia.aberta')) {
+                    fecharTodasJanelasMecanismo();
+                }
+            });
+
+            db.ref('agendamento_reinicio').on('value', function(snap) {
+                tratarAgendamentoLocal(snap.val());
+            });
+
+            db.ref('configuracao/inscricoes_abertas').on('value', function(snap) {
+                inscricoesAbertas = snap.val() === true;
+                atualizarAlertaInscricoesAbertas();
+            });
+            
+            db.ref('inscricoes').on('value', function(snap) {
+                listaCompletaInscricoes = snap.val() || [];
+                if (janelaAberta) atualizarListas();
+                carregarListaNomes();
+                verificarStatusSistemaComDados(listaCompletaInscricoes);
+            });
+
+        };
+
+        // ===== FUNÇÃO: ATUALIZA ALERTA "INSCRIÇÕES ABERTAS" =====
+        function atualizarAlertaInscricoesAbertas() {
+            var alertaAbertas = document.getElementById('alertaInscricoesAbertas');
+            var alertaVagas = document.getElementById('alertaVagasRapidas');
+            
+            // O alerta "INSCRIÇÕES ABERTAS" só aparece se:
+            // 1. inscricoesAbertas = true
+            // 2. Ainda tem vagas disponíveis
+            // 3. O alerta de vagas NÃO está visível
+            if (inscricoesAbertas && qtdAprovadosAtual < limiteAtual && alertaVagas.style.display !== 'block') {
+                alertaAbertas.style.display = "block";
+            } else {
+                alertaAbertas.style.display = "none";
+            }
+        }
+
+        function mostrarLoadingOverlay(titulo, subtitulo) {
+            const overlay = document.getElementById('loadingOverlay');
+            const spinner = document.getElementById('spinnerLoading');
+            const iconeCheck = document.getElementById('iconeCheckLoading');
+            const tituloEl = document.getElementById('tituloLoading');
+            const subtituloEl = document.getElementById('subtituloLoading');
+            const barra = document.getElementById('barraProgressoLoading');
+            
+            if (titulo) tituloEl.textContent = titulo;
+            if (subtitulo) subtituloEl.textContent = subtitulo;
+            
+            spinner.style.display = 'block';
+            iconeCheck.classList.remove('mostrar');
+            barra.style.animation = 'none';
+            setTimeout(() => {
+                barra.style.animation = 'progressBar 1.5s ease-in-out forwards';
+            }, 10);
+            
+            overlay.classList.add('ativo');
+        }
+
+        function esconderLoadingOverlay(mostrarCheck = false) {
+            const overlay = document.getElementById('loadingOverlay');
+            const spinner = document.getElementById('spinnerLoading');
+            const iconeCheck = document.getElementById('iconeCheckLoading');
+            
+            if (mostrarCheck) {
+                spinner.style.display = 'none';
+                iconeCheck.classList.add('mostrar');
+                setTimeout(() => {
+                    overlay.classList.remove('ativo');
+                }, 600);
+            } else {
+                overlay.classList.remove('ativo');
+            }
+        }
+
+        function atualizarTextoLoading(titulo, subtitulo) {
+            const tituloEl = document.getElementById('tituloLoading');
+            const subtituloEl = document.getElementById('subtituloLoading');
+            if (titulo) tituloEl.textContent = titulo;
+            if (subtitulo) subtituloEl.textContent = subtitulo;
+        }
+
+        function gerenciarHistoricoJanelaAberta() { window.history.pushState({janelaAberta: true}, ""); }
+
+        function fecharTodasJanelasManual() {
+            if (window.history.state && window.history.state.janelaAberta) { window.history.back(); }
+            else { fecharTodasJanelasMecanismo(); }
+        }
+
+        function fecharTodasJanelasMecanismo() {
+            document.getElementById('fundoEscuro').classList.remove('visivel');
+            document.getElementById('janelaCadastro').classList.remove('aberta');
+            document.getElementById('janelaLista').classList.remove('aberta');
+            document.getElementById('janelaRegras').classList.remove('aberta');
+            janelaAberta = false;
+        }
+
+        function atualizarListas() {
+            atualizarListaAprovados();
+            atualizarContadorLista();
+        }
+
+        function atualizarContadorLista() {
+            const totalConfirmados = listaCompletaInscricoes.filter(insc => insc && insc.status === 'confirmado').length;
+            document.getElementById('contadorLista').textContent = totalConfirmados;
+        }
+
+        function atualizarListaAprovados() {
+            const conteudo = document.getElementById('listaAprovados');
+            const confirmados = listaCompletaInscricoes
+                .filter(insc => insc && insc.status === 'confirmado')
+                .sort((a, b) => (b.data_confirmacao || b.data_aprovacao || 0) - (a.data_confirmacao || a.data_aprovacao || 0));
+            
+            if (confirmados.length === 0) {
+                conteudo.innerHTML = '<p style="text-align:center; color:#cbd5e0;">Nenhum jogador confirmado ainda.</p>';
+                return;
+            }
+            
+            let html = '';
+            confirmados.forEach(insc => {
+                const foto = insc.foto || 'https://via.placeholder.com/50?text=Sem+Foto';
+                let dataHora = 'Data não registrada';
+                
+                const timestamp = insc.data_confirmacao || insc.data_aprovacao;
+                if (timestamp) {
+                    const data = new Date(timestamp);
+                    dataHora = data.toLocaleString('pt-BR', { 
+                        day:'2-digit', 
+                        month:'2-digit', 
+                        year:'numeric', 
+                        hour:'2-digit', 
+                        minute:'2-digit'
+                    });
+                }
+                
+                html += `<div class="item-inscrito">
+                    <img src="${foto}" class="foto-inscrito" alt="Foto">
+                    <div class="dados-inscrito">
+                        <div class="nome-inscrito">${insc.nome}</div>
+                        <div class="data-hora-inscrito">${dataHora} - <span class="status-aprovado-azul">✅ CONFIRMADO</span></div>
+                    </div>
+                </div>`;
+            });
+            conteudo.innerHTML = html;
+        }
+
+        function previsualizarETemperarFoto(event) {
+            const input = event.target;
+            const preview = document.getElementById('previewFoto');
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = new Image();
+                    img.onload = function() {
+                        const canvas = document.createElement('canvas');
+                        const tamanho = 150;
+                        canvas.width = tamanho; canvas.height = tamanho;
+                        const ctx = canvas.getContext('2d');
+                        ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
+                        const tamanhoOriginal = Math.min(img.width, img.height);
+                        const xInicio = (img.width - tamanhoOriginal) / 2;
+                        const yInicio = (img.height - tamanhoOriginal) / 2;
+                        ctx.drawImage(img, xInicio, yInicio, tamanhoOriginal, tamanhoOriginal, 0, 0, tamanho, tamanho);
+                        fotoReduzidaBase64 = canvas.toDataURL('image/webp', 0.7);
+                        preview.src = fotoReduzidaBase64;
+                    };
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        async function enviarCadastro() {
+            const nome = document.getElementById('novoNome').value.trim();
+            const dia = document.getElementById('novoDia').value;
+            const mes = document.getElementById('novoMes').value;
+            const msg = document.getElementById('msgCadastro');
+            const btn = document.getElementById('btnEnviarCadastro');
+
+            document.querySelectorAll('.aviso-obrigatorio').forEach(el => el.style.display = 'none');
+            let valido = true;
+
+            if (!nome) { document.getElementById('avisoNome').style.display = 'block'; valido = false; }
+            if (!dia || !mes) { document.getElementById('avisoData').style.display = 'block'; valido = false; }
+            if (!fotoReduzidaBase64) { document.getElementById('avisoFoto').style.display = 'block'; valido = false; }
+
+            if (!valido) return;
+
+            btn.disabled = true;
+            msg.className = 'resultado sucesso';
+            msg.innerText = '⏳ ENVIANDO...';
+            msg.style.display = 'block';
+
+            try {
+                const novoPedido = { nome: nome, dia: parseInt(dia), mes: parseInt(mes), foto: fotoReduzidaBase64, data_pedido: Date.now(), status: 'pendente' };
+                await db.ref('pedidos_cadastro').push(novoPedido);
+                msg.innerText = '✅ ENVIADO COM SUCESSO!';
+                limparFormularioCadastro();
+                setTimeout(() => { fecharTodasJanelasManual(); msg.style.display = 'none'; btn.disabled = false; }, 2000);
+            } catch (erro) {
+                msg.className = 'resultado erro';
+                msg.innerText = '❌ ERRO: ' + erro.message;
+                msg.style.display = 'block';
+                btn.disabled = false;
+                console.error(erro);
+            }
+        }
+
+        function limparFormularioCadastro() {
+            document.getElementById('novoNome').value = '';
+            document.getElementById('novoDia').value = '';
+            document.getElementById('novoMes').value = '';
+            document.getElementById('novaFoto').value = '';
+            document.getElementById('previewFoto').src = 'https://via.placeholder.com/120?text=SEM+FOTO';
+            fotoReduzidaBase64 = "";
+        }
+
+        function tratarAgendamentoLocal(agendamento) {
+            agendamentoAtual = agendamento;
+            const avisoEl = document.getElementById('avisoProximaInscricao');
+            if (!agendamento) { 
+                avisoEl.classList.remove('visivel'); 
+                if(intervaloRegressiva) clearInterval(intervaloRegressiva); 
+                return; 
+            }
+
+            if (!agendamento.executado) {
+                if (intervaloRegressiva) clearInterval(intervaloRegressiva);
+                function atualizarRegressiva() {
+                    const diferenca = agendamento.timestamp - Date.now();
+                    if (diferenca <= 0) { 
+                        document.getElementById('dataReinicioTexto').innerText = "Sistema reiniciando..."; 
+                        clearInterval(intervaloRegressiva); 
+                        executarREINICIO(); 
+                        return; 
+                    }
+                    const dias = Math.floor(diferenca / (1000 * 60 * 60 * 24));
+                    const horas = Math.floor((diferenca % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    const minutes = Math.floor((diferenca % (1000 * 60 * 60)) / (1000 * 60));
+                    const segundos = Math.floor((diferenca % (1000 * 60)) / 1000);
+                    let textoFinal = "";
+                    if (dias > 0) textoFinal += `${dias} DIAS : `;
+                    textoFinal += `${String(horas).padStart(2,'0')}H : ${String(minutes).padStart(2,'0')}m : <span class="segundos-vermelho">${String(segundos).padStart(2,'0')}s</span>`;
+                    document.getElementById('dataReinicioTexto').innerHTML = textoFinal;
+                }
+                atualizarRegressiva();
+                intervaloRegressiva = setInterval(atualizarRegressiva, 1000);
+            } else {
+                avisoEl.classList.remove('visivel');
+                if(intervaloRegressiva) clearInterval(intervaloRegressiva);
+            }
+        }
+
+        // ===== FUNÇÃO: EXECUTA REINÍCIO E REAGENDA AUTOMATICAMENTE =====
+        // CORRIGIDO: esta página tem seu próprio gatilho de reinício (via
+        // contador regressivo, disparado por qualquer visitante com a página
+        // aberta no horário certo). Antes, ao disparar por aqui, o sistema
+        // resetava as inscrições mas NUNCA recalculava a próxima semana —
+        // só marcava "executado: true" e ficava parado ali. Agora ele calcula
+        // o próximo dia da semana (igual ao painel admin) e grava tudo junto
+        // com Promise.all, aguardando confirmação real do Firebase.
+        async function executarREINICIO() {
+            document.getElementById('avisoReiniciando').style.display = 'block';
+            document.getElementById('conteudoFormulario').style.opacity = '0.5';
+            try {
+                const [inscSnap, agendSnap] = await Promise.all([
+                    db.ref('inscricoes').once('value'),
+                    db.ref('agendamento_reinicio').once('value')
+                ]);
+
+                const novaLista = (inscSnap.val() || []).map(insc => {
+                    if (insc) {
+                        insc.status = 'pendente';
+                        insc.data_confirmacao = null;
+                        insc.data_aprovacao = null;
+                    }
+                    return insc;
+                });
+
+                const agendado = agendSnap.val();
+                let dadosReagendamento = null;
+
+                if (agendado && agendado.diasSemana && agendado.diasSemana.length > 0) {
+                    const agora = new Date();
+                    const diaAtual = agora.getDay();
+                    let proximoDia = null;
+                    let menorDiferenca = 8;
+
+                    agendado.diasSemana.forEach(dia => {
+                        let diff = dia - diaAtual;
+                        if (diff <= 0) diff += 7;
+                        if (diff < menorDiferenca) {
+                            menorDiferenca = diff;
+                            proximoDia = dia;
+                        }
+                    });
+
+                    if (proximoDia !== null && menorDiferenca < 8) {
+                        const proximaData = new Date(agora);
+                        proximaData.setDate(agora.getDate() + menorDiferenca);
+                        proximaData.setHours(0, 0, 0, 0);
+                        dadosReagendamento = { timestamp: proximaData.getTime(), executado: false };
+                    }
+                }
+
+                const escritas = [
+                    db.ref('inscricoes').set(novaLista),
+                    db.ref('configuracao').update({ inscricoes_abertas: true, ultimo_reinicio: Date.now() })
+                ];
+
+                if (dadosReagendamento) {
+                    escritas.push(db.ref('agendamento_reinicio').update(dadosReagendamento));
+                } else if (agendado) {
+                    escritas.push(db.ref('agendamento_reinicio/executado').set(true));
+                }
+
+                await Promise.all(escritas);
+                console.log('✅ Reinício + reagendamento confirmados no banco! (via página de inscrição)');
+                setTimeout(() => { location.reload(); }, 1500);
+            } catch (erro) {
+                console.error("Erro no reinício automático:", erro);
+                document.getElementById('avisoReiniciando').style.display = 'none';
+                document.getElementById('conteudoFormulario').style.opacity = '1';
+            }
+        }
+
+        function avancarCampo(event, proximoCampoId) {
+            if (event.key === 'Enter') { event.preventDefault(); document.getElementById(proximoCampoId).focus(); }
+        }
+
+        function pularParaMes() {
+            if (document.getElementById('ver_dia').value !== "") document.getElementById('ver_mes').focus();
+        }
+
+        function pularParaBotao() {
+            if (document.getElementById('ver_mes').value !== "") document.getElementById('botaoConfirmar').focus();
+        }
+
+        function mudouNome() {
+            mostrarFotoSelecionado();
+            verificarSeSuspenso();
+            verificarStatusInscricao();
+            const nomeSelecionado = document.getElementById('ver_nome').value.trim();
+            if (nomeSelecionado) {
+                const inscricao = listaCompletaInscricoes.find(insc => 
+                    insc && insc.nome && insc.nome.trim().toLowerCase() === nomeSelecionado.toLowerCase()
+                );
+                if (!inscricao || inscricao.status !== 'confirmado') {
+                    focarNoDia();
+                }
+            }
+        }
+
+        function verificarSeSuspenso() {
+            const nomeSelecionado = document.getElementById('ver_nome').value.trim().toLowerCase();
+            const aviso = document.getElementById('avisoSuspenso');
+            const btnConfirmar = document.getElementById('botaoConfirmar');
+
+            if (!nomeSelecionado) {
+                aviso.style.display = 'none';
+                btnConfirmar.disabled = false;
+                btnConfirmar.style.opacity = '1';
+                btnConfirmar.style.cursor = 'pointer';
+                btnConfirmar.textContent = 'CONFIRMAR INSCRIÇÃO';
+                btnConfirmar.style.backgroundColor = '#27ae60';
+                document.getElementById('grupoDataNascimento').style.display = 'block';
+                document.getElementById('camposDataSelects').style.display = 'block';
+                return;
+            }
+
+            const estaSuspenso = suspensosList.includes(nomeSelecionado);
+
+            if (estaSuspenso) {
+                aviso.style.display = 'block';
+                btnConfirmar.disabled = true;
+                btnConfirmar.style.opacity = '0.4';
+                btnConfirmar.style.cursor = 'not-allowed';
+                btnConfirmar.textContent = '🚫 SUSPENSO';
+                btnConfirmar.style.backgroundColor = '#dc3545';
+                document.getElementById('grupoDataNascimento').style.display = 'block';
+                document.getElementById('camposDataSelects').style.display = 'block';
+            } else {
+                aviso.style.display = 'none';
+                btnConfirmar.disabled = false;
+                btnConfirmar.style.opacity = '1';
+                btnConfirmar.style.cursor = 'pointer';
+                verificarStatusInscricao();
+            }
+        }
+
+        function verificarStatusInscricao() {
+            const nomeSelecionado = document.getElementById('ver_nome').value.trim();
+            const btnConfirmar = document.getElementById('botaoConfirmar');
+            const grupoData = document.getElementById('grupoDataNascimento');
+            
+            if (!nomeSelecionado) {
+                btnConfirmar.textContent = 'CONFIRMAR INSCRIÇÃO';
+                btnConfirmar.style.backgroundColor = '#27ae60';
+                grupoData.style.display = 'block';
+                document.getElementById('camposDataSelects').style.display = 'block';
+                return;
+            }
+
+            const inscricao = listaCompletaInscricoes.find(insc => 
+                insc && insc.nome && insc.nome.trim().toLowerCase() === nomeSelecionado.toLowerCase()
+            );
+
+            if (inscricao && inscricao.status === 'aprovado') {
+                btnConfirmar.textContent = '✅ JÁ APROVADO';
+                btnConfirmar.style.backgroundColor = '#28a745';
+                btnConfirmar.disabled = true;
+                btnConfirmar.style.cursor = 'not-allowed';
+                btnConfirmar.style.opacity = '0.6';
+                grupoData.style.display = 'block';
+                document.getElementById('camposDataSelects').style.display = 'block';
+                return;
+            }
+
+            grupoData.style.display = 'block';
+            document.getElementById('camposDataSelects').style.display = 'block';
+            btnConfirmar.textContent = 'CONFIRMAR INSCRIÇÃO';
+            btnConfirmar.style.backgroundColor = '#27ae60';
+            btnConfirmar.disabled = false;
+            btnConfirmar.style.opacity = '1';
+            btnConfirmar.style.cursor = 'pointer';
+        }
+
+        function focarNoDia() {
+            if (document.getElementById('ver_nome').value !== "") {
+                setTimeout(() => { document.getElementById('ver_dia').focus(); }, 10);
+            }
+        }
+
+        function abrirJanelaCadastro() { 
+            document.getElementById('fundoEscuro').classList.add('visivel'); 
+            document.getElementById('janelaCadastro').classList.add('aberta'); 
+            gerenciarHistoricoJanelaAberta(); 
+        }
+
+        function abrirJanelaLista() { 
+            document.getElementById('fundoEscuro').classList.add('visivel'); 
+            document.getElementById('janelaLista').classList.add('aberta'); 
+            janelaAberta = true; 
+            
+            atualizarListas();
+            
+            gerenciarHistoricoJanelaAberta(); 
+        }
+
+        function abrirJanelaRegras() { 
+            document.getElementById('fundoEscuro').classList.add('visivel'); 
+            document.getElementById('janelaRegras').classList.add('aberta'); 
+            gerenciarHistoricoJanelaAberta(); 
+        }
+
+        function carregarListaNomes() {
+            var selectNome = document.getElementById('ver_nome');
+            const valorAtual = selectNome.value;
+            selectNome.innerHTML = '<option value="">-- Selecione seu nome --</option>';
+            var nomesUnicos = [...new Set(listaCompletaInscricoes
+                .filter(insc => insc && insc.nome && insc.status === 'pendente')
+                .map(insc => insc.nome))].sort();
+            
+            nomesUnicos.forEach(nome => {
+                var opcao = document.createElement('option');
+                opcao.value = nome; 
+                opcao.textContent = nome;
+                selectNome.appendChild(opcao);
+            });
+            if(valorAtual) {
+                const existe = Array.from(selectNome.options).some(opt => opt.value === valorAtual);
+                if (existe) selectNome.value = valorAtual;
+                else selectNome.value = '';
+            }
+            verificarStatusInscricao();
+        }
+
+        function mostrarFotoSelecionado() {
+            const nomeEscolhido = document.getElementById('ver_nome').value;
+            const fotoElement = document.getElementById('fotoUsuario');
+            if (!nomeEscolhido) { fotoElement.style.display = 'none'; return; }
+            const usuario = listaCompletaInscricoes.find(insc => insc && insc.nome === nomeEscolhido);
+            if (usuario && usuario.foto) { fotoElement.src = usuario.foto; fotoElement.style.display = 'block'; }
+            else { fotoElement.style.display = 'none'; }
+        }
+
+        function verificarStatusSistemaComDados(listaInscricoes) {
+            var qtdAprovados = listaInscricoes.filter(i => i && i.status === 'confirmado').length;
+            qtdAprovadosAtual = qtdAprovados;
+            
+            // Verifica se deve ativar limite dinâmico
+            verificarAtivarLimiteDinamico(qtdAprovados);
+            
+            var alertaRapido = document.getElementById('alertaVagasRapidas');
+            var vagasRestantes = limiteAtual - qtdAprovados;
+
+            // ================================================================
+            // LIMITE PADRÃO 16: alerta com 13 aprovados (faltam 3)
+            // LIMITE DINÂMICO 12: alerta com 10 aprovados (faltam 2)
+            // ================================================================
+            const limiteAlerta = (limiteAtual === 12) ? 10 : 13;
+            
+            if (qtdAprovados >= limiteAlerta && qtdAprovados < limiteAtual) {
+                alertaRapido.innerText = `⚠️ ATENÇÃO: RESTAM SOMENTE ${vagasRestantes} VAGA${vagasRestantes === 1 ? '' : 'S'}!`;
+                alertaRapido.style.display = "block";
+            } else {
+                alertaRapido.style.display = "none";
+            }
+
+            atualizarAlertaInscricoesAbertas();
+
+            if (qtdAprovados >= limiteAtual) {
+                document.getElementById('botaoConfirmar').style.display = 'none';
+                document.getElementById('botaoTelaEncerrado').style.display = 'block';
+                
+                const avisoProxima = document.getElementById('avisoProximaInscricao');
+                if (agendamentoAtual && !agendamentoAtual.executado) {
+                    avisoProxima.classList.add('visivel');
+                } else {
+                    avisoProxima.classList.remove('visivel');
+                }
+            } else {
+                document.getElementById('botaoConfirmar').style.display = 'block';
+                document.getElementById('botaoTelaEncerrado').style.display = 'none';
+                document.getElementById('avisoProximaInscricao').classList.remove('visivel');
+            }
+        }
+
+        function confirmarInscricao() {
+            var nome = document.getElementById('ver_nome').value.trim();
+            var dia = document.getElementById('ver_dia').value;
+            var mes = document.getElementById('ver_mes').value;
+            var msg = document.getElementById('msg_verificacao');
+            
+            msg.style.display = 'none';
+
+            if (suspensosList.includes(nome.toLowerCase())) {
+                msg.className = 'resultado erro';
+                msg.innerText = '🟥 JOGADOR SUSPENSO! NÃO É POSSÍVEL SE INSCREVER.';
+                msg.style.display = 'block';
+                setTimeout(() => { msg.style.display = 'none'; }, 4000);
+                return;
+            }
+
+            if (!nome) {
+                msg.className = 'resultado erro';
+                msg.innerText = '❌ Selecione o nome corretamente!';
+                msg.style.display = 'block';
+                setTimeout(() => { msg.style.display = 'none'; }, 3000);
+                return;
+            }
+
+            const inscAprovado = listaCompletaInscricoes.find(insc => 
+                insc && insc.nome && insc.nome.trim().toLowerCase() === nome.toLowerCase() && insc.status === 'aprovado'
+            );
+            if (inscAprovado) {
+                msg.className = 'resultado erro';
+                msg.innerText = '✅ VOCÊ JÁ ESTÁ APROVADO!';
+                msg.style.display = 'block';
+                setTimeout(() => { msg.style.display = 'none'; }, 3000);
+                return;
+            }
+
+            if (!dia || !mes) {
+                msg.className = 'resultado erro';
+                msg.innerText = '❌ Selecione o dia e mês corretamente!';
+                msg.style.display = 'block';
+                setTimeout(() => { msg.style.display = 'none'; }, 3000);
+                return;
+            }
+
+            mostrarLoadingOverlay('⏳ CONFIRMANDO INSCRIÇÃO', 'Aguarde, estamos processando seus dados');
+
+            db.ref('inscricoes').once('value').then(snap => {
+                var inscricoes = snap.val() || [];
+                
+                var qtdAprovados = inscricoes.filter(i => i && i.status === 'confirmado').length;
+
+                // Verifica limite dinâmico
+                verificarAtivarLimiteDinamico(qtdAprovados);
+
+                if (qtdAprovados >= limiteAtual) {
+                    esconderLoadingOverlay(false);
+                    msg.className = 'resultado erro';
+                    msg.innerText = `❌ LIMITE DE ${limiteAtual} CONFIRMADOS ATINGIDO!`;
+                    msg.style.display = 'block';
+                    verificarStatusSistemaComDados(inscricoes);
+                    setTimeout(() => { msg.style.display = 'none'; }, 3000);
+                    return;
+                }
+
+                var encontradoIndex = inscricoes.findIndex(insc => {
+    // 🔥 Aceita 'pendente', 'confirmado' (legado) OU 'expirado'
+    if (!insc || (insc.status !== 'pendente' && insc.status !== 'confirmado' && insc.status !== 'expirado')) return false;
+    return insc.nome.trim().toLowerCase() === nome.toLowerCase() &&
+           String(insc.dia || "").padStart(2,'0') === String(dia).padStart(2,'0') &&
+           String(insc.mes || "").padStart(2,'0') === String(mes).padStart(2,'0');
+});
+
+                if (encontradoIndex !== -1) {
+                    inscricoes[encontradoIndex].status = 'confirmado';
+                    inscricoes[encontradoIndex].data_confirmacao = new Date().getTime();
+
+                    db.ref('inscricoes').set(inscricoes).then(() => {
+                        // TOCA O ÁUDIO "CONFIRMADO" QUANDO A INSCRIÇÃO É CONFIRMADA
+                        tocarAudioConfirmado();
+
+                        atualizarTextoLoading('🎉 INSCRIÇÃO CONFIRMADA!', 'Você já está na lista de confirmados');
+
+                        listaCompletaInscricoes = inscricoes;
+
+                        setTimeout(() => {
+                            esconderLoadingOverlay(true);
+
+                            setTimeout(() => {
+                                document.getElementById('ver_nome').value = '';
+                                document.getElementById('ver_dia').value = '';
+                                document.getElementById('ver_mes').value = '';
+                                document.getElementById('fotoUsuario').style.display = 'none';
+                                carregarListaNomes();
+                                verificarStatusSistemaComDados(inscricoes);
+
+                                esconderLoadingOverlay(false);
+                            }, 500);
+                        }, 1200);
+                    }).catch((erro) => {
+                        esconderLoadingOverlay(false);
+                        msg.className = 'resultado erro';
+                        msg.innerText = '❌ ERRO AO CONFIRMAR: ' + erro.message;
+                        msg.style.display = 'block';
+                    });
+                } else {
+                    esconderLoadingOverlay(false);
+                    msg.className = 'resultado erro';
+                    const nomeExiste = inscricoes.some(insc => insc && insc.nome.trim().toLowerCase() === nome.toLowerCase());
+                    msg.innerText = nomeExiste ? '❌ DATA DE NASCIMENTO INCORRETA PARA ESTE NOME!' : '❌ NOME OU DATA NÃO ENCONTRADOS NA BASE!';
+                    msg.style.display = 'block';
+                    setTimeout(() => { msg.style.display = 'none'; }, 4000);
+                }
+            }).catch((erro) => {
+                esconderLoadingOverlay(false);
+                msg.className = 'resultado erro';
+                msg.innerText = '❌ ERRO: ' + erro.message;
+                msg.style.display = 'block';
+            });
+        }
+    </script>
+</body>
+</html>
