@@ -55,7 +55,8 @@
         }
         
         h2 {color: #f8f9fa; margin-bottom: 20px; font-size: 18px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding-right: 60px;}
-        .contador-aprovados {color: #2ecc71; font-weight: bold; font-size: 13px; background: #1a3327; padding: 6px 12px; border-radius: 6px; border: 1px solid #2ecc71;}
+        .contador-aprovados {color: #3498db; font-weight: bold; font-size: 13px; background: #16283a; padding: 6px 12px; border-radius: 6px; border: 1px solid #3498db;}
+        .contador-confirmados {color: #2ecc71; font-weight: bold; font-size: 13px; background: #1a3327; padding: 6px 12px; border-radius: 6px; border: 1px solid #2ecc71;}
         .aviso-limite {color: #e74c3c; font-weight: bold; font-size: 13px; background: #3a1e1e; padding: 6px 12px; border-radius: 6px; border: 1px solid #e74c3c; animation: piscar 1s infinite;}
         @keyframes piscar { 0%{opacity:1;} 50%{opacity:0.4;} 100%{opacity:1;} }
         
@@ -578,6 +579,7 @@
         <div class="secao">
             <h2>
                 📊 LISTA DE INSCRIÇÕES 
+                <span id="contadorConfirmados" class="contador-confirmados"></span>
                 <span id="contadorAprovados" class="contador-aprovados"></span>
                 <div id="avisoLimite" class="aviso-limite">⚠️ LIMITE DE 16 APROVADOS ATINGIDO! INSCRIÇÕES ENCERRADAS AUTOMATICAMENTE.</div>
             </h2>
@@ -598,6 +600,7 @@
                 <button class="btn-ocultar-coluna" onclick="alternarVisibilidadeData(); alternarMenuFlutuante();">🙈 OCULTAR DATA NASC.</button>
                 <button class="btn-agendar" onclick="abrirAgendamento(); alternarMenuFlutuante();">⏰ AGENDAR REINÍCIO</button>
                 <button class="btn-inscricao" onclick="window.open('https://cup-edition.github.io/sistema-inscricoes/INSCREVER.html', '_blank'); alternarMenuFlutuante();">📝 SITE DE INSCRIÇÃO</button>
+                <button class="btn-inscricao" onclick="window.open('https://cup-edition.github.io/sistema-inscricoes/INSCRICAO-GRATUITA.html', '_blank'); alternarMenuFlutuante();">🆓 SITE DE INSCRIÇÃO GRATUITO</button>
                 <button class="btn-sorteio" onclick="window.open('https://cup-edition.github.io/sorteio-nomes/SORTEIO.html', '_blank'); alternarMenuFlutuante();">🎰 SITE DE SORTEIO</button>
                 <button class="btn-live" onclick="window.open('https://meet.google.com/esn-aqxa-gdi', '_blank'); alternarMenuFlutuante();">🔴 LIVE</button>
                 <button class="btn-instagram" onclick="window.open('https://www.instagram.com/direct/inbox', '_blank'); alternarMenuFlutuante();">📸 INSTAGRAM</button>
@@ -1471,6 +1474,7 @@
 
             if (inscricoes.length === 0 || !inscricoes[0]) {
                 tabela.innerHTML = '<tr><td colspan="8" style="text-align: center; color: #adb5bd;">NENHUMA INSCRIÇÃO CADASTRADA AINDA.</td></tr>';
+                document.getElementById('contadorConfirmados').innerText = '✅ 0 CONFIRMADOS';
                 verificarLimiteAprovados(0);
                 return;
             }
@@ -1490,7 +1494,9 @@
             });
 
             var qtdAprovados = listaOrdenada.filter(i => i.status === 'aprovado').length;
+            var qtdConfirmados = listaOrdenada.filter(i => i.status === 'confirmado').length;
             verificarLimiteAprovados(qtdAprovados);
+            document.getElementById('contadorConfirmados').innerText = `✅ ${qtdConfirmados} CONFIRMADOS`;
 
             tabela.innerHTML = '';
             listaOrdenada.forEach(insc => {
