@@ -95,6 +95,29 @@
         .btn-roxo:hover {background-color: #8e44ad; box-shadow: 0 4px 12px rgba(155, 89, 182, 0.2);}
         .btn-ocultar-coluna, .btn-sorteio, .btn-agendar, .btn-inscricao, .btn-live {background-color: #8e44ad; font-size: 12px;}
         .btn-ocultar-coluna:hover, .btn-sorteio:hover, .btn-agendar:hover, .btn-inscricao:hover {background-color: #713394;}
+
+        .btn-inscricao {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+        }
+        .btn-inscricao .btn-texto { text-align: left; }
+        .switch-inscricao {
+            position: relative; width: 40px; height: 22px;
+            background: #495057; border-radius: 11px;
+            cursor: pointer; transition: background 0.2s;
+            flex-shrink: 0; display: inline-block;
+        }
+        .switch-inscricao .switch-slider {
+            position: absolute; top: 2px; left: 2px;
+            width: 18px; height: 18px; background: #f8f9fa;
+            border-radius: 50%; transition: transform 0.2s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.4);
+        }
+        .switch-inscricao.ligado { background: #2ecc71; }
+        .switch-inscricao.ligado .switch-slider { transform: translateX(18px); }
         .btn-live {background-color: #e74c3c;}
         .btn-live:hover {background-color: #c0392b;}
         .btn-editar {background-color: #3498db; padding: 6px 10px;}
@@ -127,7 +150,7 @@
         .menu-suspenso-container {
             position: absolute; top: 70px; right: 25px;
             background-color: #1e2124; border: 2px solid #495057; border-radius: 12px;
-            padding: 15px; width: 260px; box-shadow: 0 10px 25px rgba(0,0,0,0.6);
+            padding: 15px; width: 320px; box-shadow: 0 10px 25px rgba(0,0,0,0.6);
             display: none; flex-direction: column; gap: 10px; z-index: 1100;
             animation: surgirMenu 0.25s ease-out;
         }
@@ -614,7 +637,12 @@
                 <button class="btn-ocultar-coluna" onclick="alternarVisibilidadeData(); alternarMenuFlutuante();">🙈 OCULTAR DATA NASC.</button>
                 <button class="btn-agendar" onclick="abrirAgendamento(); alternarMenuFlutuante();">⏰ AGENDAR REINÍCIO</button>
                 <button class="btn-inscricao" onclick="window.open('https://cup-edition.github.io/sistema-inscricoes/INSCREVER.html', '_blank'); alternarMenuFlutuante();">📝 SITE DE INSCRIÇÃO</button>
-                <button class="btn-inscricao" onclick="window.open('https://cup-edition.github.io/sistema-inscricoes/INSCRICAO-GRATUITA.html', '_blank'); alternarMenuFlutuante();">🆓 SITE DE INSCRIÇÃO GRATUITO</button>
+                <button class="btn-inscricao" onclick="window.open('https://cup-edition.github.io/sistema-inscricoes/INSCRICAO-GRATUITA.html', '_blank'); alternarMenuFlutuante();">
+                    <span class="btn-texto">🆓 SITE DE INSCRIÇÃO GRATUITO</span>
+                    <span class="switch-inscricao" id="switchInscricaoGratuita" onclick="event.stopPropagation(); alternarInscricaoGratuita();">
+                        <span class="switch-slider"></span>
+                    </span>
+                </button>
                 <button class="btn-sorteio" onclick="window.open('https://cup-edition.github.io/sorteio-nomes/SORTEIO.html', '_blank'); alternarMenuFlutuante();">🎰 SITE DE SORTEIO</button>
                 <button class="btn-live" onclick="window.open('https://meet.google.com/esn-aqxa-gdi', '_blank'); alternarMenuFlutuante();">🔴 LIVE</button>
                 <button class="btn-instagram" onclick="window.open('https://www.instagram.com/direct/inbox', '_blank'); alternarMenuFlutuante();">📸 INSTAGRAM</button>
@@ -759,7 +787,7 @@
                     
                     // Se já tiver 12 ou mais aprovados, fecha automaticamente
                     if (qtdAprovados >= 12) {
-                        db.ref('configuracao').set({ inscricoes_abertas: false });
+                        db.ref('configuracao').update({ inscricoes_abertas: false });
                         document.getElementById('avisoLimite').style.display = 'block';
                         document.getElementById('avisoLimite').innerText = 
                             `⚠️ LIMITE DE ${limiteAtual} APROVADOS ATINGIDO! INSCRIÇÕES ENCERRADAS AUTOMATICAMENTE.`;
@@ -790,13 +818,13 @@
             
             // Usa o limite atual (pode ser 16 ou 12)
             if (limiteAtual - qtd === 0) {
-                db.ref('configuracao').set({ inscricoes_abertas: false });
+                db.ref('configuracao').update({ inscricoes_abertas: false });
                 aviso.style.display = 'block';
                 aviso.innerText = `⚠️ LIMITE DE ${limiteAtual} APROVADOS ATINGIDO! INSCRIÇÕES ENCERRADAS AUTOMATICAMENTE.`;
             } else {
                 // Só reabre se o limite atual não foi atingido
                 if (qtd < limiteAtual) {
-                    db.ref('configuracao').set({ inscricoes_abertas: true });
+                    db.ref('configuracao').update({ inscricoes_abertas: true });
                 }
                 aviso.style.display = 'none';
             }
@@ -854,6 +882,21 @@
                 menu.style.display = 'flex';
                 btn.classList.add('aberto');
             }
+        }
+
+        function carregarInscricaoGratuita() {
+            db.ref('configuracao/inscricao_gratuita_aberta').on('value', function(snap) {
+                const ligado = snap.val() === true;
+                const sw = document.getElementById('switchInscricaoGratuita');
+                if (sw) sw.classList.toggle('ligado', ligado);
+            });
+        }
+
+        function alternarInscricaoGratuita() {
+            const sw = document.getElementById('switchInscricaoGratuita');
+            if (!sw) return;
+            const novoValor = !sw.classList.contains('ligado');
+            db.ref('configuracao/inscricao_gratuita_aberta').set(novoValor);
         }
 
         document.addEventListener('click', function(event) {
@@ -1598,6 +1641,7 @@
 
             verificarPagamentosConfirmados();
             carregarSaldoAsaas();
+            carregarInscricaoGratuita();
         }
 
         async function carregarSaldoAsaas() {
@@ -1636,7 +1680,7 @@
                     return insc; 
                 });
                 db.ref('inscricoes').set(lista);
-                db.ref('configuracao').set({inscricoes_abertas: true, ultimo_reinicio: Date.now()});
+                db.ref('configuracao').update({inscricoes_abertas: true, ultimo_reinicio: Date.now()});
                 
                 db.ref('agendamento_reinicio').once('value').then(snapAgend => {
                     const agendado = snapAgend.val();
