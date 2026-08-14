@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SAQUE CUP EDITION</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif; }
         body {
@@ -11,8 +12,8 @@
             min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px;
         }
         .caixa {
-            background: #ffffff; padding: 32px; border-radius: 20px; width: 100%; max-width: 460px;
-            box-shadow: 0 25px 60px rgba(0,0,0,0.45); border: 1px solid rgba(255,255,255,0.08);
+            background: #ffffff; padding: 32px 32px 8px; border-radius: 20px; width: 100%; max-width: 460px;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.45); border: 2px solid #22c55e;
         }
         .topo {
             display: flex; align-items: center; gap: 10px; justify-content: center; margin-bottom: 8px;
@@ -24,7 +25,12 @@
             font-weight: 800; color: white; font-size: 18px;
             box-shadow: 0 6px 16px rgba(59,130,246,0.4);
         }
-        h2 { color: #111827; font-size: 22px; letter-spacing: -0.5px; }
+        h2 {
+            color: #ffffff; font-size: 32px; letter-spacing: 1px; font-weight: 900;
+            background: linear-gradient(135deg, #22d3ee, #3b82f6);
+            -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+            text-shadow: 0 2px 20px rgba(59,130,246,0.35);
+        }
         .subtitulo { text-align: center; color: #6b7280; font-size: 13px; margin-bottom: 28px; }
         .grupo { margin-bottom: 20px; }
         label {
@@ -35,13 +41,16 @@
             width: 100%; padding: 14px 16px; border: 2px solid #e5e7eb; border-radius: 12px;
             font-size: 16px; color: #111827; background: #f9fafb; transition: all 0.2s ease;
             outline: none; appearance: none; -webkit-appearance: none;
+            text-transform: uppercase;
         }
         select {
             background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2'><path d='M6 9l6 6 6-6'/></svg>");
             background-repeat: no-repeat; background-position: right 16px center; padding-right: 44px;
             cursor: pointer;
         }
-        input::placeholder { color: #9ca3af; }
+        option { text-transform: uppercase; }
+        input::placeholder { color: #9ca3af; text-transform: uppercase; font-size: 12px; }
+        #chave::placeholder { font-size: 11px; }
         input:focus, select:focus {
             border-color: #3b82f6; background: #ffffff;
             box-shadow: 0 0 0 4px rgba(59,130,246,0.15);
@@ -52,6 +61,7 @@
             width: 100%; padding: 15px; background: linear-gradient(135deg, #3b82f6, #2563eb);
             color: white; border: none; border-radius: 12px; font-size: 16px; font-weight: 700;
             cursor: pointer; transition: all 0.2s ease; box-shadow: 0 6px 16px rgba(37,99,235,0.35);
+            text-transform: uppercase;
         }
         button:hover { transform: translateY(-1px); box-shadow: 0 10px 20px rgba(37,99,235,0.45); }
         button:active { transform: translateY(0); }
@@ -88,6 +98,14 @@
             box-shadow: 0 4px 12px rgba(239,68,68,0.15);
         }
         .rodape { margin-top: 24px; text-align: center; color: #9ca3af; font-size: 11px; }
+        .logos-rodape { display: flex; align-items: center; justify-content: center; gap: 12px; margin-top: 14px; }
+        .logos-rodape img { height: 52px; width: auto; }
+        .logos-rodape img:first-child { height: 46px; }
+        .logos-rodape img:last-child { height: 46px; }
+
+        @media (max-width: 420px) {
+            .topo h2 { font-size: 30px; font-weight: 900; white-space: nowrap; }
+        }
     </style>
 </head>
 <body>
@@ -95,7 +113,7 @@
         <div class="topo">
             <h2>SAQUE CUP EDITION</h2>
         </div>
-        <p class="subtitulo">Transferência via Pix segura e instantânea</p>
+        <p class="subtitulo">SAQUES VIA PIX SEGUROS E INSTANTÂNEOS</p>
 
         <div id="caixaValidacao">
             <div class="grupo">
@@ -126,8 +144,9 @@
         </div>
 
         <div id="caixaSaque" style="display:none;">
-            <div style="background:#f0fdf4; border:1px solid #86efac; border-radius:12px; padding:14px 16px; margin-bottom:20px; text-align:center;">
-                <div id="nomeCadastrado" style="font-size:18px; font-weight:700; color:#166534; text-transform:uppercase;"></div>
+            <div style="background:#f0fdf4; border:1px solid #86efac; border-radius:12px; padding:14px 16px; margin-bottom:20px; display:flex; align-items:center; gap:14px; justify-content:center;">
+                <div id="fotoCadastrado" style="width:52px; height:52px; border-radius:50%; overflow:hidden; border:2px solid #22c55e; flex-shrink:0;"></div>
+                <div id="nomeCadastrado" style="font-size:18px; font-weight:700; color:#166534; text-transform:uppercase; text-align:left;"></div>
             </div>
 
             <div class="grupo" id="grupoValor">
@@ -137,13 +156,13 @@
 
         <div class="grupo" id="grupoChave">
             <label>Chave Pix</label>
-            <input type="text" id="chave" placeholder="CPF, CNPJ, e-mail, telefone ou chave aleatória" required>
+            <input type="text" id="chave" placeholder="DIGITE A CHAVE PIX" required>
         </div>
 
         <button id="btn1">Verificar</button>
 
         <div class="confirmacao" id="caixaConfirma">
-            <h3>Confirme os dados do recebedor</h3>
+            <h3>CONFIRME OS DADOS DO RECEBEDOR</h3>
             <div class="linha"><span>Valor</span><span id="mostraValor"></span></div>
             <div class="linha"><span>Chave</span><span id="mostraChave"></span></div>
             <div class="linha"><span>Tipo</span><span id="mostraTipo"></span></div>
@@ -158,6 +177,11 @@
         </div>
 
         <p class="rodape">Cup Edition · Plataforma de pagamentos</p>
+        <div class="logos-rodape">
+            <img src="https://cup-edition.github.io/sistema-inscricoes/LOGO%20PIX.png" alt="Logo PIX">
+            <img src="https://cup-edition.github.io/sistema-inscricoes/CUP%20EDITION%20CAMPIM%20FC.png" alt="Cup Edition Campim FC">
+            <img src="https://cup-edition.github.io/campimfc/CUP%20EDITION%20PES.png" alt="Cup Edition PES">
+        </div>
     </div>
 
     <script>
@@ -173,6 +197,10 @@
             messagingSenderId: "232618438422",
             appId: "1:232618438422:web:1c62103b2169e64e862a37"
         };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+        const refInscricoes = db.ref('inscricoes');
 
         const caixaValidacao = document.getElementById('caixaValidacao');
         const caixaSaque = document.getElementById('caixaSaque');
@@ -199,26 +227,65 @@
             selMes.appendChild(op);
         }
 
-        async function carregarInscricoes() {
+        selNome.addEventListener('change', function () {
+            if (this.value) selDia.focus();
+        });
+        selDia.addEventListener('change', function () {
+            if (this.value) selMes.focus();
+        });
+        selMes.addEventListener('change', function () {
+            if (this.value) btnValidar.focus();
+        });
+
+async function carregarInscricoes() {
             try {
                 const res = await fetch(firebaseConfig.databaseURL + '/inscricoes.json');
                 const dados = await res.json();
+                tratarInscricoes(dados);
+            } catch (e) {
+                msgValidacao.style.display = 'block';
+                msgValidacao.style.color = '#dc2626';
+                msgValidacao.textContent = 'ERRO AO CARREGAR INSCRIÇÕES: ' + e.message;
+            }
+        }
 
-                inscricoes = Array.isArray(dados) ? dados : Object.values(dados || {});
+        function tratarInscricoes(dados) {
+            inscricoes = Array.isArray(dados) ? dados : Object.values(dados || {});
 
-                const nomes = [...new Set(inscricoes.map(i => i.nome).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'pt-BR'));
-                nomes.forEach(nome => {
+            const nomes = [...new Set(inscricoes.map(i => i.nome).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'pt-BR'));
+            nomes.forEach(nome => {
+                const existe = [...selNome.options].some(op => op.value === nome);
+                if (!existe) {
                     const op = document.createElement('option');
                     op.value = nome;
                     op.textContent = nome;
                     selNome.appendChild(op);
-                });
-            } catch (e) {
-                msgValidacao.style.display = 'block';
-                msgValidacao.style.color = '#dc2626';
-                msgValidacao.textContent = 'Erro ao carregar inscrições: ' + e.message;
-            }
+                }
+            });
+
+            atualizarValorSeAberto();
         }
+
+        function atualizarValorSeAberto() {
+            if (caixaSaque.style.display !== 'block' || !idCadastrado) return;
+            const atualizado = inscricoes.find(i => i && i.id === idCadastrado);
+            if (!atualizado) return;
+            const valorDisponivel = (atualizado.valor !== undefined && atualizado.valor !== null && atualizado.valor !== '')
+                ? Number(atualizado.valor).toFixed(2).replace('.', ',')
+                : '0,00';
+            campoValor.value = valorDisponivel;
+            const chaveInput = document.getElementById('chave');
+            const semValor = Number(atualizado.valor || 0) <= 0;
+            chaveInput.disabled = semValor;
+            chaveInput.placeholder = semValor
+                ? 'Sem valor disponível para saque'
+                : 'CPF, CNPJ, e-mail, telefone ou chave aleatória';
+            document.getElementById('btn1').disabled = semValor;
+        }
+
+refInscricoes.on('value', function (snap) {
+            tratarInscricoes(snap.val());
+        });
 
         btnValidar.onclick = function () {
             const nome = selNome.value;
@@ -228,7 +295,7 @@
             if (!nome || !dia || !mes) {
                 msgValidacao.style.display = 'block';
                 msgValidacao.style.color = '#dc2626';
-                msgValidacao.textContent = 'Selecione nome, dia e mês para validar!';
+                msgValidacao.textContent = 'SELECIONE NOME, DIA E MÊS PARA VALIDAR!';
                 return;
             }
 
@@ -238,6 +305,13 @@
 
             if (encontrada) {
                 idCadastrado = encontrada.id;
+                document.getElementById('nomeCadastrado').innerText = encontrada.nome;
+                const fotoContainer = document.getElementById('fotoCadastrado');
+                if (encontrada.foto) {
+                    fotoContainer.innerHTML = '<img src="' + encontrada.foto + '" style="width:100%;height:100%;object-fit:cover;display:block;">';
+                } else {
+                    fotoContainer.innerHTML = '<div style="width:100%;height:100%;background:#e5e7eb;display:flex;align-items:center;justify-content:center;font-size:22px;">📄</div>';
+                }
                 const valorDisponivel = (encontrada.valor !== undefined && encontrada.valor !== null && encontrada.valor !== '')
                     ? Number(encontrada.valor).toFixed(2).replace('.', ',')
                     : '0,00';
@@ -252,13 +326,13 @@
                 document.getElementById('btn1').disabled = semValor;
                 msgValidacao.style.display = 'block';
                 msgValidacao.style.color = '#059669';
-                msgValidacao.textContent = '✅ Acesso liberado! Bem-vindo, ' + nome + '.';
+                msgValidacao.textContent = '✅ ACESSO LIBERADO! BEM-VINDO, ' + nome + '.';
                 caixaValidacao.style.display = 'none';
                 caixaSaque.style.display = 'block';
             } else {
                 msgValidacao.style.display = 'block';
                 msgValidacao.style.color = '#dc2626';
-                msgValidacao.textContent = '❌ Dados não conferem. Verifique nome, dia e mês da sua inscrição.';
+                msgValidacao.textContent = '❌ DADOS NÃO CONFEREM. VERIFIQUE NOME, DIA E MÊS DA SUA INSCRIÇÃO.';
             }
         };
 
@@ -302,7 +376,7 @@
 
             if (!valor || !chave) {
                 resultado.className = 'resultado erro';
-                resultado.innerText = 'Preencha todos os campos!';
+                resultado.innerText = 'PREENCHE TODOS OS CAMPOS!';
                 resultado.style.display = 'block';
                 return;
             }
@@ -320,7 +394,7 @@
 
                 if (!res.ok || dados.erro) {
                     resultado.className = 'resultado erro';
-                    resultado.innerText = 'Chave não encontrada ou inválida: ' + (dados.erro || '');
+                    resultado.innerText = 'CHAVE NÃO ENCONTRADA OU INVÁLIDA: ' + (dados.erro || '');
                     resultado.style.display = 'block';
                     return;
                 }
@@ -337,7 +411,7 @@
                 btn1.style.display = 'none';
             } catch (e) {
                 resultado.className = 'resultado erro';
-                resultado.innerText = 'Falha ao consultar: ' + e.message;
+                resultado.innerText = 'FALHA AO CONSULTAR: ' + e.message;
                 resultado.style.display = 'block';
             } finally {
                 btn1.disabled = false;
@@ -374,10 +448,10 @@
                     resultado.innerText =
 `✅ ENVIADO COM SUCESSO!
 
-Valor: R$ ${valor.toFixed(2).replace('.', ',')}
-Titular: ${t.bankAccount?.ownerName || 'Não informado'}
-CPF/CNPJ: ${t.bankAccount?.cpfCnpj || 'Não informado'}
-Banco: ${b?.name || 'Não informado'} (${b?.code || '---'})
+VALOR: R$ ${valor.toFixed(2).replace('.', ',')}
+TITULAR: ${t.bankAccount?.ownerName || 'NÃO INFORMADO'}
+CPF/CNPJ: ${t.bankAccount?.cpfCnpj || 'NÃO INFORMADO'}
+BANCO: ${b?.name || 'NÃO INFORMADO'} (${b?.code || '---'})
 ID: ${t.id}`;
 
                     if (idCadastrado) {
@@ -408,12 +482,12 @@ ID: ${t.id}`;
                     btn1.style.display = 'none';
                 } else {
                     resultado.className = 'resultado erro';
-                    resultado.innerText = 'Erro: ' + (dados.erro || 'Não foi possível enviar');
+                    resultado.innerText = 'ERRO: ' + (dados.erro || 'Não foi possível enviar');
                 }
 
             } catch (e) {
                 resultado.className = 'resultado erro';
-                resultado.innerText = 'Falha: ' + e.message;
+                resultado.innerText = 'FALHA: ' + e.message;
             } finally {
                 resultado.style.display = 'block';
                 btnEnviar.disabled = false;
@@ -421,7 +495,23 @@ ID: ${t.id}`;
             }
         };
 
-        carregarInscricoes();
+refInscricoes.on('value', function (snap) {
+            tratarInscricoes(snap.val());
+        });
+
+        document.addEventListener('keydown', function (event) {
+            if (event.key === 'F12') { event.preventDefault(); return false; }
+            if (event.ctrlKey) {
+                if (event.shiftKey && (event.key === 'I' || event.key === 'i' || event.key === 'J' || event.key === 'j' || event.key === 'C' || event.key === 'c')) { event.preventDefault(); return false; }
+                if (event.key === 'u' || event.key === 'U' || event.key === 's' || event.key === 'S') { event.preventDefault(); return false; }
+            }
+        });
+
+        document.addEventListener('contextmenu', function (event) { event.preventDefault(); return false; });
+
+        document.addEventListener('selectstart', function (event) { event.preventDefault(); return false; });
+
+        document.addEventListener('dragstart', function (event) { event.preventDefault(); return false; });
     </script>
 </body>
 </html>
