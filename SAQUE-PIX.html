@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAQUE CUP EDITION</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif; }
+        body {
+            background: linear-gradient(160deg, #0f172a 0%, #1e293b 55%, #0f172a 100%);
+            min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px;
+        }
+        .caixa {
+            background: #ffffff; padding: 32px; border-radius: 20px; width: 100%; max-width: 460px;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.45); border: 1px solid rgba(255,255,255,0.08);
+        }
+        .topo {
+            display: flex; align-items: center; gap: 10px; justify-content: center; margin-bottom: 8px;
+        }
+        .logo {
+            width: 40px; height: 40px; border-radius: 12px;
+            background: linear-gradient(135deg, #22d3ee, #3b82f6);
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 800; color: white; font-size: 18px;
+            box-shadow: 0 6px 16px rgba(59,130,246,0.4);
+        }
+        h2 { color: #111827; font-size: 22px; letter-spacing: -0.5px; }
+        .subtitulo { text-align: center; color: #6b7280; font-size: 13px; margin-bottom: 28px; }
+        .grupo { margin-bottom: 20px; }
+        label {
+            display: block; margin-bottom: 8px; color: #374151; font-weight: 600; font-size: 13px;
+            text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        input, select {
+            width: 100%; padding: 14px 16px; border: 2px solid #e5e7eb; border-radius: 12px;
+            font-size: 16px; color: #111827; background: #f9fafb; transition: all 0.2s ease;
+            outline: none; appearance: none; -webkit-appearance: none;
+        }
+        select {
+            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2'><path d='M6 9l6 6 6-6'/></svg>");
+            background-repeat: no-repeat; background-position: right 16px center; padding-right: 44px;
+            cursor: pointer;
+        }
+        input::placeholder { color: #9ca3af; }
+        input:focus, select:focus {
+            border-color: #3b82f6; background: #ffffff;
+            box-shadow: 0 0 0 4px rgba(59,130,246,0.15);
+        }
+        .linha2 { display: flex; gap: 12px; }
+        .linha2 .grupo { flex: 1; }
+        button {
+            width: 100%; padding: 15px; background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white; border: none; border-radius: 12px; font-size: 16px; font-weight: 700;
+            cursor: pointer; transition: all 0.2s ease; box-shadow: 0 6px 16px rgba(37,99,235,0.35);
+        }
+        button:hover { transform: translateY(-1px); box-shadow: 0 10px 20px rgba(37,99,235,0.45); }
+        button:active { transform: translateY(0); }
+        button:disabled { background: #93c5fd; cursor: not-allowed; box-shadow: none; transform: none; }
+        .cinza {
+            background: #e5e7eb; color: #374151; box-shadow: none; margin-top: 10px; font-weight: 600;
+        }
+        .cinza:hover { background: #d1d5db; box-shadow: none; }
+        .confirmacao {
+            margin-top: 20px; padding: 20px; background: #f0f9ff; border: 1px solid #bae6fd;
+            border-radius: 16px; display: none;
+        }
+        .confirmacao h3 {
+            color: #0369a1; margin-bottom: 16px; font-size: 15px; text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .linha {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 10px 0; border-bottom: 1px solid #e0f2fe;
+        }
+        .linha:last-of-type { border-bottom: none; }
+        .linha span:first-child { color: #64748b; font-size: 13px; }
+        .linha span:last-child { color: #0f172a; font-weight: 600; font-size: 14px; text-align: right; }
+        .resultado {
+            margin-top: 20px; padding: 18px; border-radius: 14px; display: none; white-space: pre-line;
+            font-size: 14px; line-height: 1.7;
+        }
+        .sucesso {
+            background: #f0fdf4; border: 1px solid #86efac; color: #14532d; display: block;
+            box-shadow: 0 4px 12px rgba(34,197,94,0.15);
+        }
+        .erro {
+            background: #fef2f2; border: 1px solid #fca5a5; color: #7f1d1d; display: block;
+            box-shadow: 0 4px 12px rgba(239,68,68,0.15);
+        }
+        .rodape { margin-top: 24px; text-align: center; color: #9ca3af; font-size: 11px; }
+    </style>
+</head>
+<body>
+    <div class="caixa">
+        <div class="topo">
+            <h2>SAQUE CUP EDITION</h2>
+        </div>
+        <p class="subtitulo">Transferência via Pix segura e instantânea</p>
+
+        <div id="caixaValidacao">
+            <div class="grupo">
+                <label>Nome</label>
+                <select id="selNome" required>
+                    <option value="">Selecione seu nome</option>
+                </select>
+            </div>
+
+            <div class="grupo">
+                <label>Data de Nascimento</label>
+                <div class="linha2">
+                    <div>
+                        <select id="selDia" required>
+                            <option value="">Dia</option>
+                        </select>
+                    </div>
+                    <div>
+                        <select id="selMes" required>
+                            <option value="">Mês</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <button id="btnValidar">Validar Acesso</button>
+            <p class="rodape" id="msgValidacao" style="margin-top:12px; display:none;"></p>
+        </div>
+
+        <div id="caixaSaque" style="display:none;">
+            <div style="background:#f0fdf4; border:1px solid #86efac; border-radius:12px; padding:14px 16px; margin-bottom:20px; text-align:center;">
+                <div id="nomeCadastrado" style="font-size:18px; font-weight:700; color:#166534; text-transform:uppercase;"></div>
+            </div>
+
+            <div class="grupo" id="grupoValor">
+            <label>VALOR DISPONÍVEL 💵</label>
+            <input type="text" inputmode="numeric" id="valor" placeholder="0,00" maxlength="15" required readonly style="background:#f1f5f9; cursor:not-allowed; font-weight:700;">
+        </div>
+
+        <div class="grupo" id="grupoChave">
+            <label>Chave Pix</label>
+            <input type="text" id="chave" placeholder="CPF, CNPJ, e-mail, telefone ou chave aleatória" required>
+        </div>
+
+        <button id="btn1">Verificar</button>
+
+        <div class="confirmacao" id="caixaConfirma">
+            <h3>Confirme os dados do recebedor</h3>
+            <div class="linha"><span>Valor</span><span id="mostraValor"></span></div>
+            <div class="linha"><span>Chave</span><span id="mostraChave"></span></div>
+            <div class="linha"><span>Tipo</span><span id="mostraTipo"></span></div>
+            <div class="linha"><span>Titular</span><span id="mostraTitular"></span></div>
+            <div class="linha"><span>CPF/CNPJ</span><span id="mostraCpf"></span></div>
+            <div class="linha"><span>Instituição</span><span id="mostraBanco"></span></div>
+            <button id="btnEnviar">SACAR ✅</button>
+            <button id="btnVoltar" class="cinza">Alterar</button>
+        </div>
+
+        <div id="resultado" class="resultado"></div>
+        </div>
+
+        <p class="rodape">Cup Edition · Plataforma de pagamentos</p>
+    </div>
+
+    <script>
+        const URL = 'https://cup-edition-api-saques.onrender.com/enviar-pix';
+        const URL_CONSULTA = 'https://cup-edition-api-saques.onrender.com/consultar-chave';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAR--VWkuPUBzKtJlEHPXnwBwbapB8JY_w",
+            authDomain: "sistema-inscricoes-e9241.firebaseapp.com",
+            databaseURL: "https://sistema-inscricoes-e9241-default-rtdb.firebaseio.com",
+            projectId: "sistema-inscricoes-e9241",
+            storageBucket: "sistema-inscricoes-e9241.firebasestorage.app",
+            messagingSenderId: "232618438422",
+            appId: "1:232618438422:web:1c62103b2169e64e862a37"
+        };
+
+        const caixaValidacao = document.getElementById('caixaValidacao');
+        const caixaSaque = document.getElementById('caixaSaque');
+        const selNome = document.getElementById('selNome');
+        const selDia = document.getElementById('selDia');
+        const selMes = document.getElementById('selMes');
+        const btnValidar = document.getElementById('btnValidar');
+        const msgValidacao = document.getElementById('msgValidacao');
+
+        let inscricoes = [];
+
+        for (let i = 1; i <= 31; i++) {
+            const op = document.createElement('option');
+            op.value = i;
+            op.textContent = i;
+            selDia.appendChild(op);
+        }
+
+        const nomesMes = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+        for (let i = 1; i <= 12; i++) {
+            const op = document.createElement('option');
+            op.value = i;
+            op.textContent = nomesMes[i - 1];
+            selMes.appendChild(op);
+        }
+
+        async function carregarInscricoes() {
+            try {
+                const res = await fetch(firebaseConfig.databaseURL + '/inscricoes.json');
+                const dados = await res.json();
+
+                inscricoes = Array.isArray(dados) ? dados : Object.values(dados || {});
+
+                const nomes = [...new Set(inscricoes.map(i => i.nome).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'pt-BR'));
+                nomes.forEach(nome => {
+                    const op = document.createElement('option');
+                    op.value = nome;
+                    op.textContent = nome;
+                    selNome.appendChild(op);
+                });
+            } catch (e) {
+                msgValidacao.style.display = 'block';
+                msgValidacao.style.color = '#dc2626';
+                msgValidacao.textContent = 'Erro ao carregar inscrições: ' + e.message;
+            }
+        }
+
+        btnValidar.onclick = function () {
+            const nome = selNome.value;
+            const dia = selDia.value;
+            const mes = selMes.value;
+
+            if (!nome || !dia || !mes) {
+                msgValidacao.style.display = 'block';
+                msgValidacao.style.color = '#dc2626';
+                msgValidacao.textContent = 'Selecione nome, dia e mês para validar!';
+                return;
+            }
+
+            const encontrada = inscricoes.find(i =>
+                i.nome === nome && String(i.dia) === String(dia) && String(i.mes) === String(mes)
+            );
+
+            if (encontrada) {
+                idCadastrado = encontrada.id;
+                const valorDisponivel = (encontrada.valor !== undefined && encontrada.valor !== null && encontrada.valor !== '')
+                    ? Number(encontrada.valor).toFixed(2).replace('.', ',')
+                    : '0,00';
+                campoValor.value = valorDisponivel;
+                document.getElementById('nomeCadastrado').innerText = encontrada.nome;
+                const chaveInput = document.getElementById('chave');
+                const semValor = Number(encontrada.valor || 0) <= 0;
+                chaveInput.disabled = semValor;
+                chaveInput.placeholder = semValor
+                    ? 'Sem valor disponível para saque'
+                    : 'CPF, CNPJ, e-mail, telefone ou chave aleatória';
+                document.getElementById('btn1').disabled = semValor;
+                msgValidacao.style.display = 'block';
+                msgValidacao.style.color = '#059669';
+                msgValidacao.textContent = '✅ Acesso liberado! Bem-vindo, ' + nome + '.';
+                caixaValidacao.style.display = 'none';
+                caixaSaque.style.display = 'block';
+            } else {
+                msgValidacao.style.display = 'block';
+                msgValidacao.style.color = '#dc2626';
+                msgValidacao.textContent = '❌ Dados não conferem. Verifique nome, dia e mês da sua inscrição.';
+            }
+        };
+
+        const btn1 = document.getElementById('btn1');
+        const caixaConfirma = document.getElementById('caixaConfirma');
+        const btnEnviar = document.getElementById('btnEnviar');
+        const btnVoltar = document.getElementById('btnVoltar');
+        const resultado = document.getElementById('resultado');
+        const campoValor = document.getElementById('valor');
+        const grupoValor = document.getElementById('grupoValor');
+        const grupoChave = document.getElementById('grupoChave');
+
+        campoValor.addEventListener('input', function () {
+            let digitos = this.value.replace(/\D/g, '');
+            if (!digitos) { this.value = ''; return; }
+            digitos = digitos.padStart(3, '0');
+            let reais = digitos.slice(0, -2).replace(/^0+(?=\d)/, '') || '0';
+            const centavos = digitos.slice(-2);
+            this.value = reais.replace(/\B(?=(\d{3})+(?!\d))/g, '.') + ',' + centavos;
+        });
+
+        campoValor.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                document.getElementById('chave').focus();
+            }
+        });
+
+        document.getElementById('chave').addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                btn1.click();
+            }
+        });
+
+        let valor, chave, idCadastrado = null;
+
+        btn1.onclick = async function () {
+            valor = parseFloat(campoValor.value.replace(/\./g, '').replace(',', '.'));
+            chave = document.getElementById('chave').value.trim();
+
+            if (!valor || !chave) {
+                resultado.className = 'resultado erro';
+                resultado.innerText = 'Preencha todos os campos!';
+                resultado.style.display = 'block';
+                return;
+            }
+
+            document.getElementById('mostraValor').innerText = 'R$ ' + valor.toFixed(2).replace('.', ',');
+            document.getElementById('mostraChave').innerText = chave;
+            resultado.style.display = 'none';
+
+            btn1.disabled = true;
+            btn1.innerText = 'Consultando chave...';
+
+            try {
+                const res = await fetch(URL_CONSULTA + '?chave=' + encodeURIComponent(chave));
+                const dados = await res.json();
+
+                if (!res.ok || dados.erro) {
+                    resultado.className = 'resultado erro';
+                    resultado.innerText = 'Chave não encontrada ou inválida: ' + (dados.erro || '');
+                    resultado.style.display = 'block';
+                    return;
+                }
+
+                document.getElementById('mostraTitular').innerText = dados.owner?.name || 'Não informado';
+                document.getElementById('mostraCpf').innerText = dados.owner?.cpfCnpj || 'Não informado';
+                document.getElementById('mostraTipo').innerText = dados.tipoDetectado || 'Não informado';
+                document.getElementById('mostraBanco').innerText =
+                    (dados.financialInstitution?.name || 'Não informado') +
+                    (dados.financialInstitution?.code ? ' (Cód. ' + dados.financialInstitution.code + ')' : '');
+                caixaConfirma.style.display = 'block';
+                grupoValor.style.display = 'none';
+                grupoChave.style.display = 'none';
+                btn1.style.display = 'none';
+            } catch (e) {
+                resultado.className = 'resultado erro';
+                resultado.innerText = 'Falha ao consultar: ' + e.message;
+                resultado.style.display = 'block';
+            } finally {
+                btn1.disabled = false;
+                btn1.innerText = 'Verificar';
+            }
+        };
+
+        btnVoltar.onclick = function () {
+            caixaConfirma.style.display = 'none';
+            resultado.style.display = 'none';
+            grupoValor.style.display = 'block';
+            grupoChave.style.display = 'block';
+            btn1.style.display = 'block';
+        };
+
+        btnEnviar.onclick = async function () {
+            btnEnviar.disabled = true;
+            btnEnviar.innerText = 'Enviando...';
+            resultado.style.display = 'none';
+
+            try {
+                const res = await fetch(URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ valor, chavePix: chave })
+                });
+
+                const dados = await res.json();
+
+                if (dados.sucesso) {
+                    const t = dados.dados;
+                    const b = t.bankAccount?.bank;
+                    resultado.className = 'resultado sucesso';
+                    resultado.innerText =
+`✅ ENVIADO COM SUCESSO!
+
+Valor: R$ ${valor.toFixed(2).replace('.', ',')}
+Titular: ${t.bankAccount?.ownerName || 'Não informado'}
+CPF/CNPJ: ${t.bankAccount?.cpfCnpj || 'Não informado'}
+Banco: ${b?.name || 'Não informado'} (${b?.code || '---'})
+ID: ${t.id}`;
+
+                    if (idCadastrado) {
+                        try {
+                            const resBanco = await fetch(firebaseConfig.databaseURL + '/inscricoes.json');
+                            const listaBanco = await resBanco.json();
+                            const lista = Array.isArray(listaBanco) ? listaBanco : Object.values(listaBanco || {});
+                            const item = lista.find(i => i && i.id === idCadastrado);
+                            if (item) {
+                                const disponivelAtual = Number(item.valor || 0);
+                                item.valor = Math.max(0, disponivelAtual - valor);
+                                await fetch(firebaseConfig.databaseURL + '/inscricoes.json', {
+                                    method: 'PUT',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify(lista)
+                                });
+                            }
+                        } catch (e) {
+                            console.error('Erro ao atualizar saldo no banco:', e);
+                        }
+                    }
+
+                    document.getElementById('valor').value = '';
+                    document.getElementById('chave').value = '';
+                    caixaConfirma.style.display = 'none';
+                    grupoValor.style.display = 'none';
+                    grupoChave.style.display = 'none';
+                    btn1.style.display = 'none';
+                } else {
+                    resultado.className = 'resultado erro';
+                    resultado.innerText = 'Erro: ' + (dados.erro || 'Não foi possível enviar');
+                }
+
+            } catch (e) {
+                resultado.className = 'resultado erro';
+                resultado.innerText = 'Falha: ' + e.message;
+            } finally {
+                resultado.style.display = 'block';
+                btnEnviar.disabled = false;
+                btnEnviar.innerText = 'SACAR ✅';
+            }
+        };
+
+        carregarInscricoes();
+    </script>
+</body>
+</html>
