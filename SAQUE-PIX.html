@@ -57,6 +57,26 @@
         }
         .linha2 { display: flex; gap: 12px; }
         .linha2 .grupo { flex: 1; }
+        .saldo-linha {
+            display: flex; align-items: center; justify-content: space-between; gap: 10px;
+            background: #0f172a; border: 2px solid #e5e7eb; border-radius: 14px;
+            padding: 12px 18px;
+        }
+        .saldo-linha label {
+            margin: 0; color: #ffffff; font-weight: 700; font-size: 13px;
+            text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        .saldo-linha input {
+            width: auto; flex: 1; max-width: 160px; text-align: right;
+            background: transparent !important; border: none; box-shadow: none;
+            padding: 0; font-size: 22px; font-weight: 800; color: #94a3b8;
+            cursor: not-allowed;
+        }
+        .saldo-linha input.saldo-positivo { color: #3b82f6; text-shadow: 0 0 12px rgba(59,130,246,0.4); }
+        .saldo-moeda { font-size: 22px; font-weight: 800; color: #94a3b8; }
+        .saldo-moeda.saldo-positivo { color: #3b82f6; text-shadow: 0 0 12px rgba(59,130,246,0.4); }
+        .saldo-valor { font-size: 22px; font-weight: 800; color: #94a3b8; margin-left: 1px; }
+        .saldo-valor.saldo-positivo { color: #3b82f6; text-shadow: 0 0 12px rgba(59,130,246,0.4); }
         button {
             width: 100%; padding: 15px; background: linear-gradient(135deg, #3b82f6, #2563eb);
             color: white; border: none; border-radius: 12px; font-size: 16px; font-weight: 700;
@@ -67,9 +87,9 @@
         button:active { transform: translateY(0); }
         button:disabled { background: #93c5fd; cursor: not-allowed; box-shadow: none; transform: none; }
         .cinza {
-            background: #e5e7eb; color: #374151; box-shadow: none; margin-top: 10px; font-weight: 600;
+            background: #f59e0b; color: #ffffff; box-shadow: none; margin-top: 10px; font-weight: 600;
         }
-        .cinza:hover { background: #d1d5db; box-shadow: none; }
+        .cinza:hover { background: #d97706; box-shadow: none; }
         .confirmacao {
             margin-top: 20px; padding: 20px; background: #f0f9ff; border: 1px solid #bae6fd;
             border-radius: 16px; display: none;
@@ -77,6 +97,25 @@
         .confirmacao h3 {
             color: #0369a1; margin-bottom: 16px; font-size: 15px; text-transform: uppercase;
             letter-spacing: 0.5px;
+        }
+        .caixa-historico {
+            margin-bottom: 0; padding: 8px 14px; background: #0f172a;
+            border: 1px solid #22c55e; border-radius: 14px;
+        }
+        .caixa-historico h3 {
+            color: #ffffff; margin-bottom: 6px; font-size: 13px; text-transform: uppercase;
+            letter-spacing: 1px; font-weight: 800;
+        }
+        .hist-item {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 4px 0; border-bottom: 1px solid rgba(34,197,94,0.15);
+            font-size: 13px;
+        }
+        .hist-item:last-child { border-bottom: none; }
+        .hist-item .hist-data { color: #94a3b8; font-size: 12px; }
+        .hist-item .hist-valor { color: #ffffff; font-weight: 800; }
+        .hist-item .hist-status {
+            color: #22c55e; font-weight: 800; font-size: 12px; margin-left: 10px;
         }
         .linha {
             display: flex; justify-content: space-between; align-items: center;
@@ -106,6 +145,116 @@
         @media (max-width: 420px) {
             .topo h2 { font-size: 30px; font-weight: 900; white-space: nowrap; }
         }
+
+        /* ===== LOADING OVERLAY - MEIO DA TELA ===== */
+        #loadingOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(6px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 99999;
+            animation: fadeInOverlay 0.4s ease-out;
+        }
+        #loadingOverlay.ativo { display: flex; }
+        @keyframes fadeInOverlay {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .loading-content {
+            background: #1e293b;
+            border-radius: 20px;
+            padding: 40px 50px;
+            max-width: 450px;
+            width: 90%;
+            text-align: center;
+            border: 2px solid #3b82f6;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+            animation: scaleIn 0.5s ease-out;
+            position: relative;
+        }
+        @keyframes scaleIn {
+            from { transform: scale(0.7); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        .loading-content .spinner-grande {
+            width: 70px;
+            height: 70px;
+            border: 6px solid #334155;
+            border-top: 6px solid #3b82f6;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 20px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .loading-content .titulo-loading {
+            color: #f8f9fa;
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        .loading-content .subtitulo-loading {
+            color: #94a3b8;
+            font-size: 15px;
+            margin-bottom: 15px;
+        }
+        .loading-content .barra-progresso {
+            width: 100%;
+            height: 4px;
+            background: #334155;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+        .loading-content .barra-progresso .progresso-interno {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #3b82f6, #22c55e);
+            border-radius: 4px;
+            animation: progressBar 1.5s ease-in-out forwards;
+        }
+        @keyframes progressBar {
+            0% { width: 0%; }
+            50% { width: 60%; }
+            100% { width: 100%; }
+        }
+        .loading-content .pontos-animados::after {
+            content: '';
+            animation: pontos 1.2s steps(3, end) infinite;
+        }
+        @keyframes pontos {
+            0% { content: ''; }
+            33% { content: '.'; }
+            66% { content: '..'; }
+            100% { content: '...'; }
+        }
+        .loading-content .icone-check {
+            display: none;
+            font-size: 60px;
+            margin-bottom: 10px;
+            animation: pulseCheck 0.6s ease-out;
+        }
+        @keyframes pulseCheck {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.3); }
+            100% { transform: scale(1); }
+        }
+        .loading-content .icone-check.mostrar { display: block; }
+        @media (max-width: 480px) {
+            .loading-content { padding: 30px 25px; }
+            .loading-content .titulo-loading { font-size: 18px; }
+            .loading-content .subtitulo-loading { font-size: 13px; }
+            .loading-content .spinner-grande { width: 50px; height: 50px; }
+        }
+        /* ===== FIM DO LOADING OVERLAY ===== */
     </style>
 </head>
 <body>
@@ -144,14 +293,20 @@
         </div>
 
         <div id="caixaSaque" style="display:none;">
-            <div style="background:#f0fdf4; border:1px solid #86efac; border-radius:12px; padding:14px 16px; margin-bottom:20px; display:flex; align-items:center; gap:14px; justify-content:center;">
+            <div style="display:flex; align-items:center; gap:14px; justify-content:center; margin-bottom:20px;">
                 <div id="fotoCadastrado" style="width:52px; height:52px; border-radius:50%; overflow:hidden; border:2px solid #22c55e; flex-shrink:0;"></div>
                 <div id="nomeCadastrado" style="font-size:18px; font-weight:700; color:#166534; text-transform:uppercase; text-align:left;"></div>
             </div>
 
             <div class="grupo" id="grupoValor">
-            <label>VALOR DISPONÍVEL 💵</label>
-            <input type="text" inputmode="numeric" id="valor" placeholder="0,00" maxlength="15" required readonly style="background:#f1f5f9; cursor:not-allowed; font-weight:700;">
+            <div class="saldo-linha">
+                <label>💵 SALDO DISPONÍVEL</label>
+                <div style="display:flex; align-items:center; gap:0; flex:1; justify-content:flex-end;">
+                    <span id="saldoR$" class="saldo-moeda">R$</span>
+                    <span id="saldoValor" class="saldo-valor">0,00</span>
+                    <input type="text" inputmode="numeric" id="valor" placeholder="0,00" maxlength="15" required readonly style="position:absolute; opacity:0; pointer-events:none; width:1px;">
+                </div>
+            </div>
         </div>
 
         <div class="grupo" id="grupoChave">
@@ -160,6 +315,11 @@
         </div>
 
         <button id="btn1">Verificar</button>
+
+        <div class="caixa-historico" id="caixaHistorico" style="display:none; margin-top:18px;">
+            <h3>🕓 HISTÓRICO DE SAQUES</h3>
+            <div id="listaHistorico"></div>
+        </div>
 
         <div class="confirmacao" id="caixaConfirma">
             <h3>CONFIRME OS DADOS DO RECEBEDOR</h3>
@@ -183,6 +343,20 @@
             <img src="https://cup-edition.github.io/campimfc/CUP%20EDITION%20PES.png" alt="Cup Edition PES">
         </div>
     </div>
+
+    <!-- ===== LOADING OVERLAY - MEIO DA TELA ===== -->
+    <div id="loadingOverlay">
+        <div class="loading-content">
+            <div class="spinner-grande" id="spinnerLoading"></div>
+            <div class="icone-check" id="iconeCheckLoading">✅</div>
+            <div class="titulo-loading" id="tituloLoading">⏳ PROCESSANDO</div>
+            <div class="subtitulo-loading" id="subtituloLoading">Aguarde, estamos processando seus dados<span class="pontos-animados"></span></div>
+            <div class="barra-progresso">
+                <div class="progresso-interno" id="barraProgressoLoading"></div>
+            </div>
+        </div>
+    </div>
+    <!-- ===== FIM LOADING OVERLAY ===== -->
 
     <script>
         const URL = 'https://cup-edition-api-saques.onrender.com/enviar-pix';
@@ -211,6 +385,50 @@
         const msgValidacao = document.getElementById('msgValidacao');
 
         let inscricoes = [];
+
+        function mostrarLoadingOverlay(titulo, subtitulo) {
+            const overlay = document.getElementById('loadingOverlay');
+            const spinner = document.getElementById('spinnerLoading');
+            const iconeCheck = document.getElementById('iconeCheckLoading');
+            const tituloEl = document.getElementById('tituloLoading');
+            const subtituloEl = document.getElementById('subtituloLoading');
+            const barra = document.getElementById('barraProgressoLoading');
+
+            if (titulo) tituloEl.textContent = titulo;
+            if (subtitulo) subtituloEl.textContent = subtitulo;
+
+            spinner.style.display = 'block';
+            iconeCheck.classList.remove('mostrar');
+            barra.style.animation = 'none';
+            setTimeout(() => {
+                barra.style.animation = 'progressBar 1.5s ease-in-out forwards';
+            }, 10);
+
+            overlay.classList.add('ativo');
+        }
+
+        function esconderLoadingOverlay(mostrarCheck = false) {
+            const overlay = document.getElementById('loadingOverlay');
+            const spinner = document.getElementById('spinnerLoading');
+            const iconeCheck = document.getElementById('iconeCheckLoading');
+
+            if (mostrarCheck) {
+                spinner.style.display = 'none';
+                iconeCheck.classList.add('mostrar');
+                setTimeout(() => {
+                    overlay.classList.remove('ativo');
+                }, 600);
+            } else {
+                overlay.classList.remove('ativo');
+            }
+        }
+
+        function atualizarTextoLoading(titulo, subtitulo) {
+            const tituloEl = document.getElementById('tituloLoading');
+            const subtituloEl = document.getElementById('subtituloLoading');
+            if (titulo) tituloEl.textContent = titulo;
+            if (subtitulo) subtituloEl.textContent = subtitulo;
+        }
 
         for (let i = 1; i <= 31; i++) {
             const op = document.createElement('option');
@@ -270,10 +488,12 @@ async function carregarInscricoes() {
             if (caixaSaque.style.display !== 'block' || !idCadastrado) return;
             const atualizado = inscricoes.find(i => i && i.id === idCadastrado);
             if (!atualizado) return;
+            mostrarHistorico(atualizado);
             const valorDisponivel = (atualizado.valor !== undefined && atualizado.valor !== null && atualizado.valor !== '')
                 ? Number(atualizado.valor).toFixed(2).replace('.', ',')
                 : '0,00';
             campoValor.value = valorDisponivel;
+            aplicarCorSaldo();
             const chaveInput = document.getElementById('chave');
             const semValor = Number(atualizado.valor || 0) <= 0;
             chaveInput.disabled = semValor;
@@ -299,13 +519,17 @@ refInscricoes.on('value', function (snap) {
                 return;
             }
 
+            mostrarLoadingOverlay('🔎 VALIDANDO ACESSO', 'Verificando seus dados');
+
             const encontrada = inscricoes.find(i =>
                 i.nome === nome && String(i.dia) === String(dia) && String(i.mes) === String(mes)
             );
 
             if (encontrada) {
+                atualizarTextoLoading('✅ ACESSO LIBERADO!', 'Bem-vindo');
                 idCadastrado = encontrada.id;
                 document.getElementById('nomeCadastrado').innerText = encontrada.nome;
+                mostrarHistorico(encontrada);
                 const fotoContainer = document.getElementById('fotoCadastrado');
                 if (encontrada.foto) {
                     fotoContainer.innerHTML = '<img src="' + encontrada.foto + '" style="width:100%;height:100%;object-fit:cover;display:block;">';
@@ -316,6 +540,7 @@ refInscricoes.on('value', function (snap) {
                     ? Number(encontrada.valor).toFixed(2).replace('.', ',')
                     : '0,00';
                 campoValor.value = valorDisponivel;
+                aplicarCorSaldo();
                 document.getElementById('nomeCadastrado').innerText = encontrada.nome;
                 const chaveInput = document.getElementById('chave');
                 const semValor = Number(encontrada.valor || 0) <= 0;
@@ -329,7 +554,9 @@ refInscricoes.on('value', function (snap) {
                 msgValidacao.textContent = '✅ ACESSO LIBERADO! BEM-VINDO, ' + nome + '.';
                 caixaValidacao.style.display = 'none';
                 caixaSaque.style.display = 'block';
+                setTimeout(() => { esconderLoadingOverlay(true); }, 1200);
             } else {
+                esconderLoadingOverlay(false);
                 msgValidacao.style.display = 'block';
                 msgValidacao.style.color = '#dc2626';
                 msgValidacao.textContent = '❌ DADOS NÃO CONFEREM. VERIFIQUE NOME, DIA E MÊS DA SUA INSCRIÇÃO.';
@@ -370,6 +597,45 @@ refInscricoes.on('value', function (snap) {
 
         let valor, chave, idCadastrado = null;
 
+        function aplicarCorSaldo() {
+            const campo = document.getElementById('valor');
+            const moeda = document.getElementById('saldoR$');
+            const valorSpan = document.getElementById('saldoValor');
+            const num = parseFloat(String(campo.value).replace(/\./g, '').replace(',', '.'));
+            const positivo = num > 0;
+            if (valorSpan) valorSpan.textContent = campo.value || '0,00';
+            campo.classList.toggle('saldo-positivo', positivo);
+            if (moeda) moeda.classList.toggle('saldo-positivo', positivo);
+            if (valorSpan) valorSpan.classList.toggle('saldo-positivo', positivo);
+        }
+
+        function mostrarHistorico(cadastro) {
+            const caixaHist = document.getElementById('caixaHistorico');
+            const listaHist = document.getElementById('listaHistorico');
+            const historico = Array.isArray(cadastro.historico_saques) ? cadastro.historico_saques : [];
+
+            if (historico.length === 0) {
+                caixaHist.style.display = 'none';
+                return;
+            }
+
+            let html = '';
+            historico.forEach(s => {
+                const d = new Date(s.data);
+                const dataStr = String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0') + '/' + d.getFullYear() + ' ' + String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+                html += `
+                <div class="hist-item">
+                    <span class="hist-data">${dataStr}</span>
+                    <span style="display:flex; align-items:center;">
+                        <span class="hist-valor">R$ ${Number(s.valor).toFixed(2).replace('.', ',')}</span>
+                        <span class="hist-status">✓ APROVADO</span>
+                    </span>
+                </div>`;
+            });
+            listaHist.innerHTML = html;
+            caixaHist.style.display = 'block';
+        }
+
         btn1.onclick = async function () {
             valor = parseFloat(campoValor.value.replace(/\./g, '').replace(',', '.'));
             chave = document.getElementById('chave').value.trim();
@@ -387,12 +653,14 @@ refInscricoes.on('value', function (snap) {
 
             btn1.disabled = true;
             btn1.innerText = 'Consultando chave...';
+            mostrarLoadingOverlay('🔎 CONSULTANDO CHAVE', 'Buscando dados do recebedor');
 
             try {
                 const res = await fetch(URL_CONSULTA + '?chave=' + encodeURIComponent(chave));
                 const dados = await res.json();
 
                 if (!res.ok || dados.erro) {
+                    esconderLoadingOverlay(false);
                     resultado.className = 'resultado erro';
                     resultado.innerText = 'CHAVE NÃO ENCONTRADA OU INVÁLIDA: ' + (dados.erro || '');
                     resultado.style.display = 'block';
@@ -405,11 +673,14 @@ refInscricoes.on('value', function (snap) {
                 document.getElementById('mostraBanco').innerText =
                     (dados.financialInstitution?.name || 'Não informado') +
                     (dados.financialInstitution?.code ? ' (Cód. ' + dados.financialInstitution.code + ')' : '');
+                atualizarTextoLoading('✅ CHAVE ENCONTRADA!', 'Confira os dados do recebedor');
                 caixaConfirma.style.display = 'block';
                 grupoValor.style.display = 'none';
                 grupoChave.style.display = 'none';
                 btn1.style.display = 'none';
+                setTimeout(() => { esconderLoadingOverlay(true); }, 1000);
             } catch (e) {
+                esconderLoadingOverlay(false);
                 resultado.className = 'resultado erro';
                 resultado.innerText = 'FALHA AO CONSULTAR: ' + e.message;
                 resultado.style.display = 'block';
@@ -431,6 +702,7 @@ refInscricoes.on('value', function (snap) {
             btnEnviar.disabled = true;
             btnEnviar.innerText = 'Enviando...';
             resultado.style.display = 'none';
+            mostrarLoadingOverlay('💸 ENVIANDO PIX', 'Processando seu saque');
 
             try {
                 const res = await fetch(URL, {
@@ -463,6 +735,13 @@ ID: ${t.id}`;
                             if (item) {
                                 const disponivelAtual = Number(item.valor || 0);
                                 item.valor = Math.max(0, disponivelAtual - valor);
+                                const historico = Array.isArray(item.historico_saques) ? item.historico_saques : [];
+                                historico.unshift({
+                                    valor: valor,
+                                    data: Date.now(),
+                                    status: 'aprovado'
+                                });
+                                item.historico_saques = historico.slice(0, 3);
                                 await fetch(firebaseConfig.databaseURL + '/inscricoes.json', {
                                     method: 'PUT',
                                     headers: { 'Content-Type': 'application/json' },
@@ -480,12 +759,20 @@ ID: ${t.id}`;
                     grupoValor.style.display = 'none';
                     grupoChave.style.display = 'none';
                     btn1.style.display = 'none';
+                    if (idCadastrado) {
+                        const atualizado = inscricoes.find(i => i && i.id === idCadastrado);
+                        if (atualizado) mostrarHistorico(atualizado);
+                    }
+                    atualizarTextoLoading('✅ PIX ENVIADO COM SUCESSO!', 'Seu dinheiro está a caminho');
+                    setTimeout(() => { esconderLoadingOverlay(true); }, 1200);
                 } else {
+                    esconderLoadingOverlay(false);
                     resultado.className = 'resultado erro';
                     resultado.innerText = 'ERRO: ' + (dados.erro || 'Não foi possível enviar');
                 }
 
             } catch (e) {
+                esconderLoadingOverlay(false);
                 resultado.className = 'resultado erro';
                 resultado.innerText = 'FALHA: ' + e.message;
             } finally {
