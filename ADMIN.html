@@ -45,10 +45,13 @@
         }
         .creditos-botoes {
             margin-top: 5px; display: flex; flex-direction: column; gap: 6px;
-            width: 100%; max-width: 300px; justify-content: center;
+            width: 380px; max-width: 100%; justify-content: center;
+        }
+        .creditos-botoes > div {
+            display: flex; gap: 6px; width: 100%;
         }
         .creditos-botoes button {
-            padding: 7px 8px; font-size: 10px;
+            flex: 1 1 0; min-width: 0; padding: 10px 10px; font-size: 11px;
             background-color: #8e44ad; color: white; border: none; border-radius: 6px;
             cursor: pointer; font-weight: bold; transition: all 0.2s;
             white-space: nowrap;
@@ -95,6 +98,20 @@
             transform: scale(1.2); margin: 0 auto; display: block;
         }
         
+        .historico-admin {
+            background: #2c3034; border: 1px solid #22c55e; border-radius: 10px;
+            padding: 10px 14px;
+        }
+        .historico-admin .historico-vazio { color: #adb5bd; font-size: 12px; text-align: center; }
+        .historico-item {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 6px 0; border-bottom: 1px solid rgba(34,197,94,0.15); font-size: 12px;
+        }
+        .historico-item:last-child { border-bottom: none; }
+        .historico-item .hist-data { color: #adb5bd; font-weight: normal; }
+        .historico-item .hist-valor { color: #ffffff; font-weight: bold; }
+        .historico-item .hist-status { color: #2ecc71; font-weight: bold; }
+
         .foto-preview { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid #e74c3c; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
         .foto-confirmado { border-color: #2ecc71 !important; }
         .foto-aprovado { border-color: #3498db !important; }
@@ -309,6 +326,35 @@
         }
         .caixa-suspensos h3 { color: #e74c3c; }
 
+        #modalHistoricoGeral {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.75);
+            display: none; align-items: center; justify-content: center; z-index: 99999;
+            backdrop-filter: blur(3px); animation: fadeIn 0.2s ease-out;
+        }
+        .caixa-historico-geral {
+            background: #212529; padding: 30px; border-radius: 16px; width: 100%; max-width: 520px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.6); border: 2px solid #22c55e; color: #f8f9fa;
+            max-height: 85vh; display: flex; flex-direction: column; position: relative;
+        }
+        .conteudo-historico-geral { overflow-y: auto; flex: 1; padding-right: 5px; }
+        .item-saque-geral {
+            display: grid;
+            grid-template-columns: 1fr auto auto auto;
+            align-items: center;
+            column-gap: 10px;
+            background: #2c3034; border: 1px solid #343a40; border-radius: 8px;
+            padding: 10px 14px; margin-bottom: 8px; font-size: 12px;
+        }
+        .item-saque-geral .saq-nome {
+            color: #f8f9fa; font-weight: bold; white-space: nowrap;
+            overflow: hidden; text-overflow: ellipsis; max-width: 100%;
+        }
+        .item-saque-geral .saq-data { color: #adb5bd; font-weight: normal; white-space: nowrap; }
+        .item-saque-geral .saq-valor { color: #ffffff; font-weight: bold; white-space: nowrap; }
+        .item-saque-geral .saq-status-aprovado { color: #2ecc71; font-weight: bold; white-space: nowrap; }
+        .item-saque-geral .saq-status-negado { color: #e74c3c; font-weight: bold; white-space: nowrap; }
+
         .select-nome {
             width: 100%; padding: 12px; border: 1px solid #495057; background-color: #2c3034;
             color: white; border-radius: 8px; font-size: 14px; font-weight: bold;
@@ -451,6 +497,36 @@
             font-size: 16px; 
             margin-top: 15px;
         }
+
+        /* ===== POPUP DE SAQUE (VERDE) ===== */
+        #avisoNovaSaque {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0); display: none;
+            align-items: center; justify-content: center; z-index: 999999;
+            backdrop-filter: blur(5px); animation: fadeIn 0.3s ease-out;
+        }
+        #avisoNovaSaque > div {
+            background: #212529; border: 3px solid #22c55e; border-radius: 20px;
+            padding: 40px; text-align: center; max-width: 400px; width: 90%;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.7); text-transform: uppercase;
+        }
+        #avisoNovaSaque h2 {
+            color: #22c55e;
+            font-size: 24px;
+            margin-bottom: 20px;
+            justify-content: center;
+            padding-right: 0;
+        }
+        #avisoNovaSaque .saque-valor {
+            color: #3b82f6;
+            font-size: 28px;
+            margin-top: 10px;
+            text-shadow: 0 0 12px rgba(59,130,246,0.4);
+        }
+        #avisoNovaSaque .saque-status {
+            font-size: 16px;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
@@ -466,17 +542,17 @@
         </div>
         <div class="creditos-container">
             <div class="creditos-botoes">
-                <div style="display:flex; gap:6px; width:100%;">
-                    <button style="flex:1;" onclick="window.open('https://cup-edition.github.io/sistema-inscricoes/INSCREVER.html', '_blank')">📝 SITE DE INSCRIÇÃO</button>
-                    <button style="flex:1;" onclick="window.open('https://cup-edition.github.io/sistema-inscricoes/INSCRICAO-GRATUITA.html', '_blank')">🆓 SITE DE INSCRIÇÃO GRATUITO</button>
+                <div>
+                    <button onclick="window.open('https://cup-edition.github.io/sistema-inscricoes/INSCREVER.html', '_blank')">📝 SITE DE INSCRIÇÃO</button>
+                    <button onclick="window.open('https://cup-edition.github.io/sistema-inscricoes/INSCRICAO-GRATUITA.html', '_blank')">🆓 SITE DE INSCRIÇÃO GRATUITO</button>
                 </div>
-                <div style="display:flex; gap:6px; width:100%;">
-                    <button style="flex:1;" onclick="window.open('https://cup-edition.github.io/sorteio-nomes/SORTEIO.html', '_blank')">🎰 SORTEIO</button>
-                    <button style="flex:1;" onclick="window.open('https://meet.google.com/esn-aqxa-gdi', '_blank')">🔴 LIVE</button>
+                <div>
+                    <button onclick="window.open('https://cup-edition.github.io/sorteio-nomes/SORTEIO.html', '_blank')">🎰 SORTEIO</button>
+                    <button onclick="window.open('https://meet.google.com/esn-aqxa-gdi', '_blank')">🔴 LIVE</button>
                 </div>
-                <div style="display:flex; gap:6px; width:100%;">
-                    <button style="flex:1;" class="btn-instagram" onclick="window.open('https://www.instagram.com/direct/inbox', '_blank')">📸 INSTAGRAM</button>
-                    <button style="flex:1;" class="btn-whatsapp" onclick="window.open('https://web.whatsapp.com', '_blank')">💬 WHATSAPP</button>
+                <div>
+                    <button class="btn-instagram" onclick="window.open('https://www.instagram.com/direct/inbox', '_blank')">📸 INSTAGRAM</button>
+                    <button class="btn-whatsapp" onclick="window.open('https://web.whatsapp.com', '_blank')">💬 WHATSAPP</button>
                 </div>
             </div>
             <div class="creditos-menor" style="margin-top: 15px;">DESENVOLVIDO POR</div>
@@ -498,12 +574,18 @@
                 <input type="number" id="edit_mes" min="1" max="12" placeholder="MÊS">
             </div>
             <div class="grupo-campo">
+                <label>📸 TROCAR FOTO (OPCIONAL):</label>
+                <input type="file" id="edit_foto" accept="image/*">
+            </div>
+            <div class="grupo-campo">
                 <label>VALOR PIX DISPONÍVEL:</label>
                 <input type="text" id="edit_valor" inputmode="decimal" placeholder="0,00" maxlength="15">
             </div>
             <div class="grupo-campo">
-                <label>📸 TROCAR FOTO (OPCIONAL):</label>
-                <input type="file" id="edit_foto" accept="image/*">
+                <label>🕓 HISTÓRICO DE SAQUES:</label>
+                <div class="historico-admin" id="historicoSaques">
+                    <div class="historico-vazio">NENHUM SAQUE REALIZADO.</div>
+                </div>
             </div>
             <div class="botoes-modal">
                 <button type="button" onclick="excluirCadastro()" class="btn-vermelho">🗑️ EXCLUIR</button>
@@ -618,6 +700,18 @@
         </div>
     </div>
 
+    <div id="modalHistoricoGeral">
+        <div class="caixa-historico-geral">
+            <h3>🗒️ HISTÓRICO DE SAQUES</h3>
+            <div class="conteudo-historico-geral" id="listaHistoricoGeral">
+                <div class="item-suspenso-vazio">NENHUM SAQUE REALIZADO.</div>
+            </div>
+            <div class="botoes-modal" style="margin-top: 15px; justify-content: flex-end;">
+                <button type="button" onclick="fecharHistoricoGeral()">FECHAR</button>
+            </div>
+        </div>
+    </div>
+
     <!-- POPUP DE CONFIRMAÇÃO -->
     <div id="avisoNovaConfirmacao">
         <div>
@@ -637,6 +731,17 @@
         </div>
     </div>
 
+    <!-- POPUP DE SAQUE (VERDE) -->
+    <div id="avisoNovaSaque">
+        <div>
+            <h2>💸 SAQUE REALIZADO!</h2>
+            <div id="popupSaqueFotoContainer" style="margin-bottom: 20px;"></div>
+            <div id="popupSaqueNome" style="font-size: 22px; color: #f8f9fa; font-weight: bold; word-break: break-word;"></div>
+            <div class="saque-valor" id="popupSaqueValor"></div>
+            <div class="saque-status" id="popupSaqueStatus"></div>
+        </div>
+    </div>
+
     <div id="conteudoPrincipal">
         <h1>🔐 PAINEL ADMINISTRATIVO CUP EDITION ⚽</h1>
         <div class="aviso-link"></div>
@@ -646,7 +751,7 @@
                 📊 INSCRIÇÕES 
                 <span id="contadorConfirmados" class="contador-confirmados"></span>
                 <span id="contadorAprovados" class="contador-aprovados"></span>
-                <span id="saldoAsaas" class="contador-saldo">💵 SALDO: --</span>
+                <span id="saldoAsaas" class="contador-saldo" onclick="abrirHistoricoGeral()">💵 SALDO: --</span>
                 <div id="avisoLimite" class="aviso-limite">⚠️ LIMITE DE 16 APROVADOS ATINGIDO! INSCRIÇÕES ENCERRADAS AUTOMATICAMENTE.</div>
             </h2>
 
@@ -901,6 +1006,28 @@
             setTimeout(() => { aviso.style.display = 'none'; }, 4000);
         }
 
+        function mostrarAvisoNovoSaque(inscricao, saque) {
+            const aviso = document.getElementById('avisoNovaSaque');
+            const fotoContainer = document.getElementById('popupSaqueFotoContainer');
+            const nomeContainer = document.getElementById('popupSaqueNome');
+            const valorContainer = document.getElementById('popupSaqueValor');
+            const statusContainer = document.getElementById('popupSaqueStatus');
+
+            fotoContainer.innerHTML = inscricao.foto
+                ? `<img src="${inscricao.foto}" style="width:120px;height:120px;border-radius:50%;object-fit:cover;border:4px solid #22c55e;box-shadow:0 4px 15px rgba(0,0,0,0.5);">`
+                : `<div style="font-size:70px;line-height:120px;width:120px;height:120px;background:#2c3034;border-radius:50%;margin:0 auto;border:4px solid #22c55e;">📄</div>`;
+            nomeContainer.innerText = inscricao.nome;
+            valorContainer.innerText = 'R$ ' + Number(saque.valor).toFixed(2).replace('.', ',');
+
+            const aprovado = saque.status === 'aprovado';
+            statusContainer.innerText = aprovado ? '✓ APROVADO' : '✗ NEGADO';
+            statusContainer.style.color = aprovado ? '#2ecc71' : '#e74c3c';
+
+            aviso.style.display = 'flex';
+            setTimeout(() => { aviso.style.display = 'none'; }, 3000);
+            carregarSaldoAsaas();
+        }
+
         function alternarMenuFlutuante() {
             const menu = document.getElementById('menuFlutuante');
             const btn = document.getElementById('btnMenu');
@@ -940,12 +1067,16 @@
             if (document.getElementById('modalAprovacao') && event.target === document.getElementById('modalAprovacao')) fecharAprovacao();
             if (document.getElementById('fundoCadastro') && event.target === document.getElementById('fundoCadastro')) ocultarCadastro();
             if (document.getElementById('modalSuspensos') && event.target === document.getElementById('modalSuspensos')) fecharSuspensos();
+            if (document.getElementById('modalHistoricoGeral') && event.target === document.getElementById('modalHistoricoGeral')) fecharHistoricoGeral();
             
             const avisoNovaConfirmacao = document.getElementById('avisoNovaConfirmacao');
             if (avisoNovaConfirmacao && avisoNovaConfirmacao.style.display === 'flex') avisoNovaConfirmacao.style.display = 'none';
             
             const avisoNovaAprovacao = document.getElementById('avisoNovaAprovacao');
             if (avisoNovaAprovacao && avisoNovaAprovacao.style.display === 'flex') avisoNovaAprovacao.style.display = 'none';
+            
+            const avisoNovaSaque = document.getElementById('avisoNovaSaque');
+            if (avisoNovaSaque && avisoNovaSaque.style.display === 'flex') avisoNovaSaque.style.display = 'none';
         });
 
         function mostrarCadastro() { document.getElementById('fundoCadastro').style.display = 'flex'; }
@@ -1055,6 +1186,84 @@
             });
         }
 
+        function abrirHistoricoGeral() {
+            document.getElementById('modalHistoricoGeral').style.display = 'flex';
+            carregarHistoricoGeral();
+        }
+
+        function fecharHistoricoGeral() {
+            document.getElementById('modalHistoricoGeral').style.display = 'none';
+        }
+
+        function carregarHistoricoGeral() {
+            const container = document.getElementById('listaHistoricoGeral');
+            db.ref('inscricoes').once('value').then(snap => {
+                const lista = snap.val() || [];
+                const todosSaques = [];
+
+                lista.forEach(insc => {
+                    if (!insc) return;
+                    const historico = Array.isArray(insc.historico_saques) ? insc.historico_saques : [];
+                    historico.forEach(s => {
+                        todosSaques.push({
+                            nome: insc.nome || '—',
+                            valor: s.valor,
+                            data: s.data,
+                            status: s.status
+                        });
+                    });
+                });
+
+                todosSaques.sort((a, b) => (b.data || 0) - (a.data || 0));
+                const recentes = todosSaques.slice(0, 30);
+
+                if (recentes.length === 0) {
+                    container.innerHTML = '<div class="item-suspenso-vazio">NENHUM SAQUE REALIZADO.</div>';
+                    return;
+                }
+
+                let html = '';
+                recentes.forEach(s => {
+                    const d = new Date(s.data);
+                    const dataStr = String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0') + '/' + d.getFullYear() + ' ' + String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+                    const aprovado = s.status === 'aprovado';
+                    html += `
+                    <div class="item-saque-geral">
+                        <span class="saq-nome">${s.nome}</span>
+                        <span class="saq-data">${dataStr}</span>
+                        <span class="saq-valor">R$ ${Number(s.valor).toFixed(2).replace('.', ',')}</span>
+                        <span class="${aprovado ? 'saq-status-aprovado' : 'saq-status-negado'}">${aprovado ? '✓ APROVADO' : '✗ NEGADO'}</span>
+                    </div>`;
+                });
+                container.innerHTML = html;
+            });
+        }
+
+        function preencherHistorico(item) {
+            const container = document.getElementById('historicoSaques');
+            const historico = Array.isArray(item.historico_saques) ? item.historico_saques : [];
+
+            if (historico.length === 0) {
+                container.innerHTML = '<div class="historico-vazio">NENHUM SAQUE REALIZADO.</div>';
+                return;
+            }
+
+            let html = '';
+            historico.forEach(s => {
+                const d = new Date(s.data);
+                const dataStr = String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0') + '/' + d.getFullYear() + ' ' + String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+                html += `
+                <div class="historico-item">
+                    <span class="hist-data">${dataStr}</span>
+                    <span style="display:flex; align-items:center; gap:8px;">
+                        <span class="hist-valor">R$ ${Number(s.valor).toFixed(2).replace('.', ',')}</span>
+                        <span class="hist-status">✓ APROVADO</span>
+                    </span>
+                </div>`;
+            });
+            container.innerHTML = html;
+        }
+
         function abrirEdicao(id) {
             idEmEdicao = id;
             db.ref('inscricoes').once('value').then(snap => {
@@ -1067,6 +1276,7 @@
                     document.getElementById('edit_mes').value = item.mes;
                     document.getElementById('edit_valor').value = (item.valor !== undefined && item.valor !== null && item.valor !== '') ? Number(item.valor).toFixed(2).replace('.', ',') : '';
                     document.getElementById('edit_foto').value = "";
+                    preencherHistorico(item);
                     document.getElementById('modalEditar').style.display = 'flex';
                 }
             });
@@ -1569,6 +1779,12 @@
                 if (anterior.status === 'confirmado' && item.status === 'aprovado' && item.data_aprovacao) {
                     mostrarAvisoNovaAprovacao(item);
                 }
+
+                const histAnterior = Array.isArray(anterior.historico_saques) ? anterior.historico_saques : [];
+                const histAtual = Array.isArray(item.historico_saques) ? item.historico_saques : [];
+                if (histAtual.length > 0 && histAtual[0].data !== (histAnterior[0] && histAnterior[0].data)) {
+                    mostrarAvisoNovoSaque(item, histAtual[0]);
+                }
             }
         });
     }
@@ -1693,7 +1909,7 @@
         }
 
         document.getElementById('saldoAsaas').addEventListener('click', function () {
-            carregarSaldoAsaas();
+            abrirHistoricoGeral();
         });
 
         // ===== FUNÇÃO: EXECUTA REINÍCIO E REAGENDA AUTOMATICAMENTE =====
@@ -1801,9 +2017,10 @@
 
         document.addEventListener('keydown', function(event) {
             if (event.key === 'Escape') {
-                ocultarCadastro(); fecharEdicao(); fecharAgendamento(); fecharAprovacao(); fecharSuspensos();
+                ocultarCadastro(); fecharEdicao(); fecharAgendamento(); fecharAprovacao(); fecharSuspensos(); fecharHistoricoGeral();
                 document.getElementById('avisoNovaConfirmacao').style.display = 'none';
                 document.getElementById('avisoNovaAprovacao').style.display = 'none';
+                document.getElementById('avisoNovaSaque').style.display = 'none';
                 const menu = document.getElementById('menuFlutuante');
                 const btn = document.getElementById('btnMenu');
                 menu.style.display = 'none'; btn.classList.remove('aberto');
