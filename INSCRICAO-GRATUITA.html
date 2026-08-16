@@ -850,25 +850,26 @@
 
         // ===== FUNÇÃO: VERIFICA E ATIVA LIMITE DINÂMICO =====
         function verificarAtivarLimiteDinamico(qtdAprovados) {
-            if (limiteDinamicoAtivado) return;
-            
             const agora = new Date();
             const diaSemana = agora.getDay();
             const hora = agora.getHours();
             
             // Sexta-feira a partir das 20h até domingo
-            if ((diaSemana === 5 && hora >= 20) || diaSemana === 6 || diaSemana === 0) {
-                if (qtdAprovados < 12) {
+            if (!((diaSemana === 5 && hora >= 20) || diaSemana === 6 || diaSemana === 0)) return;
+            
+            if (qtdAprovados < 12) {
+                if (!limiteDinamicoAtivado) {
                     limiteAtual = 12;
                     limiteDinamicoAtivado = true;
                     console.log(`🔁 LIMITE DINÂMICO ATIVADO: novo limite = ${limiteAtual}`);
-                    
-                    if (qtdAprovados >= 12) {
-                        db.ref('configuracao').set({ inscricoes_abertas: false });
-                        document.getElementById('botaoConfirmar').style.display = 'none';
-                        document.getElementById('botaoTelaEncerrado').style.display = 'block';
-                    }
                 }
+            } else {
+                // Já tem 12 ou mais confirmados, fecha automaticamente no banco
+                limiteAtual = 12;
+                limiteDinamicoAtivado = true;
+                db.ref('configuracao').update({ inscricoes_abertas: false });
+                document.getElementById('botaoConfirmar').style.display = 'none';
+                document.getElementById('botaoTelaEncerrado').style.display = 'block';
             }
         }
 
@@ -900,6 +901,7 @@
             db.ref('configuracao/inscricoes_abertas').on('value', function(snap) {
                 inscricoesAbertas = snap.val() === true;
                 atualizarAlertaInscricoesAbertas();
+                verificarStatusSistemaComDados(listaCompletaInscricoes || []);
             });
             
             db.ref('inscricoes').on('value', function(snap) {
@@ -1400,9 +1402,10 @@
 
             atualizarAlertaInscricoesAbertas();
 
-            if (qtdAprovados >= limiteAtual) {
+            if (!inscricoesAbertas || qtdAprovados >= limiteAtual) {
                 document.getElementById('botaoConfirmar').style.display = 'none';
                 document.getElementById('botaoTelaEncerrado').style.display = 'block';
+                bloquearCamposInscricao(true);
                 
                 const avisoProxima = document.getElementById('avisoProximaInscricao');
                 if (agendamentoAtual && !agendamentoAtual.executado) {
@@ -1413,8 +1416,16 @@
             } else {
                 document.getElementById('botaoConfirmar').style.display = 'block';
                 document.getElementById('botaoTelaEncerrado').style.display = 'none';
+                bloquearCamposInscricao(false);
                 document.getElementById('avisoProximaInscricao').classList.remove('visivel');
             }
+        }
+
+        // ===== FUNÇÃO: BLOQUEIA/LIBERA CAMPOS QUANDO INSCRIÇÃO ENCERRADA =====
+        function bloquearCamposInscricao(bloquear) {
+            document.getElementById('ver_nome').disabled = bloquear;
+            document.getElementById('ver_dia').disabled = bloquear;
+            document.getElementById('ver_mes').disabled = bloquear;
         }
 
         function confirmarInscricao() {
@@ -1470,10 +1481,10 @@
                 // Verifica limite dinâmico
                 verificarAtivarLimiteDinamico(qtdAprovados);
 
-                if (qtdAprovados >= limiteAtual) {
+                if (!inscricoesAbertas || qtdAprovados >= limiteAtual) {
                     esconderLoadingOverlay(false);
                     msg.className = 'resultado erro';
-                    msg.innerText = `❌ LIMITE DE ${limiteAtual} CONFIRMADOS ATINGIDO!`;
+                    msg.innerText = `❌ INSCRIÇÕES ENCERRADAS!`;
                     msg.style.display = 'block';
                     verificarStatusSistemaComDados(inscricoes);
                     setTimeout(() => { msg.style.display = 'none'; }, 3000);
