@@ -1293,8 +1293,8 @@
             const diaSemana = agora.getDay();
             const hora = agora.getHours();
             
-            // Sexta-feira a partir das 20h
-            if (diaSemana === 5 && hora >= 20) {
+            // Sexta-feira a partir das 20h até domingo
+            if ((diaSemana === 5 && hora >= 20) || diaSemana === 6 || diaSemana === 0) {
                 if (qtdAprovados < 12) {
                     limiteAtual = 12;
                     limiteDinamicoAtivado = true;
