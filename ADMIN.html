@@ -85,6 +85,7 @@
         }
         @keyframes girar { to { transform: rotate(360deg); } }
         .aviso-limite {color: #e74c3c; font-weight: bold; font-size: 13px; background: #3a1e1e; padding: 6px 12px; border-radius: 6px; border: 1px solid #e74c3c; animation: piscar 1s infinite;}
+        .aviso-limite-confirmados {color: #e74c3c; background: #3a1e1e; border-color: #e74c3c; animation: piscar 1s infinite;}
         @keyframes piscar { 0%{opacity:1;} 50%{opacity:0.4;} 100%{opacity:1;} }
         
         .grupo-campo {margin-bottom: 15px;}
@@ -753,6 +754,7 @@
                 <span id="contadorAprovados" class="contador-aprovados"></span>
                 <span id="saldoAsaas" class="contador-saldo" onclick="abrirHistoricoGeral()">💵 SALDO: --</span>
                 <div id="avisoLimite" class="aviso-limite">⚠️ LIMITE DE 16 APROVADOS ATINGIDO! INSCRIÇÕES ENCERRADAS AUTOMATICAMENTE.</div>
+                <div id="avisoLimiteConfirmados" class="aviso-limite aviso-limite-confirmados">⚠️ LIMITE DE 16 CONFIRMADOS ATINGIDO!</div>
             </h2>
 
             <div class="btn-menu-hamburguer" id="btnMenu" onclick="alternarMenuFlutuante()">
@@ -851,6 +853,10 @@
         let idEmEdicao = null;
         let listaAnterior = [];
         let inscritosCache = [];
+        let qtdAprovadosGlobal = 0;
+        let qtdConfirmadosGlobal = 0;
+        let dadosCarregados = false;
+        let ultimoStatusInscricoes = null;
 
         db.ref('.info/connected').on('value', function(snap) {
             if (snap.val() !== true) { firebase.database().goOnline(); }
@@ -905,68 +911,78 @@
 
         // ===== FUNÇÃO: VERIFICA E ATIVA LIMITE DINÂMICO =====
         function verificarAtivarLimiteDinamico(qtdAprovados) {
-            if (limiteDinamicoAtivado) return; // já foi ativado
-            
             const agora = new Date();
             const diaSemana = agora.getDay(); // 5 = sexta-feira
             const hora = agora.getHours();
             
             // Verifica se é sexta-feira a partir das 20h até domingo
-            if ((diaSemana === 5 && hora >= 20) || diaSemana === 6 || diaSemana === 0) {
-                // Se tiver MENOS de 12 aprovados, ativa limite 12
-                if (qtdAprovados < 12) {
+            if (!((diaSemana === 5 && hora >= 20) || diaSemana === 6 || diaSemana === 0)) return;
+            
+            if (qtdAprovados < 12) {
+                if (!limiteDinamicoAtivado) {
                     limiteAtual = 12;
                     limiteDinamicoAtivado = true;
                     console.log(`🔁 LIMITE DINÂMICO ATIVADO: novo limite = ${limiteAtual} (menos de 12 aprovados na sexta 20h)`);
-                    
-                    // Se já tiver 12 ou mais aprovados, fecha automaticamente
-                    if (qtdAprovados >= 12) {
-                        db.ref('configuracao').update({ inscricoes_abertas: false });
-                        document.getElementById('avisoLimite').style.display = 'block';
-                        document.getElementById('avisoLimite').innerText = 
-                            `⚠️ LIMITE DE ${limiteAtual} APROVADOS ATINGIDO! INSCRIÇÕES ENCERRADAS AUTOMATICAMENTE.`;
-                    }
-                } else {
-                    // Se já tem 12 ou mais, mantém 16 e avisa
-                    console.log(`ℹ️ Já há ${qtdAprovados} aprovados, mantendo limite 16.`);
                 }
+            } else {
+                // Já tem 12 ou mais aprovados, fecha automaticamente
+                limiteAtual = 12;
+                limiteDinamicoAtivado = true;
+                db.ref('configuracao').update({ inscricoes_abertas: false });
+                document.getElementById('avisoLimite').style.display = 'block';
+                document.getElementById('avisoLimite').innerText = 
+                    `⚠️ LIMITE DE ${limiteAtual} APROVADOS ATINGIDO! INSCRIÇÕES ENCERRADAS AUTOMATICAMENTE.`;
             }
         }
 
         // ===== FUNÇÃO: VERIFICA LIMITE DINÂMICO PERIODICAMENTE =====
+        // Não lê o Firebase: usa as quantidades já carregadas pelo listener
+        // apenas para reavaliar o horário (sexta 20h até domingo).
         function verificarLimiteDinamicoPeriodicamente() {
-            db.ref('inscricoes').once('value', snap => {
-                const lista = snap.val() || [];
-                const qtdAprovados = lista.filter(i => i && i.status === 'aprovado').length;
-                verificarAtivarLimiteDinamico(qtdAprovados);
-                verificarLimiteAprovados(qtdAprovados);
-            });
+            verificarLimitesCompletos();
         }
 
-        // ===== FUNÇÃO: VERIFICA LIMITE DE APROVADOS =====
-        function verificarLimiteAprovados(qtd) {
-            const aviso = document.getElementById('avisoLimite');
+        // ===== FUNÇÃO: VERIFICA LIMITES DE APROVADOS E CONFIRMADOS =====
+        // Fecha as inscrições se QUALQUER um dos limites for atingido.
+        // Só reabre quando AMBOS estiverem abaixo do limite (e com dados carregados).
+        function verificarLimitesCompletos() {
+            verificarAtivarLimiteDinamico(qtdAprovadosGlobal);
             
-            // Verifica se o limite dinâmico deve ser ativado
-            verificarAtivarLimiteDinamico(qtd);
+            const avisoAprovados = document.getElementById('avisoLimite');
+            const avisoConfirmados = document.getElementById('avisoLimiteConfirmados');
             
-            // Usa o limite atual (pode ser 16 ou 12)
-            if (limiteAtual - qtd === 0) {
-                db.ref('configuracao').update({ inscricoes_abertas: false });
-                aviso.style.display = 'block';
-                aviso.innerText = `⚠️ LIMITE DE ${limiteAtual} APROVADOS ATINGIDO! INSCRIÇÕES ENCERRADAS AUTOMATICAMENTE.`;
-            } else {
-                // Só reabre se o limite atual não foi atingido
-                if (qtd < limiteAtual) {
-                    db.ref('configuracao').update({ inscricoes_abertas: true });
+            const limiteAprovados = qtdAprovadosGlobal >= limiteAtual;
+            const limiteConfirmados = qtdConfirmadosGlobal >= limiteAtual;
+            
+            if (avisoAprovados) {
+                if (limiteAprovados) {
+                    avisoAprovados.style.display = 'block';
+                    avisoAprovados.innerText = `⚠️ LIMITE DE ${limiteAtual} APROVADOS ATINGIDO! INSCRIÇÕES ENCERRADAS AUTOMATICAMENTE.`;
+                } else {
+                    avisoAprovados.style.display = 'none';
                 }
-                aviso.style.display = 'none';
+            }
+            if (avisoConfirmados) {
+                if (limiteConfirmados) {
+                    avisoConfirmados.style.display = 'block';
+                    avisoConfirmados.innerText = `⚠️ LIMITE DE ${limiteAtual} CONFIRMADOS ATINGIDO!`;
+                } else {
+                    avisoConfirmados.style.display = 'none';
+                }
             }
             
-            // Atualiza o contador com o limite atual
-            const vagasRestantes = limiteAtual - qtd;
-            document.getElementById('contadorAprovados').innerText = 
-                `💰 ${qtd} APROVADOS | RESTAM ${vagasRestantes} VAGAS`;
+            const algumAtingido = limiteAprovados || limiteConfirmados;
+            const novoStatus = !algumAtingido;
+            if (dadosCarregados && novoStatus !== ultimoStatusInscricoes) {
+                db.ref('configuracao').update({ inscricoes_abertas: novoStatus });
+                ultimoStatusInscricoes = novoStatus;
+            }
+            
+            const contador = document.getElementById('contadorAprovados');
+            if (contador) {
+                const vagasRestantes = Math.max(0, limiteAtual - qtdAprovadosGlobal);
+                contador.innerText = `💰 ${qtdAprovadosGlobal} APROVADOS | RESTAM ${vagasRestantes} VAGAS`;
+            }
         }
 
         // Chama a verificação a cada 1 minuto
@@ -1041,7 +1057,7 @@
         }
 
         function carregarInscricaoGratuita() {
-            db.ref('configuracao/inscricao_gratuita_aberta').on('value', function(snap) {
+            db.ref('configuracao/botao_gratuito_aberto').on('value', function(snap) {
                 const ligado = snap.val() === true;
                 const sw = document.getElementById('switchInscricaoGratuita');
                 if (sw) sw.classList.toggle('ligado', ligado);
@@ -1052,7 +1068,7 @@
             const sw = document.getElementById('switchInscricaoGratuita');
             if (!sw) return;
             const novoValor = !sw.classList.contains('ligado');
-            db.ref('configuracao/inscricao_gratuita_aberta').set(novoValor);
+            db.ref('configuracao/botao_gratuito_aberto').set(novoValor);
         }
 
         document.addEventListener('click', function(event) {
@@ -1793,7 +1809,10 @@
             if (inscricoes.length === 0 || !inscricoes[0]) {
                 tabela.innerHTML = '<tr><td colspan="8" style="text-align: center; color: #adb5bd;">NENHUMA INSCRIÇÃO CADASTRADA AINDA.</td></tr>';
                 document.getElementById('contadorConfirmados').innerText = '✅ 0 CONFIRMADOS';
-                verificarLimiteAprovados(0);
+                qtdAprovadosGlobal = 0;
+                qtdConfirmadosGlobal = 0;
+                dadosCarregados = true;
+                verificarLimitesCompletos();
                 return;
             }
 
@@ -1813,7 +1832,10 @@
 
             var qtdAprovados = listaOrdenada.filter(i => i.status === 'aprovado').length;
             var qtdConfirmados = listaOrdenada.filter(i => i.status === 'confirmado').length;
-            verificarLimiteAprovados(qtdAprovados);
+            qtdAprovadosGlobal = qtdAprovados;
+            qtdConfirmadosGlobal = qtdConfirmados;
+            dadosCarregados = true;
+            verificarLimitesCompletos();
             document.getElementById('contadorConfirmados').innerText = `✅ ${qtdConfirmados} CONFIRMADOS`;
 
             tabela.innerHTML = '';
