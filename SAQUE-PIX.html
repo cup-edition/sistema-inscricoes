@@ -100,18 +100,63 @@
             letter-spacing: 0.5px;
         }
         .caixa-historico {
-            margin-bottom: 0; padding: 8px 14px; background: #0f172a;
-            border: 1px solid #22c55e; border-radius: 14px;
+            margin-bottom: 0; margin-top: 14px; text-align: right;
         }
-        .caixa-historico h3 {
-            color: #ffffff; margin-bottom: 6px; font-size: 13px; text-transform: uppercase;
-            letter-spacing: 1px; font-weight: 800;
+        .btn-historico {
+            display: inline-flex; align-items: center; gap: 8px;
+            width: auto; max-width: 100%;
+            background: #e2e8f0; border: 2px solid #94a3b8; cursor: pointer;
+            padding: 7px 14px; border-radius: 999px;
+            transition: all 0.2s ease; box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+        }
+        .btn-historico:hover {
+            background: #f1f5f9; border-color: #3b82f6;
+            box-shadow: 0 4px 12px rgba(59,130,246,0.2);
+        }
+        .btn-historico:active { transform: scale(0.96); }
+        .btn-historico span:first-child {
+            color: #1e293b; font-size: 12px; text-transform: uppercase;
+            letter-spacing: 0.5px; font-weight: 800;
+        }
+        .icone-historico {
+            font-size: 12px; color: #3b82f6; transition: transform 0.25s ease;
+        }
+        /* ===== JANELINHA FLUTUANTE DO HISTÓRICO ===== */
+        #modalHistorico, #modalDetalheSaque {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(4px);
+            display: none; align-items: center; justify-content: center; z-index: 99998;
+            animation: fadeInOverlay 0.3s ease-out;
+        }
+        #modalHistorico.aberto, #modalDetalheSaque.aberto { display: flex; }
+        .janela-historico {
+            background: #1e293b; border: 2px solid #22c55e; border-radius: 18px;
+            padding: 24px; width: 92%; max-width: 420px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.7);
+            animation: scaleIn 0.3s ease-out; position: relative;
+            max-height: 80vh; display: flex; flex-direction: column;
+        }
+        .janela-historico h3 {
+            color: #ffffff; font-size: 16px; text-transform: uppercase;
+            letter-spacing: 1px; font-weight: 800; text-align: center; margin-bottom: 14px;
+        }
+        .fechar-historico {
+            position: absolute; top: 12px; right: 12px; width: 30px; height: 30px;
+            background: #e74c3c; color: white; border: none; border-radius: 50%;
+            font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+            padding: 0; line-height: 1; transition: all 0.2s;
+        }
+        .fechar-historico:hover { background: #c0392b; }
+        .lista-historico {
+            overflow-y: auto; padding: 4px 6px 4px 2px;
         }
         .hist-item {
             display: flex; justify-content: space-between; align-items: center;
-            padding: 4px 0; border-bottom: 1px solid rgba(34,197,94,0.15);
-            font-size: 13px;
+            padding: 8px 6px; border-bottom: 1px solid rgba(34,197,94,0.15);
+            font-size: 13px; cursor: pointer; border-radius: 8px;
+            transition: background 0.15s ease;
         }
+        .hist-item:hover { background: rgba(34,197,94,0.08); }
         .hist-item:last-child { border-bottom: none; }
         .hist-item .hist-data { color: #94a3b8; font-size: 12px; }
         .hist-item .hist-valor { color: #ffffff; font-weight: 800; }
@@ -125,6 +170,9 @@
         .linha:last-of-type { border-bottom: none; }
         .linha span:first-child { color: #64748b; font-size: 13px; }
         .linha span:last-child { color: #0f172a; font-weight: 600; font-size: 14px; text-align: right; }
+        #detalheSaqueConteudo .linha { border-bottom: 1px solid rgba(59,130,246,0.15); }
+        #detalheSaqueConteudo .linha span:first-child { color: #94a3b8; }
+        #detalheSaqueConteudo .linha span:last-child { color: #ffffff; }
         .resultado {
             margin-top: 20px; padding: 18px; border-radius: 14px; display: none; white-space: pre-line;
             font-size: 14px; line-height: 1.7;
@@ -317,9 +365,11 @@
 
         <button id="btn1">Verificar</button>
 
-        <div class="caixa-historico" id="caixaHistorico" style="display:none; margin-top:18px;">
-            <h3>🕓 HISTÓRICO DE SAQUES</h3>
-            <div id="listaHistorico"></div>
+        <div class="caixa-historico" id="caixaHistorico" style="display:none; margin-top:14px;">
+            <button type="button" class="btn-historico" id="btnHistorico" onclick="abrirJanelaHistorico()">
+                <span>🕓 ÚLTIMOS SAQUES</span>
+                <span class="icone-historico">▸</span>
+            </button>
         </div>
 
         <div class="confirmacao" id="caixaConfirma">
@@ -330,7 +380,7 @@
             <div class="linha"><span>Titular</span><span id="mostraTitular"></span></div>
             <div class="linha"><span>CPF/CNPJ</span><span id="mostraCpf"></span></div>
             <div class="linha"><span>Instituição</span><span id="mostraBanco"></span></div>
-            <button id="btnEnviar">SACAR ✅</button>
+            <button id="btnEnviar">SACAR💵</button>
             <button id="btnVoltar" class="cinza">Alterar</button>
         </div>
 
@@ -358,6 +408,26 @@
         </div>
     </div>
     <!-- ===== FIM LOADING OVERLAY ===== -->
+
+    <!-- ===== JANELINHA FLUTUANTE DO HISTÓRICO ===== -->
+    <div id="modalHistorico">
+        <div class="janela-historico">
+            <button type="button" class="fechar-historico" onclick="fecharJanelaHistorico()">&times;</button>
+            <h3>🕓 ÚLTIMOS SAQUES</h3>
+            <div id="listaHistorico" class="lista-historico"></div>
+        </div>
+    </div>
+    <!-- ===== FIM JANELINHA DO HISTÓRICO ===== -->
+
+    <!-- ===== JANELINHA FLUTUANTE DE DETALHES DO SAQUE ===== -->
+    <div id="modalDetalheSaque">
+        <div class="janela-historico" style="border-color: #3b82f6;">
+            <button type="button" class="fechar-historico" onclick="fecharDetalheSaque()">&times;</button>
+            <h3>🧾 DETALHES DO SAQUE</h3>
+            <div id="detalheSaqueConteudo" style="overflow-y: auto;"></div>
+        </div>
+    </div>
+    <!-- ===== FIM JANELINHA DE DETALHES ===== -->
 
     <audio id="audioConfirmado" src="https://cup-edition.github.io/sistema-inscricoes/confirmado.mp3" preload="auto"></audio>
 
@@ -617,10 +687,13 @@ refInscricoes.on('value', function (snap) {
             if (valorSpan) valorSpan.classList.toggle('saldo-positivo', positivo);
         }
 
+        let historicoAtual = [];
+
         function mostrarHistorico(cadastro) {
             const caixaHist = document.getElementById('caixaHistorico');
             const listaHist = document.getElementById('listaHistorico');
             const historico = Array.isArray(cadastro.historico_saques) ? cadastro.historico_saques : [];
+            historicoAtual = historico;
 
             if (historico.length === 0) {
                 caixaHist.style.display = 'none';
@@ -628,11 +701,11 @@ refInscricoes.on('value', function (snap) {
             }
 
             let html = '';
-            historico.forEach(s => {
+            historico.forEach((s, idx) => {
                 const d = new Date(s.data);
                 const dataStr = String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0') + '/' + d.getFullYear() + ' ' + String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
                 html += `
-                <div class="hist-item">
+                <div class="hist-item" onclick="verDetalheSaque(${idx})">
                     <span class="hist-data">${dataStr}</span>
                     <span style="display:flex; align-items:center;">
                         <span class="hist-valor">R$ ${Number(s.valor).toFixed(2).replace('.', ',')}</span>
@@ -643,6 +716,51 @@ refInscricoes.on('value', function (snap) {
             listaHist.innerHTML = html;
             caixaHist.style.display = 'block';
         }
+
+        function verDetalheSaque(idx) {
+            const s = historicoAtual[idx];
+            if (!s) return;
+            const d = new Date(s.data);
+            const dataStr = String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0') + '/' + d.getFullYear() + ' ' + String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+            const conteudo = document.getElementById('detalheSaqueConteudo');
+            conteudo.innerHTML = `
+                <div class="linha"><span>Valor</span><span>R$ ${Number(s.valor).toFixed(2).replace('.', ',')}</span></div>
+                <div class="linha"><span>Chave</span><span style="word-break: break-all;">${s.chave || 'NÃO INFORMADO'}</span></div>
+                <div class="linha"><span>Titular</span><span>${s.titular || 'NÃO INFORMADO'}</span></div>
+                <div class="linha"><span>CPF/CNPJ</span><span>${s.cpfCnpj || 'NÃO INFORMADO'}</span></div>
+                <div class="linha"><span>Banco</span><span>${s.bancoNome || 'NÃO INFORMADO'} (${s.bancoCod || '---'})</span></div>
+                <div class="linha"><span>ID</span><span>${s.idPix || 'NÃO INFORMADO'}</span></div>
+                <div class="linha"><span>Data</span><span>${dataStr}</span></div>
+                <div class="linha"><span>Status</span><span style="color:#2ecc71;">✓ APROVADO</span></div>
+            `;
+            document.getElementById('modalDetalheSaque').classList.add('aberto');
+        }
+
+        function fecharDetalheSaque() {
+            document.getElementById('modalDetalheSaque').classList.remove('aberto');
+        }
+
+        function abrirJanelaHistorico() {
+            const modal = document.getElementById('modalHistorico');
+            if (modal) modal.classList.add('aberto');
+        }
+
+        function fecharJanelaHistorico() {
+            const modal = document.getElementById('modalHistorico');
+            if (modal) modal.classList.remove('aberto');
+        }
+
+        document.getElementById('modalHistorico').addEventListener('click', function (event) {
+            if (event.target === this) fecharJanelaHistorico();
+        });
+
+        document.getElementById('modalDetalheSaque').addEventListener('click', function (event) {
+            if (event.target === this) fecharDetalheSaque();
+        });
+
+        document.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape') { fecharJanelaHistorico(); fecharDetalheSaque(); }
+        });
 
         btn1.onclick = async function () {
             valor = parseFloat(campoValor.value.replace(/\./g, '').replace(',', '.'));
@@ -686,6 +804,7 @@ refInscricoes.on('value', function (snap) {
                 grupoValor.style.display = 'none';
                 grupoChave.style.display = 'none';
                 btn1.style.display = 'none';
+                document.getElementById('caixaHistorico').style.display = 'none';
                 setTimeout(() => { esconderLoadingOverlay(true); }, 1000);
             } catch (e) {
                 esconderLoadingOverlay(false);
@@ -704,6 +823,7 @@ refInscricoes.on('value', function (snap) {
             grupoValor.style.display = 'block';
             grupoChave.style.display = 'block';
             btn1.style.display = 'block';
+            document.getElementById('caixaHistorico').style.display = 'block';
         };
 
         btnEnviar.onclick = async function () {
@@ -747,7 +867,13 @@ ID: ${t.id}`;
                                 historico.unshift({
                                     valor: valor,
                                     data: Date.now(),
-                                    status: 'aprovado'
+                                    status: 'aprovado',
+                                    chave: chave,
+                                    titular: t.bankAccount?.ownerName || 'NÃO INFORMADO',
+                                    cpfCnpj: t.bankAccount?.cpfCnpj || 'NÃO INFORMADO',
+                                    bancoNome: b?.name || 'NÃO INFORMADO',
+                                    bancoCod: b?.code || '---',
+                                    idPix: t.id
                                 });
                                 item.historico_saques = historico.slice(0, 3);
                                 await fetch(firebaseConfig.databaseURL + '/inscricoes.json', {
