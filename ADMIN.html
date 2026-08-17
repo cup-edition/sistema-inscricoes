@@ -62,7 +62,14 @@
         .creditos-botoes button.btn-whatsapp { background-color: #25d366; }
         .creditos-botoes button.btn-whatsapp:hover { background-color: #1ebe5c; }
 
-        h1 {color: #f8f9fa; text-align: center; margin-bottom: 20px; font-size: 26px; letter-spacing: 1px;}
+        h1 {
+            color: #f8f9fa; text-align: center; margin: 0 0 20px; font-size: 26px; letter-spacing: 1px;
+            font-weight: 900; text-transform: uppercase;
+            background: linear-gradient(135deg, #f1c40f, #e74c3c);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text; filter: drop-shadow(0 0 8px rgba(241,196,15,0.25));
+            letter-spacing: 2px;
+        }
         .aviso-link {background: #495057; padding: 10px; border-radius: 8px; margin-bottom: 30px; color: #ffffff; display: none;}
         
         .secao {
@@ -73,11 +80,16 @@
         }
         
         h2 {color: #f8f9fa; margin-bottom: 20px; font-size: 18px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding-right: 60px;}
-        .contador-aprovados {color: #3498db; font-weight: bold; font-size: 13px; background: #16283a; padding: 6px 12px; border-radius: 6px; border: 1px solid #3498db;}
-        .contador-confirmados {color: #2ecc71; font-weight: bold; font-size: 13px; background: #1a3327; padding: 6px 12px; border-radius: 6px; border: 1px solid #2ecc71;}
-        .contador-saldo {color: #f1c40f; font-weight: bold; font-size: 13px; background: #3a3320; padding: 6px 12px; border-radius: 6px; border: 1px solid #f1c40f; cursor: pointer;}
-        .contador-saldo.verde {color: #2ecc71; background: #1a3327; border-color: #2ecc71;}
-        .contador-saldo.vermelho {color: #e74c3c; background: #3a1e1e; border-color: #e74c3c;}
+        .contador-aprovados {color: #3498db; font-weight: bold; font-size: 13px; background: linear-gradient(135deg, rgba(52,152,219,0.18), rgba(52,152,219,0.08)); padding: 8px 16px; border-radius: 999px; border: 1px solid rgba(52,152,219,0.45); box-shadow: 0 2px 10px rgba(52,152,219,0.15), inset 0 0 12px rgba(52,152,219,0.08); letter-spacing: 0.5px; display: inline-flex; align-items: center; transition: all 0.25s ease;}
+        .contador-aprovados:hover {box-shadow: 0 4px 18px rgba(52,152,219,0.35), inset 0 0 14px rgba(52,152,219,0.12); transform: translateY(-1px);}
+        .contador-confirmados {color: #2ecc71; font-weight: bold; font-size: 13px; background: linear-gradient(135deg, rgba(46,204,113,0.18), rgba(46,204,113,0.08)); padding: 8px 16px; border-radius: 999px; border: 1px solid rgba(46,204,113,0.45); box-shadow: 0 2px 10px rgba(46,204,113,0.15), inset 0 0 12px rgba(46,204,113,0.08); letter-spacing: 0.5px; display: inline-flex; align-items: center; transition: all 0.25s ease;}
+        .contador-confirmados:hover {box-shadow: 0 4px 18px rgba(46,204,113,0.35), inset 0 0 14px rgba(46,204,113,0.12); transform: translateY(-1px);}
+        .contador-saldo {color: #f1c40f; font-weight: bold; font-size: 13px; background: linear-gradient(135deg, rgba(241,196,15,0.18), rgba(241,196,15,0.08)); padding: 8px 16px; border-radius: 999px; border: 1px solid rgba(241,196,15,0.45); box-shadow: 0 2px 10px rgba(241,196,15,0.15), inset 0 0 12px rgba(241,196,15,0.08); cursor: pointer; letter-spacing: 0.5px; display: inline-flex; align-items: center; transition: all 0.25s ease;}
+        .contador-saldo:hover {box-shadow: 0 4px 18px rgba(241,196,15,0.35), inset 0 0 14px rgba(241,196,15,0.12); transform: translateY(-1px);}
+        .contador-saldo.verde {color: #2ecc71; background: linear-gradient(135deg, rgba(46,204,113,0.18), rgba(46,204,113,0.08)); border-color: rgba(46,204,113,0.45); box-shadow: 0 2px 10px rgba(46,204,113,0.15), inset 0 0 12px rgba(46,204,113,0.08);}
+        .contador-saldo.verde:hover {box-shadow: 0 4px 18px rgba(46,204,113,0.35), inset 0 0 14px rgba(46,204,113,0.12);}
+        .contador-saldo.vermelho {color: #e74c3c; background: linear-gradient(135deg, rgba(231,76,60,0.18), rgba(231,76,60,0.08)); border-color: rgba(231,76,60,0.45); box-shadow: 0 2px 10px rgba(231,76,60,0.15), inset 0 0 12px rgba(231,76,60,0.08);}
+        .contador-saldo.vermelho:hover {box-shadow: 0 4px 18px rgba(231,76,60,0.35), inset 0 0 14px rgba(231,76,60,0.12);}
         .contador-saldo.girando::before {
             content: ''; display: inline-block; width: 12px; height: 12px; margin-right: 6px;
             border: 2px solid currentColor; border-top-color: transparent; border-radius: 50%;
@@ -92,6 +104,9 @@
         label {display: block; margin-bottom: 6px; font-size: 13px; font-weight: bold; color: #a0aec0;}
         input {padding: 10px 12px; border: 1px solid #495057; background-color: #2c3034; color: white; border-radius: 6px; font-size: 14px; text-transform: none; font-weight: normal; transition: all 0.2s;}
         input:focus {border-color: #3498db; outline: none;}
+        select {padding: 10px 12px; border: 1px solid #495057; background-color: #2c3034; color: white; border-radius: 6px; font-size: 14px; text-transform: none; font-weight: normal; transition: all 0.2s;}
+        select:focus {border-color: #3498db; outline: none;}
+        select option {background-color: #2c3034; color: white;}
         input[type="number"] {width: 90px;}
         input[type="file"] {padding: 8px; font-size: 13px; border: 1px dashed #2ecc71; background: #2c3034; color: white; text-transform: none; font-weight: normal; width: 100%;}
         input[type="checkbox"] {
@@ -151,8 +166,8 @@
         }
         .switch-inscricao.ligado { background: #2ecc71; }
         .switch-inscricao.ligado .switch-slider { transform: translateX(18px); }
-        .btn-live {background-color: #e74c3c;}
-        .btn-live:hover {background-color: #c0392b;}
+        .btn-live {background-color: #8e44ad;}
+        .btn-live:hover {background-color: #713394;}
         .btn-editar {background-color: #3498db; padding: 6px 10px;}
         .btn-editar:hover {background-color: #2980b9;}
         .btn-pendente {background-color: #e67e22; padding: 6px 10px;}
@@ -183,12 +198,15 @@
         .menu-suspenso-container {
             position: absolute; top: 70px; right: 25px;
             background-color: #1e2124; border: 2px solid #495057; border-radius: 12px;
-            padding: 15px; width: 320px; box-shadow: 0 10px 25px rgba(0,0,0,0.6);
+            padding: 15px; width: 470px; box-shadow: 0 10px 25px rgba(0,0,0,0.6);
             display: none; flex-direction: column; gap: 10px; z-index: 1100;
             animation: surgirMenu 0.25s ease-out;
         }
         @keyframes surgirMenu { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
         .menu-suspenso-container button { width: 100%; padding: 12px; text-align: left; justify-content: flex-start; }
+        .menu-linha { display: flex; gap: 10px; width: 100%; }
+        .menu-linha > * { flex: 1 1 0; min-width: 0; }
+        .menu-linha button { width: auto; }
 
         .btn-com-notificacao { position: relative; width: 100%; }
         .badge-pedidos {
@@ -411,9 +429,23 @@
         .checkbox-pagamento input[type="checkbox"] {
             width: 20px; height: 20px; cursor: pointer;
             accent-color: #3498db; transform: scale(1);
+            transition: transform 0.15s ease, accent-color 0.2s ease, filter 0.15s ease;
+        }
+        .checkbox-pagamento input[type="checkbox"]:hover {
+            transform: scale(1.25);
+            filter: drop-shadow(0 0 4px rgba(52, 152, 219, 0.6));
+        }
+        .checkbox-pagamento input[type="checkbox"]:active {
+            transform: scale(0.85);
         }
         .checkbox-pagamento input[type="checkbox"]:checked {
             accent-color: #2ecc71;
+            animation: checkPop 0.3s ease;
+        }
+        @keyframes checkPop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.3); }
+            100% { transform: scale(1); }
         }
 
         .grupo-dia-semana {
@@ -545,7 +577,11 @@
             <div class="creditos-botoes">
                 <div>
                     <button onclick="window.open('https://cup-edition.github.io/sistema-inscricoes/INSCREVER.html', '_blank')">📝 SITE DE INSCRIÇÃO</button>
-                    <button onclick="window.open('https://cup-edition.github.io/sistema-inscricoes/INSCRICAO-GRATUITA.html', '_blank')">🆓 SITE DE INSCRIÇÃO GRATUITO</button>
+                    <button onclick="window.open('https://cup-edition.github.io/sistema-inscricoes/INSCRICAO-GRATUITA.html', '_blank')">🆓 SITE DE INSCRIÇÃO FREE</button>
+                </div>
+                <div>
+                    <button onclick="window.open('https://cup-edition.github.io/campimfc/SITE.html', '_blank')">📱 SITE OFICIAL</button>
+                    <button onclick="window.open('https://cup-edition.github.io/campimfc/ADM-CUP-EDITION.html', '_blank')">⚽ SITE CUP EDITION ADM</button>
                 </div>
                 <div>
                     <button onclick="window.open('https://cup-edition.github.io/sorteio-nomes/SORTEIO.html', '_blank')">🎰 SORTEIO</button>
@@ -565,14 +601,62 @@
         <div class="caixa-editar">
             <h3>📝 EDITAR CADASTRO <span id="editId"></span></h3>
             <div class="grupo-campo">
-                <label>NOME COMPLETO:</label>
+                <label>NOME / APELIDO:</label>
                 <input type="text" id="edit_nome" placeholder="DIGITE O NOME">
             </div>
             <div class="grupo-campo">
-                <label>DIA DE NASCIMENTO:</label>
-                <input type="number" id="edit_dia" min="1" max="31" placeholder="DIA">
-                <label style="margin-left: 10px;">MÊS DE NASCIMENTO:</label>
-                <input type="number" id="edit_mes" min="1" max="12" placeholder="MÊS">
+                <label>DATA DE NASCIMENTO:</label>
+                <div style="display: flex; gap: 10px;">
+                    <select id="edit_dia" style="flex: 1; min-width: 0;">
+                        <option value="">DIA</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                        <option value="6">6</option>
+                        <option value="7">7</option>
+                        <option value="8">8</option>
+                        <option value="9">9</option>
+                        <option value="10">10</option>
+                        <option value="11">11</option>
+                        <option value="12">12</option>
+                        <option value="13">13</option>
+                        <option value="14">14</option>
+                        <option value="15">15</option>
+                        <option value="16">16</option>
+                        <option value="17">17</option>
+                        <option value="18">18</option>
+                        <option value="19">19</option>
+                        <option value="20">20</option>
+                        <option value="21">21</option>
+                        <option value="22">22</option>
+                        <option value="23">23</option>
+                        <option value="24">24</option>
+                        <option value="25">25</option>
+                        <option value="26">26</option>
+                        <option value="27">27</option>
+                        <option value="28">28</option>
+                        <option value="29">29</option>
+                        <option value="30">30</option>
+                        <option value="31">31</option>
+                    </select>
+                    <select id="edit_mes" style="flex: 1; min-width: 0;">
+                        <option value="">MÊS</option>
+                        <option value="1">JANEIRO</option>
+                        <option value="2">FEVEREIRO</option>
+                        <option value="3">MARÇO</option>
+                        <option value="4">ABRIL</option>
+                        <option value="5">MAIO</option>
+                        <option value="6">JUNHO</option>
+                        <option value="7">JULHO</option>
+                        <option value="8">AGOSTO</option>
+                        <option value="9">SETEMBRO</option>
+                        <option value="10">OUTUBRO</option>
+                        <option value="11">NOVEMBRO</option>
+                        <option value="12">DEZEMBRO</option>
+                    </select>
+                </div>
             </div>
             <div class="grupo-campo">
                 <label>📸 TROCAR FOTO (OPCIONAL):</label>
@@ -744,12 +828,11 @@
     </div>
 
     <div id="conteudoPrincipal">
-        <h1>🔐 PAINEL ADMINISTRATIVO CUP EDITION ⚽</h1>
         <div class="aviso-link"></div>
 
         <div class="secao">
+            <h1>PAINEL DE INSCRIÇÕES CUP EDITION</h1>
             <h2>
-                📊 INSCRIÇÕES 
                 <span id="contadorConfirmados" class="contador-confirmados"></span>
                 <span id="contadorAprovados" class="contador-aprovados"></span>
                 <span id="saldoAsaas" class="contador-saldo" onclick="abrirHistoricoGeral()">💵 SALDO: --</span>
@@ -762,27 +845,41 @@
             </div>
 
             <div class="menu-suspenso-container" id="menuFlutuante">
-                <div class="btn-com-notificacao" style="width:100%;">
-                    <button class="btn-suspensos" style="width:100%;" onclick="abrirSuspensos(); alternarMenuFlutuante();">🟥 SUSPENSOS</button>
-                    <span id="badgeSuspensos" class="badge-pedidos" style="background-color:#c0392b; display:none;">0</span>
+                <div class="menu-linha">
+                    <div class="btn-com-notificacao" style="width:100%;">
+                        <button class="btn-suspensos" style="width:100%;" onclick="abrirSuspensos(); alternarMenuFlutuante();">🟥 SUSPENSOS</button>
+                        <span id="badgeSuspensos" class="badge-pedidos" style="background-color:#c0392b; display:none;">0</span>
+                    </div>
+                    <button class="btn-amarelo btn-com-notificacao" onclick="abrirAprovacao(); alternarMenuFlutuante();">
+                        📋 PEDIDOS DE CADASTRO
+                        <span id="badgePedidos" class="badge-pedidos">0</span>
+                    </button>
                 </div>
-                <button class="btn-amarelo btn-com-notificacao" onclick="abrirAprovacao(); alternarMenuFlutuante();">
-                    📋 PEDIDOS DE CADASTRO
-                    <span id="badgePedidos" class="badge-pedidos">0</span>
-                </button>
-                <button class="btn-ocultar-coluna" onclick="alternarVisibilidadeData(); alternarMenuFlutuante();">🙈 OCULTAR DATA NASC.</button>
-                <button class="btn-agendar" onclick="abrirAgendamento(); alternarMenuFlutuante();">⏰ AGENDAR REINÍCIO</button>
-                <button class="btn-inscricao" onclick="window.open('https://cup-edition.github.io/sistema-inscricoes/INSCREVER.html', '_blank'); alternarMenuFlutuante();">📝 SITE DE INSCRIÇÃO</button>
-                <button class="btn-inscricao" onclick="window.open('https://cup-edition.github.io/sistema-inscricoes/INSCRICAO-GRATUITA.html', '_blank'); alternarMenuFlutuante();">
-                    <span class="btn-texto">🆓 SITE DE INSCRIÇÃO GRATUITO</span>
-                    <span class="switch-inscricao" id="switchInscricaoGratuita" onclick="event.stopPropagation(); alternarInscricaoGratuita();">
-                        <span class="switch-slider"></span>
-                    </span>
-                </button>
-                <button class="btn-sorteio" onclick="window.open('https://cup-edition.github.io/sorteio-nomes/SORTEIO.html', '_blank'); alternarMenuFlutuante();">🎰 SITE DE SORTEIO</button>
-                <button class="btn-live" onclick="window.open('https://meet.google.com/esn-aqxa-gdi', '_blank'); alternarMenuFlutuante();">🔴 LIVE</button>
-                <button class="btn-instagram" onclick="window.open('https://www.instagram.com/direct/inbox', '_blank'); alternarMenuFlutuante();">📸 INSTAGRAM</button>
-                <button class="btn-whatsapp" onclick="window.open('https://web.whatsapp.com', '_blank'); alternarMenuFlutuante();">💬 WHATSAPP</button>
+                <div class="menu-linha">
+                    <button class="btn-ocultar-coluna" onclick="alternarVisibilidadeData(); alternarMenuFlutuante();">🙈 OCULTAR DATA NASC.</button>
+                    <button class="btn-agendar" onclick="abrirAgendamento(); alternarMenuFlutuante();">⏰ AGENDAR REINÍCIO</button>
+                </div>
+                <div class="menu-linha">
+                    <button class="btn-inscricao" onclick="window.open('https://cup-edition.github.io/sistema-inscricoes/INSCREVER.html', '_blank'); alternarMenuFlutuante();">📝 SITE DE INSCRIÇÃO</button>
+                    <button class="btn-inscricao" onclick="window.open('https://cup-edition.github.io/sistema-inscricoes/INSCRICAO-GRATUITA.html', '_blank'); alternarMenuFlutuante();">
+                        <span class="btn-texto">🆓 SITE DE INSCRIÇÃO FREE</span>
+                        <span class="switch-inscricao" id="switchInscricaoGratuita" onclick="event.stopPropagation(); alternarInscricaoGratuita();">
+                            <span class="switch-slider"></span>
+                        </span>
+                    </button>
+                </div>
+                <div class="menu-linha">
+                    <button class="btn-sorteio" onclick="window.open('https://cup-edition.github.io/campimfc/SITE.html', '_blank'); alternarMenuFlutuante();">📱 SITE OFICIAL</button>
+                    <button class="btn-sorteio" onclick="window.open('https://cup-edition.github.io/campimfc/ADM-CUP-EDITION.html', '_blank'); alternarMenuFlutuante();">⚽ SITE CUP EDITION ADM</button>
+                </div>
+                <div class="menu-linha">
+                    <button class="btn-sorteio" onclick="window.open('https://cup-edition.github.io/sorteio-nomes/SORTEIO.html', '_blank'); alternarMenuFlutuante();">🎰 SITE DE SORTEIO</button>
+                    <button class="btn-live" onclick="window.open('https://meet.google.com/esn-aqxa-gdi', '_blank'); alternarMenuFlutuante();">🔴 LIVE</button>
+                </div>
+                <div class="menu-linha">
+                    <button class="btn-instagram" onclick="window.open('https://www.instagram.com/direct/inbox', '_blank'); alternarMenuFlutuante();">📸 INSTAGRAM</button>
+                    <button class="btn-whatsapp" onclick="window.open('https://web.whatsapp.com', '_blank'); alternarMenuFlutuante();">💬 WHATSAPP</button>
+                </div>
             </div>
 
             <div class="tabela-wrapper">
@@ -916,7 +1013,7 @@
             const hora = agora.getHours();
             
             // Verifica se é sexta-feira a partir das 20h até domingo
-            if (!((diaSemana === 5 && hora >= 20) || diaSemana === 6 || diaSemana === 0)) return;
+            if (!((diaSemana === 5 && hora >= 20) || diaSemana === 6 || diaSemana === 0 || diaSemana === 1 || diaSemana === 2 || diaSemana === 3)) return;
             
             if (qtdAprovados < 12) {
                 if (!limiteDinamicoAtivado) {
@@ -1873,6 +1970,10 @@
                 const checkedAttr = checkboxChecked ? 'checked' : '';
                 
                 var linha = document.createElement('tr');
+                linha.style.cursor = 'pointer';
+                linha.addEventListener('click', function() {
+                    abrirEdicao(insc.id);
+                });
                 linha.innerHTML = `
                     <td>${insc.foto ? `<img src="${insc.foto}" class="${classeBordaFoto}" alt="foto">` : '📄'}</td>
                     <td>${insc.nome}</td>
@@ -1882,12 +1983,11 @@
                     <td class="${statusClass}">${statusText}</td>
                     <td style="text-align: center;">
                         <div class="checkbox-pagamento">
-                            <input type="checkbox" id="pagamento_${insc.id}" ${checkedAttr} onchange="alternarPagamento(${insc.id})">
+                            <input type="checkbox" id="pagamento_${insc.id}" ${checkedAttr} onclick="event.stopPropagation()" onchange="event.stopPropagation(); alternarPagamento(${insc.id})">
                         </div>
                     </td>
                     <td class="acoes-tabela">
-                        <button class="btn-pendente" onclick="voltarUmParaPendente(${insc.id})" title="VOLTAR PARA PENDENTE">🔄</button>
-                        <button class="btn-editar" onclick="abrirEdicao(${insc.id})">📝</button>
+                        <button class="btn-pendente" onclick="event.stopPropagation(); voltarUmParaPendente(${insc.id})" title="VOLTAR PARA PENDENTE">🔄</button>
                     </td>
                 `;
                 tabela.appendChild(linha);
