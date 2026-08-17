@@ -855,7 +855,7 @@
             const hora = agora.getHours();
             
             // Sexta-feira a partir das 20h até domingo
-            if (!((diaSemana === 5 && hora >= 20) || diaSemana === 6 || diaSemana === 0)) return;
+            if (!((diaSemana === 5 && hora >= 20) || diaSemana === 6 || diaSemana === 0 || diaSemana === 1 || diaSemana === 2 || diaSemana === 3)) return;
             
             if (qtdAprovados < 12) {
                 if (!limiteDinamicoAtivado) {
