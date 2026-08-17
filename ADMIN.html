@@ -96,6 +96,23 @@
             animation: girar 0.6s linear infinite; vertical-align: middle;
         }
         @keyframes girar { to { transform: rotate(360deg); } }
+        .contador-valor-inscricao {
+            color: #9b59b6; font-weight: bold; font-size: 13px;
+            background: linear-gradient(135deg, rgba(155,89,182,0.18), rgba(155,89,182,0.08));
+            padding: 8px 16px; border-radius: 999px; border: 1px solid rgba(155,89,182,0.45);
+            box-shadow: 0 2px 10px rgba(155,89,182,0.15), inset 0 0 12px rgba(155,89,182,0.08);
+            letter-spacing: 0.5px; display: inline-flex; align-items: center;
+            cursor: pointer; transition: all 0.25s ease;
+        }
+        .contador-valor-inscricao:hover { box-shadow: 0 4px 18px rgba(155,89,182,0.35); transform: translateY(-1px); }
+        .campo-valor-inline {
+            display: none; width: 70px; margin-left: 8px; padding: 3px 8px;
+            background: #2c3034; color: #ffffff; border: 1px solid rgba(155,89,182,0.6);
+            border-radius: 6px; font-size: 13px; text-align: center;
+        }
+        .contador-valor-inscricao.aberto .campo-valor-inline { display: inline-block; }
+        .contador-valor-inscricao.aberto .btn-valor-texto { display: none; }
+        .contador-valor-inscricao.aberto .campo-valor-inline:focus { outline: none; border-color: #2ecc71; }
         .aviso-limite {color: #e74c3c; font-weight: bold; font-size: 13px; background: #3a1e1e; padding: 6px 12px; border-radius: 6px; border: 1px solid #e74c3c; animation: piscar 1s infinite;}
         .aviso-limite-confirmados {color: #e74c3c; background: #3a1e1e; border-color: #e74c3c; animation: piscar 1s infinite;}
         @keyframes piscar { 0%{opacity:1;} 50%{opacity:0.4;} 100%{opacity:1;} }
@@ -121,8 +138,10 @@
         .historico-admin .historico-vazio { color: #adb5bd; font-size: 12px; text-align: center; }
         .historico-item {
             display: flex; justify-content: space-between; align-items: center;
-            padding: 6px 0; border-bottom: 1px solid rgba(34,197,94,0.15); font-size: 12px;
+            padding: 6px 6px; border-bottom: 1px solid rgba(34,197,94,0.15); font-size: 12px;
+            cursor: pointer; border-radius: 6px; transition: background 0.15s ease;
         }
+        .historico-item:hover { background: rgba(34,197,94,0.08); }
         .historico-item:last-child { border-bottom: none; }
         .historico-item .hist-data { color: #adb5bd; font-weight: normal; }
         .historico-item .hist-valor { color: #ffffff; font-weight: bold; }
@@ -277,8 +296,8 @@
         th:nth-child(8), td:nth-child(8) { width: 65px; min-width: 65px; }
 
         th {
-            background-color: #1a1d20;
-            color: #e9ecef;
+            background: linear-gradient(180deg, #2d3142 0%, #23262e 100%);
+            color: #f1f3f5;
             font-size: 11px;
             border-bottom: 2px solid #495057;
             letter-spacing: 0.5px;
@@ -286,6 +305,16 @@
             top: 0;
             z-index: 1000;
             box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+            text-shadow: 0 1px 2px rgba(0,0,0,0.4);
+        }
+        th:first-child { border-top-left-radius: 10px; }
+        th:last-child { border-top-right-radius: 10px; }
+
+        td:first-child { text-align: center; }
+
+        .foto-preview {
+            border-radius: 50% !important;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.5);
         }
 
         th:not(:first-child)::before,
@@ -357,6 +386,13 @@
             max-height: 85vh; display: flex; flex-direction: column; position: relative;
         }
         .conteudo-historico-geral { overflow-y: auto; flex: 1; padding-right: 5px; }
+        #detalheSaqueConteudo .linha-detalhe {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 10px 0; border-bottom: 1px solid rgba(52,152,219,0.15);
+        }
+        #detalheSaqueConteudo .linha-detalhe:last-child { border-bottom: none; }
+        #detalheSaqueConteudo .linha-detalhe span:first-child { color: #94a3b8; font-size: 13px; font-weight: normal; }
+        #detalheSaqueConteudo .linha-detalhe span:last-child { color: #ffffff; font-weight: 600; font-size: 14px; text-align: right; word-break: break-all; }
         .item-saque-geral {
             display: grid;
             grid-template-columns: 1fr auto auto auto;
@@ -364,7 +400,9 @@
             column-gap: 10px;
             background: #2c3034; border: 1px solid #343a40; border-radius: 8px;
             padding: 10px 14px; margin-bottom: 8px; font-size: 12px;
+            cursor: pointer; transition: border-color 0.15s ease, background 0.15s ease;
         }
+        .item-saque-geral:hover { border-color: #3498db; background: #343a40; }
         .item-saque-geral .saq-nome {
             color: #f8f9fa; font-weight: bold; white-space: nowrap;
             overflow: hidden; text-overflow: ellipsis; max-width: 100%;
@@ -797,6 +835,17 @@
         </div>
     </div>
 
+    <!-- ===== MODAL DETALHES DO SAQUE ===== -->
+    <div id="modalDetalheSaque" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.75); display: none; align-items: center; justify-content: center; z-index: 99999; backdrop-filter: blur(3px); animation: fadeIn 0.2s ease-out;">
+        <div class="caixa-historico-geral">
+            <h3>🧾 DETALHES DO SAQUE</h3>
+            <div class="conteudo-historico-geral" id="detalheSaqueConteudo"></div>
+            <div class="botoes-modal" style="margin-top: 15px; justify-content: flex-end;">
+                <button type="button" onclick="fecharDetalheSaque()">FECHAR</button>
+            </div>
+        </div>
+    </div>
+
     <!-- POPUP DE CONFIRMAÇÃO -->
     <div id="avisoNovaConfirmacao">
         <div>
@@ -836,6 +885,10 @@
                 <span id="contadorConfirmados" class="contador-confirmados"></span>
                 <span id="contadorAprovados" class="contador-aprovados"></span>
                 <span id="saldoAsaas" class="contador-saldo" onclick="abrirHistoricoGeral()">💵 SALDO: --</span>
+                <span class="contador-valor-inscricao" id="btnValorInscricao" onclick="alternarPainelValor()">
+                    <span class="btn-valor-texto">💲 VALOR VIP</span>
+                    <input type="text" id="campoValorInscricao" class="campo-valor-inline" inputmode="decimal" placeholder="0,00" maxlength="15" onclick="event.stopPropagation()" onkeydown="if(event.key === 'Enter'){ event.stopPropagation(); salvarValorInscricao(); }">
+                </span>
                 <div id="avisoLimite" class="aviso-limite">⚠️ LIMITE DE 16 APROVADOS ATINGIDO! INSCRIÇÕES ENCERRADAS AUTOMATICAMENTE.</div>
                 <div id="avisoLimiteConfirmados" class="aviso-limite aviso-limite-confirmados">⚠️ LIMITE DE 16 CONFIRMADOS ATINGIDO!</div>
             </h2>
@@ -949,6 +1002,9 @@
         let quantidadeAnterior = 0;
         let idEmEdicao = null;
         let listaAnterior = [];
+        let saquesGeral = [];
+        let historicoEdicao = [];
+        let nomeEdicaoAtual = '';
         let inscritosCache = [];
         let qtdAprovadosGlobal = 0;
         let qtdConfirmadosGlobal = 0;
@@ -1168,6 +1224,60 @@
             db.ref('configuracao/botao_gratuito_aberto').set(novoValor);
         }
 
+        function carregarValorInscricao() {
+            db.ref('configuracao/valor_inscricao').on('value', function(snap) {
+                const valor = snap.val();
+                const botao = document.getElementById('btnValorInscricao');
+                if (!botao) return;
+                const campoValor = (valor !== null && valor !== undefined && valor !== '') ? Number(valor).toFixed(2).replace('.', ',') : '';
+                botao.dataset.valor = campoValor;
+                const textoBase = '💲 VALOR VIP';
+                botao.innerHTML = '<span class="btn-valor-texto">' + textoBase + '</span>' +
+                    '<input type="text" id="campoValorInscricao" class="campo-valor-inline" inputmode="decimal" placeholder="0,00" maxlength="15" onclick="event.stopPropagation()" onkeydown="if(event.key === \'Enter\'){ event.stopPropagation(); salvarValorInscricao(); }">';
+                const novoCampo = document.getElementById('campoValorInscricao');
+                if (novoCampo) novoCampo.addEventListener('input', function () { formatarValorMask(this); });
+            });
+        }
+
+        function alternarPainelValor() {
+            const botao = document.getElementById('btnValorInscricao');
+            if (!botao) return;
+            if (botao.classList.contains('aberto')) {
+                botao.classList.remove('aberto');
+                return;
+            }
+            const campo = document.getElementById('campoValorInscricao');
+            if (!campo) return;
+            if (botao.dataset.valor && !campo.value) campo.value = botao.dataset.valor;
+            botao.classList.add('aberto');
+            campo.focus();
+            campo.select();
+        }
+
+        function salvarValorInscricao() {
+            const campo = document.getElementById('campoValorInscricao');
+            const botao = document.getElementById('btnValorInscricao');
+            if (!campo) return;
+            let digitos = campo.value.replace(/\D/g, '');
+            if (!digitos) { alert('⚠️ DIGITE UM VALOR!'); return; }
+            digitos = digitos.padStart(3, '0');
+            let reais = digitos.slice(0, -2).replace(/^0+(?=\d)/, '') || '0';
+            const centavos = digitos.slice(-2);
+            const valorFormatado = reais.replace(/\B(?=(\d{3})+(?!\d))/g, '.') + ',' + centavos;
+            const valorNumerico = parseFloat(reais + '.' + centavos);
+            campo.value = valorFormatado;
+            db.ref('configuracao/valor_inscricao').set(valorNumerico).then(() => {
+                botao.dataset.valor = valorFormatado;
+                const textoBase = '💲 VALOR VIP';
+                botao.innerHTML = '<span class="btn-valor-texto">' + textoBase + '</span>' +
+                    '<input type="text" id="campoValorInscricao" class="campo-valor-inline" inputmode="decimal" placeholder="0,00" maxlength="15" onclick="event.stopPropagation()" onkeydown="if(event.key === \'Enter\'){ event.stopPropagation(); salvarValorInscricao(); }">';
+                const novoCampo = document.getElementById('campoValorInscricao');
+                if (novoCampo) novoCampo.addEventListener('input', function () { formatarValorMask(this); });
+                botao.classList.remove('aberto');
+                alert('✅ VALOR DA INSCRIÇÃO SALVO: R$ ' + valorFormatado);
+            });
+        }
+
         document.addEventListener('click', function(event) {
             const menu = document.getElementById('menuFlutuante');
             const btn = document.getElementById('btnMenu');
@@ -1181,6 +1291,13 @@
             if (document.getElementById('fundoCadastro') && event.target === document.getElementById('fundoCadastro')) ocultarCadastro();
             if (document.getElementById('modalSuspensos') && event.target === document.getElementById('modalSuspensos')) fecharSuspensos();
             if (document.getElementById('modalHistoricoGeral') && event.target === document.getElementById('modalHistoricoGeral')) fecharHistoricoGeral();
+            if (document.getElementById('modalDetalheSaque') && event.target === document.getElementById('modalDetalheSaque')) fecharDetalheSaque();
+            
+            const botaoValor = document.getElementById('btnValorInscricao');
+            const campoValor = document.getElementById('campoValorInscricao');
+            if (botaoValor && botaoValor.classList.contains('aberto') && !botaoValor.contains(event.target)) {
+                botaoValor.classList.remove('aberto');
+            }
             
             const avisoNovaConfirmacao = document.getElementById('avisoNovaConfirmacao');
             if (avisoNovaConfirmacao && avisoNovaConfirmacao.style.display === 'flex') avisoNovaConfirmacao.style.display = 'none';
@@ -1320,15 +1437,23 @@
                     historico.forEach(s => {
                         todosSaques.push({
                             nome: insc.nome || '—',
+                            foto: insc.foto || '',
                             valor: s.valor,
                             data: s.data,
-                            status: s.status
+                            status: s.status,
+                            chave: s.chave,
+                            titular: s.titular,
+                            cpfCnpj: s.cpfCnpj,
+                            bancoNome: s.bancoNome,
+                            bancoCod: s.bancoCod,
+                            idPix: s.idPix
                         });
                     });
                 });
 
                 todosSaques.sort((a, b) => (b.data || 0) - (a.data || 0));
                 const recentes = todosSaques.slice(0, 30);
+                saquesGeral = recentes;
 
                 if (recentes.length === 0) {
                     container.innerHTML = '<div class="item-suspenso-vazio">NENHUM SAQUE REALIZADO.</div>';
@@ -1336,13 +1461,19 @@
                 }
 
                 let html = '';
-                recentes.forEach(s => {
+                recentes.forEach((s, idx) => {
                     const d = new Date(s.data);
                     const dataStr = String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0') + '/' + d.getFullYear() + ' ' + String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
                     const aprovado = s.status === 'aprovado';
+                    const fotoHtml = s.foto
+                        ? `<img src="${s.foto}" style="width:24px;height:24px;border-radius:50%;object-fit:cover;flex-shrink:0;display:block;vertical-align:middle;">`
+                        : `<span style="font-size:16px;line-height:24px;flex-shrink:0;display:inline-block;">📄</span>`;
                     html += `
-                    <div class="item-saque-geral">
-                        <span class="saq-nome">${s.nome}</span>
+                    <div class="item-saque-geral" onclick="verDetalheSaqueGeral(${idx})">
+                        <span class="saq-nome" style="display:flex; align-items:center; gap:8px; min-width:0;">
+                            ${fotoHtml}
+                            <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${s.nome}</span>
+                        </span>
                         <span class="saq-data">${dataStr}</span>
                         <span class="saq-valor">R$ ${Number(s.valor).toFixed(2).replace('.', ',')}</span>
                         <span class="${aprovado ? 'saq-status-aprovado' : 'saq-status-negado'}">${aprovado ? '✓ APROVADO' : '✗ NEGADO'}</span>
@@ -1355,6 +1486,7 @@
         function preencherHistorico(item) {
             const container = document.getElementById('historicoSaques');
             const historico = Array.isArray(item.historico_saques) ? item.historico_saques : [];
+            historicoEdicao = historico;
 
             if (historico.length === 0) {
                 container.innerHTML = '<div class="historico-vazio">NENHUM SAQUE REALIZADO.</div>';
@@ -1362,11 +1494,11 @@
             }
 
             let html = '';
-            historico.forEach(s => {
+            historico.forEach((s, idx) => {
                 const d = new Date(s.data);
                 const dataStr = String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0') + '/' + d.getFullYear() + ' ' + String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
                 html += `
-                <div class="historico-item">
+                <div class="historico-item" onclick="verDetalheSaqueEdicao(${idx})">
                     <span class="hist-data">${dataStr}</span>
                     <span style="display:flex; align-items:center; gap:8px;">
                         <span class="hist-valor">R$ ${Number(s.valor).toFixed(2).replace('.', ',')}</span>
@@ -1377,12 +1509,50 @@
             container.innerHTML = html;
         }
 
+        function verDetalheSaqueEdicao(idx) {
+            const s = historicoEdicao[idx];
+            if (!s) return;
+            const copia = Object.assign({}, s, { nome: nomeEdicaoAtual });
+            mostrarDetalheSaque(copia);
+        }
+
+        function verDetalheSaqueGeral(idx) {
+            const s = saquesGeral[idx];
+            if (!s) return;
+            mostrarDetalheSaque(s);
+        }
+
+        function mostrarDetalheSaque(s) {
+            const conteudo = document.getElementById('detalheSaqueConteudo');
+            if (!conteudo) return;
+            const d = new Date(s.data);
+            const dataStr = String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0') + '/' + d.getFullYear() + ' ' + String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+            const aprovado = s.status === 'aprovado';
+            conteudo.innerHTML = `
+                <div class="linha-detalhe"><span>Nome</span><span>${s.nome || 'NÃO INFORMADO'}</span></div>
+                <div class="linha-detalhe"><span>Valor</span><span>R$ ${Number(s.valor).toFixed(2).replace('.', ',')}</span></div>
+                <div class="linha-detalhe"><span>Chave</span><span>${s.chave || 'NÃO INFORMADO'}</span></div>
+                <div class="linha-detalhe"><span>Titular</span><span>${s.titular || 'NÃO INFORMADO'}</span></div>
+                <div class="linha-detalhe"><span>CPF/CNPJ</span><span>${s.cpfCnpj || 'NÃO INFORMADO'}</span></div>
+                <div class="linha-detalhe"><span>Banco</span><span>${s.bancoNome || 'NÃO INFORMADO'} (${s.bancoCod || '---'})</span></div>
+                <div class="linha-detalhe"><span>ID</span><span>${s.idPix || 'NÃO INFORMADO'}</span></div>
+                <div class="linha-detalhe"><span>Data</span><span>${dataStr}</span></div>
+                <div class="linha-detalhe"><span>Status</span><span style="color:${aprovado ? '#2ecc71' : '#e74c3c'};">${aprovado ? '✓ APROVADO' : '✗ NEGADO'}</span></div>
+            `;
+            document.getElementById('modalDetalheSaque').style.display = 'flex';
+        }
+
+        function fecharDetalheSaque() {
+            document.getElementById('modalDetalheSaque').style.display = 'none';
+        }
+
         function abrirEdicao(id) {
             idEmEdicao = id;
             db.ref('inscricoes').once('value').then(snap => {
                 var lista = snap.val() || [];
                 var item = lista.find(i => i && i.id === id);
                 if(item){
+                    nomeEdicaoAtual = item.nome || '';
                     document.getElementById('editId').innerText = `#${item.id}`;
                     document.getElementById('edit_nome').value = item.nome;
                     document.getElementById('edit_dia').value = item.dia;
@@ -2009,6 +2179,7 @@
             verificarPagamentosConfirmados();
             carregarSaldoAsaas();
             carregarInscricaoGratuita();
+            carregarValorInscricao();
         }
 
         async function carregarSaldoAsaas() {
@@ -2139,7 +2310,7 @@
 
         document.addEventListener('keydown', function(event) {
             if (event.key === 'Escape') {
-                ocultarCadastro(); fecharEdicao(); fecharAgendamento(); fecharAprovacao(); fecharSuspensos(); fecharHistoricoGeral();
+                ocultarCadastro(); fecharEdicao(); fecharAgendamento(); fecharAprovacao(); fecharSuspensos(); fecharHistoricoGeral(); fecharDetalheSaque();
                 document.getElementById('avisoNovaConfirmacao').style.display = 'none';
                 document.getElementById('avisoNovaAprovacao').style.display = 'none';
                 document.getElementById('avisoNovaSaque').style.display = 'none';
