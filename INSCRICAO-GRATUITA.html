@@ -1352,7 +1352,9 @@
             selectNome.innerHTML = '<option value="">-- Selecione seu nome --</option>';
             var nomesUnicos = [...new Set(listaCompletaInscricoes
                 .filter(insc => insc && insc.nome && insc.status === 'pendente')
-                .map(insc => insc.nome))].sort();
+                .map(insc => insc.nome))].sort(function(a, b) {
+                return a.localeCompare(b, 'pt-BR');
+            });
             
             nomesUnicos.forEach(nome => {
                 var opcao = document.createElement('option');
