@@ -359,6 +359,8 @@
     </div>
     <!-- ===== FIM LOADING OVERLAY ===== -->
 
+    <audio id="audioConfirmado" src="https://cup-edition.github.io/sistema-inscricoes/confirmado.mp3" preload="auto"></audio>
+
     <script>
         const URL = 'https://cup-edition-api-saques.onrender.com/enviar-pix';
         const URL_CONSULTA = 'https://cup-edition-api-saques.onrender.com/consultar-chave';
@@ -416,6 +418,11 @@
             if (mostrarCheck) {
                 spinner.style.display = 'none';
                 iconeCheck.classList.add('mostrar');
+                const audio = document.getElementById('audioConfirmado');
+                if (audio) {
+                    audio.currentTime = 0;
+                    audio.play().catch(function () {});
+                }
                 setTimeout(() => {
                     overlay.classList.remove('ativo');
                 }, 600);
