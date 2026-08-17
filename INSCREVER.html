@@ -1119,7 +1119,7 @@
 
             <div class="valor-box">
                 <div class="label">Valor a pagar</div>
-                <div class="valor">R$ 1,80</div>
+                <div class="valor" id="valorPixDisplay">R$ 1,80</div>
             </div>
 
             <div class="loading-pix" id="loadingPix">
@@ -1250,7 +1250,8 @@
         var qtdAprovadosAtual = 0;
 
         const API_URL = 'https://cup-edition-api.onrender.com';
-        const VALOR_PIX = 1.80;
+        let VALOR_PIX = null;
+        let valorInscricaoDefinido = false;
         let paymentId = null;
         let intervaloVerificacaoPIX = null;
         let nomeInscritoAtual = null;
@@ -1284,6 +1285,24 @@
             const dados = snap.val() || {};
             suspensosList = Object.values(dados).map(s => s.nome.trim().toLowerCase());
         });
+
+        // ===== FUNÇÃO: CARREGA O VALOR DA INSCRIÇÃO DEFINIDO NO ADMIN =====
+        function carregarValorInscricao() {
+            db.ref('configuracao/valor_inscricao').on('value', function(snap) {
+                const valor = snap.val();
+                if (valor !== null && valor !== undefined && !isNaN(valor) && valor > 0) {
+                    VALOR_PIX = Number(valor);
+                    valorInscricaoDefinido = true;
+                } else {
+                    VALOR_PIX = null;
+                    valorInscricaoDefinido = false;
+                }
+                const display = document.getElementById('valorPixDisplay');
+                if (display) {
+                    display.textContent = valorInscricaoDefinido ? 'R$ ' + VALOR_PIX.toFixed(2).replace('.', ',') : 'R$ --';
+                }
+            });
+        }
 
         // ===== FUNÇÃO: VERIFICA E ATIVA LIMITE DINÂMICO =====
         function verificarAtivarLimiteDinamico(qtdAprovados) {
@@ -1354,6 +1373,8 @@
             });
 
             verificarPagamentosConfirmados();
+
+            carregarValorInscricao();
 
             document.addEventListener('visibilitychange', function() {
                 if (!document.hidden) {
@@ -1517,6 +1538,24 @@
             modal.style.display = 'flex';
             
             window.history.pushState({modalPixAberto: true}, "");
+
+            if (!valorInscricaoDefinido || VALOR_PIX === null) {
+                document.getElementById('loadingPix').style.display = 'none';
+                document.getElementById('qrContainer').style.display = 'none';
+                document.getElementById('codigoContainer').style.display = 'none';
+                document.getElementById('btnCopiarPix').style.display = 'none';
+                document.getElementById('sucessoGigante').style.display = 'none';
+                document.getElementById('statusPix').className = 'status-pix status-erro';
+                document.getElementById('statusPix').textContent = '❌ VALOR DA INSCRIÇÃO NÃO DEFINIDO. AGUARDE O ADMINISTRADOR CONFIGURAR.';
+                document.getElementById('statusPix').style.display = 'block';
+                document.getElementById('alertaPix').className = 'alert-pix alert-danger';
+                document.getElementById('alertaPix').innerHTML = `
+                    <span class="alert-pix-nome">${nome ? nome.toUpperCase() : 'CARREGANDO...'}</span>
+                    <span class="alert-pix-sub">❌ VALOR NÃO DEFINIDO</span>
+                `;
+                document.getElementById('prazoPix').textContent = '⏰ Aguardando definição do valor pelo administrador';
+                return;
+            }
             
             const nomeDisplay = nome ? nome.toUpperCase() : 'CARREGANDO...';
             document.getElementById('alertaPix').className = 'alert-pix alert-warning';
@@ -1602,6 +1641,22 @@
 
         async function gerarPIX() {
             try {
+                if (!valorInscricaoDefinido || VALOR_PIX === null) {
+                    document.getElementById('loadingPix').style.display = 'none';
+                    document.getElementById('statusPix').className = 'status-pix status-erro';
+                    document.getElementById('statusPix').textContent = '❌ VALOR DA INSCRIÇÃO NÃO DEFINIDO. AGUARDE O ADMINISTRADOR CONFIGURAR.';
+                    document.getElementById('statusPix').style.display = 'block';
+                    document.getElementById('alertaPix').className = 'alert-pix alert-danger';
+                    document.getElementById('alertaPix').innerHTML = `
+                        <span class="alert-pix-nome">${nomeInscritoAtual ? nomeInscritoAtual.toUpperCase() : 'CARREGANDO...'}</span>
+                        <span class="alert-pix-sub">❌ VALOR NÃO DEFINIDO</span>
+                    `;
+                    document.getElementById('qrContainer').style.display = 'none';
+                    document.getElementById('codigoContainer').style.display = 'none';
+                    document.getElementById('btnCopiarPix').style.display = 'none';
+                    return;
+                }
+
                 const nomeDisplay = nomeInscritoAtual ? nomeInscritoAtual.toUpperCase() : 'CARREGANDO...';
                 document.getElementById('loadingPix').style.display = 'block';
                 document.getElementById('alertaPix').className = 'alert-pix alert-warning';
@@ -2265,7 +2320,9 @@
             selectNome.innerHTML = '<option value="">-- Selecione seu nome --</option>';
             var nomesUnicos = [...new Set(listaCompletaInscricoes
                 .filter(insc => insc && insc.nome && (insc.status === 'pendente' || insc.status === 'confirmado'))
-                .map(insc => insc.nome))].sort();
+                .map(insc => insc.nome))].sort(function(a, b) {
+                return a.localeCompare(b, 'pt-BR');
+            });
             
             nomesUnicos.forEach(nome => {
                 var opcao = document.createElement('option');
