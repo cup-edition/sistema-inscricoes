@@ -92,7 +92,7 @@
             overflow: visible !important;
         }
         
-        h2 {color: #f8f9fa; margin-bottom: 20px; font-size: 18px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding-right: 60px;}
+        h2 {color: #f8f9fa; margin: 8px 0 20px; font-size: 18px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;}
         .contador-aprovados {color: #3498db; font-weight: bold; font-size: 13px; background: linear-gradient(135deg, rgba(52,152,219,0.18), rgba(52,152,219,0.08)); padding: 8px 16px; border-radius: 999px; border: 1px solid rgba(52,152,219,0.45); box-shadow: 0 2px 10px rgba(52,152,219,0.15), inset 0 0 12px rgba(52,152,219,0.08); letter-spacing: 0.5px; display: inline-flex; align-items: center; transition: all 0.25s ease;}
         .contador-aprovados:hover {box-shadow: 0 4px 18px rgba(52,152,219,0.35), inset 0 0 14px rgba(52,152,219,0.12); transform: translateY(-1px);}
         .contador-confirmados {color: #2ecc71; font-weight: bold; font-size: 13px; background: linear-gradient(135deg, rgba(46,204,113,0.18), rgba(46,204,113,0.08)); padding: 8px 16px; border-radius: 999px; border: 1px solid rgba(46,204,113,0.45); box-shadow: 0 2px 10px rgba(46,204,113,0.15), inset 0 0 12px rgba(46,204,113,0.08); letter-spacing: 0.5px; display: inline-flex; align-items: center; transition: all 0.25s ease;}
@@ -223,18 +223,19 @@
         .btn-menu-hamburguer {
             position: absolute; top: 20px; right: 25px;
             background-color: #2c3034; border: 1px solid #495057;
-            width: 42px; height: 42px; border-radius: 8px;
+            width: 38px; height: 38px; border-radius: 8px;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
-            gap: 5px; cursor: pointer; transition: all 0.2s; z-index: 1100;
+            gap: 4px; cursor: pointer; transition: all 0.2s; z-index: 1100;
         }
         .btn-menu-hamburguer:hover { background-color: #3d4246; border-color: #8e44ad; }
+        .btn-menu-hamburguer:focus { outline: none; border-color: #8e44ad; box-shadow: 0 0 0 2px rgba(142,68,173,0.4); }
         .btn-menu-hamburguer span {
-            display: block; width: 22px; height: 3px; background-color: #f8f9fa;
+            display: block; width: 19px; height: 3px; background-color: #f8f9fa;
             border-radius: 2px; transition: all 0.3s;
         }
-        .btn-menu-hamburguer.aberto span:nth-child(1) { transform: translateY(8px) rotate(45deg); }
+        .btn-menu-hamburguer.aberto span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
         .btn-menu-hamburguer.aberto span:nth-child(2) { opacity: 0; }
-        .btn-menu-hamburguer.aberto span:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
+        .btn-menu-hamburguer.aberto span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
 
         .menu-suspenso-container {
             position: absolute; top: 70px; right: 25px;
@@ -434,6 +435,27 @@
         .item-saque-geral .saq-status-aprovado { color: #2ecc71; font-weight: bold; white-space: nowrap; }
         .item-saque-geral .saq-status-negado { color: #e74c3c; font-weight: bold; white-space: nowrap; }
 
+        .abas-historico {
+            display: flex; gap: 8px; margin-bottom: 15px;
+        }
+        .aba-historico {
+            flex: 1; padding: 10px; border-radius: 8px; border: 1px solid #343a40;
+            background: #2c3034; color: #adb5bd; font-size: 12px; cursor: pointer;
+            transition: all 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+        }
+        .aba-historico:hover { border-color: #22c55e; color: #f8f9fa; }
+        .aba-historico.ativa {
+            background: linear-gradient(135deg, rgba(34,197,94,0.18), rgba(34,197,94,0.08));
+            border-color: #22c55e; color: #2ecc71;
+        }
+        .item-saldo {
+            display: grid; grid-template-columns: 1fr auto; align-items: center;
+            column-gap: 10px; background: #2c3034; border: 1px solid #343a40;
+            border-radius: 8px; padding: 10px 14px; margin-bottom: 8px; font-size: 12px;
+        }
+        .item-saldo .sal-nome { color: #f8f9fa; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+        .item-saldo .sal-valor { color: #f1c40f; font-weight: bold; white-space: nowrap; font-size: 13px; }
+
         .select-nome {
             width: 100%; padding: 12px; border: 1px solid #495057; background-color: #2c3034;
             color: white; border-radius: 8px; font-size: 14px; font-weight: bold;
@@ -620,6 +642,54 @@
             font-size: 16px;
             margin-top: 10px;
         }
+
+        /* ===== MODAL LISTA DE JOGADORES (ID ↔ NOME) ===== */
+        #modalListaJogadores {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.75);
+            display: none; align-items: center; justify-content: center; z-index: 99999;
+            backdrop-filter: blur(3px); animation: fadeIn 0.2s ease-out;
+        }
+        .caixa-lista-jogadores {
+            background: #212529; padding: 25px 30px; border-radius: 16px; width: 100%; max-width: 760px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.6); border: 2px solid #8e44ad; color: #f8f9fa;
+            max-height: 88vh; display: flex; flex-direction: column; position: relative;
+        }
+        .conteudo-lista-jogadores { overflow-y: auto; flex: 1; padding-right: 5px; }
+        .bloco-lj { margin-bottom: 22px; padding: 16px; border-radius: 10px; border: 1px solid #343a40; background: #2c3034; }
+        .bloco-lj:last-child { margin-bottom: 0; }
+        .bloco-lj h4 { margin-bottom: 12px; font-size: 14px; }
+        .bloco-lj.pes h4 { color: #00d4ff; }
+        .bloco-lj.campim h4 { color: #ffd600; }
+        .bloco-lj input[type="text"] {
+            width: 100%; padding: 8px 12px; border-radius: 6px; border: 1px solid #495057;
+            background: #1e2124; color: #f8f9fa; font-size: 13px; margin-bottom: 10px;
+            text-transform: none; font-weight: normal;
+        }
+        .bloco-lj input[type="text"]:focus { outline: none; border-color: #8e44ad; }
+        .count-lj { margin-bottom: 10px; font-size: 12px; color: #adb5bd; }
+        .loading-lj { color: #3498db; font-size: 12px; margin-bottom: 10px; }
+        .tabela-lj {
+            width: 100%; border-collapse: collapse; background: #1e2124;
+            border-radius: 8px; overflow: hidden; table-layout: fixed;
+        }
+        .tabela-lj th { background: #23262e; text-align: left; padding: 8px 10px; font-size: 11px; color: #a0aec0; }
+        .tabela-lj td { padding: 8px 10px; border-top: 1px solid #2c3034; font-size: 13px; white-space: normal; overflow-wrap: anywhere; }
+        .tabela-lj th:first-child, .tabela-lj td:first-child { width: 100px; min-width: 100px; max-width: 100px; }
+        .tabela-lj td.id { font-family: 'Courier New', monospace; font-size: 12px; cursor: pointer; word-break: break-all; overflow-wrap: anywhere; }
+        .bloco-lj.pes td.id { color: #00d4ff; }
+        .bloco-lj.campim td.id { color: #ffd600; }
+        .tabela-lj td.id:hover { color: #ffffff; text-decoration: underline; }
+        .jogador-linha-lj { display: flex; align-items: center; gap: 10px; }
+        .jogador-foto-lj { width: 26px; height: 26px; border-radius: 50%; object-fit: cover; border: 2px solid #343a40; background: #1e2124; flex-shrink: 0; }
+        .jogador-foto-lj.sem-foto { display: flex; align-items: center; justify-content: center; font-size: 14px; }
+        .btn-id-lista {
+            background-color: transparent; border: 1px solid #8e44ad; color: #9b59b6;
+            font-size: 12px; padding: 0 5px; margin-left: 6px; border-radius: 4px;
+            cursor: pointer; vertical-align: middle; display: inline-flex; align-items: center;
+            justify-content: center; line-height: 1; height: 22px;
+        }
+        .btn-id-lista:hover { background-color: rgba(155,89,182,0.35); color: #ffffff; transform: none; box-shadow: none; }
     </style>
 </head>
 <body>
@@ -854,9 +924,16 @@
 
     <div id="modalHistoricoGeral">
         <div class="caixa-historico-geral">
-            <h3>🗒️ HISTÓRICO DE SAQUES</h3>
+            <h3>🗒️ SAQUES E SALDOS</h3>
+            <div class="abas-historico">
+                <button type="button" class="aba-historico ativa" id="abaSaques" onclick="alternarAbaHistorico('saques')">💸 SAQUES</button>
+                <button type="button" class="aba-historico" id="abaSaldos" onclick="alternarAbaHistorico('saldos')">💰 SALDOS</button>
+            </div>
             <div class="conteudo-historico-geral" id="listaHistoricoGeral">
                 <div class="item-suspenso-vazio">NENHUM SAQUE REALIZADO.</div>
+            </div>
+            <div class="conteudo-historico-geral" id="listaSaldos" style="display:none;">
+                <div class="item-suspenso-vazio">CARREGANDO SALDOS...</div>
             </div>
             <div class="botoes-modal" style="margin-top: 15px; justify-content: flex-end;">
                 <button type="button" onclick="fecharHistoricoGeral()">FECHAR</button>
@@ -900,6 +977,33 @@
         </div>
     </div>
 
+    <!-- ===== MODAL LISTA DE JOGADORES (ID ↔ NOME) ===== -->
+    <div id="modalListaJogadores">
+        <div class="caixa-lista-jogadores">
+            <button class="botao-fechar" onclick="fecharListaJogadores()">&times;</button>
+            <h3>🗂️ LISTA DE JOGADORES (ID ↔ NOME)</h3>
+            <div class="conteudo-lista-jogadores">
+                <div class="bloco-lj pes">
+                    <h4>🔵 SISTEMA PES | BD FIRESTORE</h4>
+                    <input type="text" id="busca-lj-pes" placeholder="BUSCAR POR NOME OU ID..." oninput="filtrarListaJogadores('pes')">
+                    <div class="count-lj" id="count-lj-pes"></div>
+                    <div id="status-lj-pes" class="loading-lj">CONECTANDO AO FIREBASE...</div>
+                    <div id="tabela-lj-pes"></div>
+                </div>
+                <div class="bloco-lj campim">
+                    <h4>🟡 SISTEMA CAMPIM FC | BD FIRESTORE</h4>
+                    <input type="text" id="busca-lj-campim" placeholder="BUSCAR POR NOME OU ID..." oninput="filtrarListaJogadores('campim')">
+                    <div class="count-lj" id="count-lj-campim"></div>
+                    <div id="status-lj-campim" class="loading-lj">CONECTANDO AO FIREBASE...</div>
+                    <div id="tabela-lj-campim"></div>
+                </div>
+            </div>
+            <div class="botoes-modal" style="margin-top: 15px; justify-content: flex-end;">
+                <button type="button" onclick="fecharListaJogadores()">FECHAR</button>
+            </div>
+        </div>
+    </div>
+
     <!-- POPUP DE CONFIRMAÇÃO -->
     <div id="avisoNovaConfirmacao">
         <div>
@@ -938,12 +1042,12 @@
             <h2>
                 <span id="contadorConfirmados" class="contador-confirmados"></span>
                 <span id="contadorAprovados" class="contador-aprovados"></span>
-                <span id="saldoAsaas" class="contador-saldo" onclick="abrirHistoricoGeral()">💵 SALDO: --</span>
-                <div id="avisoLimite" class="aviso-limite">⚠️ LIMITE DE 16 APROVADOS ATINGIDO! INSCRIÇÕES ENCERRADAS AUTOMATICAMENTE.</div>
-                <div id="avisoLimiteConfirmados" class="aviso-limite aviso-limite-confirmados">⚠️ LIMITE DE 16 CONFIRMADOS ATINGIDO!</div>
+                <span id="saldoAsaas" class="contador-saldo" onclick="abrirHistoricoGeral()" style="margin-left:auto;">💵 SALDO: --</span>
             </h2>
+            <div id="avisoLimite" class="aviso-limite" style="margin: 0 0 15px; display:none;">⚠️ LIMITE DE 16 APROVADOS ATINGIDO! INSCRIÇÕES ENCERRADAS AUTOMATICAMENTE.</div>
+            <div id="avisoLimiteConfirmados" class="aviso-limite aviso-limite-confirmados" style="margin: 0 0 15px; display:none;">⚠️ LIMITE DE 16 CONFIRMADOS ATINGIDO!</div>
 
-            <div class="btn-menu-hamburguer" id="btnMenu" onclick="alternarMenuFlutuante()">
+            <div class="btn-menu-hamburguer" id="btnMenu" onclick="alternarMenuFlutuante()" tabindex="0" role="button" aria-label="Abrir menu">
                 <span></span><span></span><span></span>
             </div>
 
@@ -996,7 +1100,7 @@
                     <thead>
                         <tr>
                             <th>FOTO</th>
-                            <th>NOME</th>
+                            <th>NOME <button class="btn-id-lista" onclick="event.stopPropagation(); abrirListaJogadores(event)" title="VER IDS DOS JOGADORES">🆔</button></th>
                             <th id="colunaDataCabecalho">DATA NASC.</th>
                             <th>CONFIRMAÇÃO</th>
                             <th>APROVAÇÃO</th>
@@ -1287,7 +1391,7 @@
                 if (!botao) return;
                 const campoValor = (valor !== null && valor !== undefined && valor !== '') ? Number(valor).toFixed(2).replace('.', ',') : '';
                 botao.dataset.valor = campoValor;
-                const textoBase = '💲 VALOR VIP';
+                const textoBase = '💲 PÁGINA VIP';
                 botao.innerHTML = '<span class="btn-valor-texto">' + textoBase + '</span>' +
                     '<input type="text" id="campoValorInscricao" class="campo-valor-inline" inputmode="decimal" placeholder="0,00" maxlength="15" onclick="event.stopPropagation()" onkeydown="if(event.key === \'Enter\'){ event.stopPropagation(); salvarValorInscricao(); }">';
                 const novoCampo = document.getElementById('campoValorInscricao');
@@ -1324,7 +1428,7 @@
             campo.value = valorFormatado;
             db.ref('configuracao/valor_inscricao').set(valorNumerico).then(() => {
                 botao.dataset.valor = valorFormatado;
-                const textoBase = '💲 VALOR VIP';
+                const textoBase = '💲 PÁGINA VIP';
                 botao.innerHTML = '<span class="btn-valor-texto">' + textoBase + '</span>' +
                     '<input type="text" id="campoValorInscricao" class="campo-valor-inline" inputmode="decimal" placeholder="0,00" maxlength="15" onclick="event.stopPropagation()" onkeydown="if(event.key === \'Enter\'){ event.stopPropagation(); salvarValorInscricao(); }">';
                 const novoCampo = document.getElementById('campoValorInscricao');
@@ -1348,6 +1452,7 @@
             if (document.getElementById('modalSuspensos') && event.target === document.getElementById('modalSuspensos')) fecharSuspensos();
             if (document.getElementById('modalHistoricoGeral') && event.target === document.getElementById('modalHistoricoGeral')) fecharHistoricoGeral();
             if (document.getElementById('modalDetalheSaque') && event.target === document.getElementById('modalDetalheSaque')) fecharDetalheSaque();
+            if (document.getElementById('modalListaJogadores') && event.target === document.getElementById('modalListaJogadores')) fecharListaJogadores();
             
             const botaoValor = document.getElementById('btnValorInscricao');
             const campoValor = document.getElementById('campoValorInscricao');
@@ -1483,11 +1588,79 @@
 
         function abrirHistoricoGeral() {
             document.getElementById('modalHistoricoGeral').style.display = 'flex';
+            alternarAbaHistorico('saques');
             carregarHistoricoGeral();
+            carregarSaldos();
         }
 
         function fecharHistoricoGeral() {
             document.getElementById('modalHistoricoGeral').style.display = 'none';
+            descarregarSaldos();
+        }
+
+        function alternarAbaHistorico(aba) {
+            const abaSaques = document.getElementById('abaSaques');
+            const abaSaldos = document.getElementById('abaSaldos');
+            const conteudoSaques = document.getElementById('listaHistoricoGeral');
+            const conteudoSaldos = document.getElementById('listaSaldos');
+            const ehSaques = aba === 'saques';
+            abaSaques.classList.toggle('ativa', ehSaques);
+            abaSaldos.classList.toggle('ativa', !ehSaques);
+            conteudoSaques.style.display = ehSaques ? '' : 'none';
+            conteudoSaldos.style.display = ehSaques ? 'none' : '';
+        }
+
+        let listenerSaldos = null;
+
+        function carregarSaldos() {
+            const container = document.getElementById('listaSaldos');
+            if (listenerSaldos) return;
+            listenerSaldos = db.ref('inscricoes').on('value', snap => {
+                const lista = snap.val() || [];
+                const saldos = [];
+                lista.forEach(insc => {
+                    if (!insc) return;
+                    saldos.push({
+                        nome: insc.nome || '—',
+                        foto: insc.foto || '',
+                        valor: Number(insc.valor) || 0
+                    });
+                });
+                if (saldos.length === 0) {
+                    container.innerHTML = '<div class="item-suspenso-vazio">NENHUM INSCRITO CADASTRADO.</div>';
+                    return;
+                }
+                saldos.sort((a, b) => {
+                    const aPos = a.valor > 0 ? 1 : 0;
+                    const bPos = b.valor > 0 ? 1 : 0;
+                    if (aPos !== bPos) return bPos - aPos;
+                    if (aPos === 1) return b.valor - a.valor;
+                    return a.nome.localeCompare(b.nome, 'pt-BR');
+                });
+                let html = '';
+                saldos.forEach(s => {
+                    const fotoHtml = s.foto
+                        ? `<img src="${s.foto}" style="width:24px;height:24px;border-radius:50%;object-fit:cover;flex-shrink:0;display:block;vertical-align:middle;">`
+                        : `<span style="font-size:16px;line-height:24px;flex-shrink:0;display:inline-block;">📄</span>`;
+                    const corValor = s.valor > 0 ? 'color:#3498db;' : '';
+                    html += `
+                    <div class="item-saldo">
+                        <span class="sal-nome" style="display:flex; align-items:center; gap:8px; min-width:0;">
+                            ${fotoHtml}
+                            <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${s.nome}</span>
+                        </span>
+                        <span class="sal-valor" style="${corValor}">R$ ${s.valor.toFixed(2).replace('.', ',')}</span>
+                    </div>`;
+                });
+                container.innerHTML = html;
+            });
+        }
+
+        function descarregarSaldos() {
+            if (listenerSaldos) {
+                db.ref('inscricoes').off('value', listenerSaldos);
+                listenerSaldos = null;
+            }
         }
 
         function carregarHistoricoGeral() {
@@ -2574,8 +2747,22 @@
         });
 
         document.addEventListener('keydown', function(event) {
+            if (event.key === ' ' || event.key === 'Spacebar') {
+                const alvo = document.activeElement;
+                if (alvo && (alvo.tagName === 'INPUT' || alvo.tagName === 'TEXTAREA' || alvo.tagName === 'SELECT')) {
+                    return;
+                }
+                const modaisAbertos = ['modalEditar', 'modalAgendar', 'modalAprovacao', 'modalSuspensos', 'modalHistoricoGeral', 'modalDetalheSaque', 'modalPremiacao', 'modalListaJogadores'].some(function(id) {
+                    const el = document.getElementById(id);
+                    return el && el.style.display === 'flex';
+                });
+                if (modaisAbertos) return;
+                event.preventDefault();
+                alternarMenuFlutuante();
+                return;
+            }
             if (event.key === 'Escape') {
-                ocultarCadastro(); fecharEdicao(); fecharAgendamento(); fecharAprovacao(); fecharSuspensos(); fecharHistoricoGeral(); fecharDetalheSaque(); fecharPremiacao();
+                ocultarCadastro(); fecharEdicao(); fecharAgendamento(); fecharAprovacao(); fecharSuspensos(); fecharHistoricoGeral(); fecharDetalheSaque(); fecharPremiacao(); fecharListaJogadores();
                 document.getElementById('avisoNovaConfirmacao').style.display = 'none';
                 document.getElementById('avisoNovaAprovacao').style.display = 'none';
                 document.getElementById('avisoNovaSaque').style.display = 'none';
@@ -2590,6 +2777,104 @@
                 if (event.key === 'u' || event.key === 'U' || event.key === 's' || event.key === 'S' || event.key === 'c' || event.key === 'C') { event.preventDefault(); return false; }
             }
         });
+
+        // ===== MODAL LISTA DE JOGADORES (ID ↔ NOME) =====
+        let ljTodosPes = [];
+        let ljTodosCampim = [];
+
+        function abrirListaJogadores(event) {
+            if (event) event.stopPropagation();
+            document.getElementById('modalListaJogadores').style.display = 'flex';
+            carregarListaJogadores();
+        }
+
+        function fecharListaJogadores() {
+            document.getElementById('modalListaJogadores').style.display = 'none';
+        }
+
+        function carregarListaJogadores() {
+            document.getElementById('status-lj-pes').textContent = 'CONECTANDO AO FIREBASE...';
+            document.getElementById('status-lj-pes').style.display = 'block';
+            document.getElementById('status-lj-campim').textContent = 'CONECTANDO AO FIREBASE...';
+            document.getElementById('status-lj-campim').style.display = 'block';
+
+            dbPes.collection('jogadores').get().then(function(snap) {
+                ljTodosPes = snap.docs.map(function(d) {
+                    const data = d.data();
+                    return { id: d.id, nome: data.nome || '—', foto: data.foto || '' };
+                }).sort(function(a, b) { return a.nome.localeCompare(b.nome); });
+                document.getElementById('status-lj-pes').style.display = 'none';
+                renderizarListaJogadores();
+            }).catch(function(err) {
+                document.getElementById('status-lj-pes').textContent = 'ERRO: ' + err.message;
+            });
+
+            firebase.firestore().collection('jogadores').get().then(function(snap) {
+                ljTodosCampim = snap.docs.map(function(d) {
+                    const data = d.data();
+                    return { id: d.id, nome: data.nome || '—', foto: data.foto || '' };
+                }).sort(function(a, b) { return a.nome.localeCompare(b.nome); });
+                document.getElementById('status-lj-campim').style.display = 'none';
+                renderizarListaJogadores();
+            }).catch(function(err) {
+                document.getElementById('status-lj-campim').textContent = 'ERRO: ' + err.message;
+            });
+        }
+
+        function montarTabelaLJ(lista, idContainer) {
+            const el = document.getElementById(idContainer);
+            if (!el) return;
+            if (!lista.length) {
+                el.innerHTML = '<div class="loading-lj">NENHUM JOGADOR ENCONTRADO.</div>';
+                return;
+            }
+            function montarFoto(j) {
+                const fotoValida = j.foto && (j.foto.indexOf('http') === 0 || j.foto.indexOf('data:') === 0);
+                if (fotoValida) {
+                    return '<img class="jogador-foto-lj" src="' + j.foto + '" alt="' + j.nome + '">';
+                }
+                return '<span class="jogador-foto-lj sem-foto">🧑</span>';
+            }
+            el.innerHTML = '<table class="tabela-lj"><thead><tr><th>ID</th><th>NOME</th></tr></thead><tbody>' +
+                lista.map(function(j) { return '<tr><td class="id" title="CLIQUE PARA COPIAR" onclick="copiarIdLJ(this, \'' + j.id + '\')">' + j.id + '</td><td><div class="jogador-linha-lj">' + montarFoto(j) + '<span>' + j.nome + '</span></div></td></tr>'; }).join('') +
+                '</tbody></table>';
+        }
+
+        function copiarIdLJ(el, id) {
+            const original = el.textContent;
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(id).then(function() {
+                    el.textContent = '✅ COPIADO!';
+                    setTimeout(function() { el.textContent = original; }, 1200);
+                });
+            } else {
+                const ta = document.createElement('textarea');
+                ta.value = id;
+                ta.style.position = 'fixed';
+                ta.style.opacity = '0';
+                document.body.appendChild(ta);
+                ta.select();
+                try { document.execCommand('copy'); el.textContent = '✅ COPIADO!'; setTimeout(function() { el.textContent = original; }, 1200); } catch (e) {}
+                document.body.removeChild(ta);
+            }
+        }
+
+        function renderizarListaJogadores() {
+            filtrarListaJogadores('pes');
+            filtrarListaJogadores('campim');
+        }
+
+        function filtrarListaJogadores(sistema) {
+            const el = document.getElementById('busca-lj-' + sistema);
+            const q = el ? el.value.trim().toLowerCase() : '';
+            const todos = sistema === 'pes' ? ljTodosPes : ljTodosCampim;
+            const lista = q ? todos.filter(function(j) {
+                return j.nome.toLowerCase().indexOf(q) !== -1 || j.id.toLowerCase().indexOf(q) !== -1;
+            }) : todos;
+            montarTabelaLJ(lista, 'tabela-lj-' + sistema);
+            const countEl = document.getElementById('count-lj-' + sistema);
+            if (countEl) countEl.textContent = lista.length + ' JOGADOR(ES)';
+        }
 
         document.addEventListener('contextmenu', function(event) { event.preventDefault(); return false; });
     </script>
