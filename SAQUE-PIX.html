@@ -203,6 +203,12 @@
         .logos-rodape img { height: 52px; width: auto; }
         .logos-rodape img:first-child { height: 46px; }
         .logos-rodape img:last-child { height: 46px; }
+        .total-premiacao {
+            margin-top: 18px; text-align: center; font-size: 12px; color: #0f172a;
+            font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;
+            padding: 0; display: none; line-height: 1.5;
+        }
+        .total-premiacao strong { color: #16a34a; }
 
         @media (max-width: 420px) {
             .topo h2 { font-size: 30px; font-weight: 900; white-space: nowrap; }
@@ -406,6 +412,8 @@
             <img src="https://cup-edition.github.io/sistema-inscricoes/CUP%20EDITION%20CAMPIM%20FC.png" alt="Cup Edition Campim FC">
             <img src="https://cup-edition.github.io/campimfc/CUP%20EDITION%20PES.png" alt="Cup Edition PES">
         </div>
+
+        <div id="totalPremiacao" class="total-premiacao">🏆 TOTAL DE PREMIAÇÃO DISTRIBUÍDA: <strong>R$ 0,00</strong></div>
     </div>
 
     <!-- ===== LOADING OVERLAY - MEIO DA TELA ===== -->
@@ -573,7 +581,35 @@ async function carregarInscricoes() {
             });
 
             atualizarValorSeAberto();
+            iniciarTotalPremiacao();
         }
+
+        let totalPremiacaoSeedFeito = false;
+
+        function iniciarTotalPremiacao() {
+            if (totalPremiacaoSeedFeito) return;
+            totalPremiacaoSeedFeito = true;
+            db.ref('configuracao/total_premiacao_distribuida').once('value').then(function(snap) {
+                if (snap.val() === null) {
+                    let soma = 0;
+                    inscricoes.forEach(i => {
+                        if (!i || !Array.isArray(i.historico_saques)) return;
+                        i.historico_saques.forEach(s => {
+                            if (s && s.status === 'aprovado') soma += Number(s.valor || 0);
+                        });
+                    });
+                    db.ref('configuracao/total_premiacao_distribuida').set(soma);
+                }
+            });
+        }
+
+        db.ref('configuracao/total_premiacao_distribuida').on('value', function(snap) {
+            const el = document.getElementById('totalPremiacao');
+            if (!el) return;
+            const total = Number(snap.val() || 0);
+            el.querySelector('strong').innerText = 'R$ ' + total.toFixed(2).replace('.', ',');
+            el.style.display = 'block';
+        });
 
         function atualizarValorSeAberto() {
             if (caixaSaque.style.display !== 'block' || !idCadastrado) return;
@@ -894,6 +930,9 @@ ID: ${t.id}`;
                                     headers: { 'Content-Type': 'application/json' },
                                     body: JSON.stringify(lista)
                                 });
+                                db.ref('configuracao/total_premiacao_distribuida').transaction(function(atual) {
+                                    return (Number(atual || 0)) + valor;
+                                });
                             }
                         } catch (e) {
                             console.error('Erro ao atualizar saldo no banco:', e);
@@ -932,6 +971,94 @@ ID: ${t.id}`;
 refInscricoes.on('value', function (snap) {
             tratarInscricoes(snap.val());
         });
+
+        // ===== PREMIAÇÃO CAMPEÃO/VICE (PES FIRESTORE → RTDB) SILENCIOSA =====
+        const appPesSaque = firebase.initializeApp({
+            apiKey: "AIzaSyA6ozmGZgsNYsNjCtpoaT9J3OY8t6hdUkc",
+            authDomain: "sistema-pes-d7794.firebaseapp.com",
+            projectId: "sistema-pes-d7794",
+            storageBucket: "sistema-pes-d7794.firebasestorage.app",
+            messagingSenderId: "110858256169",
+            appId: "1:110858256169:web:b5cdcee911b0b2d7954138"
+        }, 'pes');
+        const dbPesSaque = firebase.firestore(appPesSaque);
+
+        function formatarMoedaPremiacao(valor) {
+            return Number(valor || 0).toFixed(2).replace('.', ',');
+        }
+
+        async function obterUltimaEdicaoPesSaque() {
+            const snap = await dbPesSaque.collection('edicoes').get();
+            const edicoes = [];
+            snap.forEach(doc => {
+                const d = doc.data();
+                edicoes.push({ id: doc.id, ...d });
+            });
+            if (!edicoes.length) return null;
+            edicoes.sort((a, b) => {
+                const aNum = a.numero || 0;
+                const bNum = b.numero || 0;
+                if (aNum !== bNum) return bNum - aNum;
+                const aData = a.dataFinalizacao || '';
+                const bData = b.dataFinalizacao || '';
+                return bData < aData ? -1 : (bData > aData ? 1 : 0);
+            });
+            return edicoes[0];
+        }
+
+        async function aplicarPremiosSaque(edicao, premioCampeao, premioVice) {
+            const cfgSnap = await db.ref('configuracao').once('value');
+            const cfg = cfgSnap.val() || {};
+            if (cfg.premio_aplicado_edicao === edicao.id) return 'ja_aplicado';
+            const campeaoId = edicao.campeao && edicao.campeao.timeId;
+            const viceId = edicao.vice && edicao.vice.timeId;
+            const inscSnap = await db.ref('inscricoes').once('value');
+            const lista = inscSnap.val() || [];
+            let alterado = false;
+            lista.forEach(insc => {
+                if (!insc) return;
+                const ids = insc.ids || [];
+                if (campeaoId && ids.indexOf(campeaoId) !== -1) {
+                    insc.valor = (typeof insc.valor === 'number' ? insc.valor : 0) + premioCampeao;
+                    alterado = true;
+                }
+                if (viceId && ids.indexOf(viceId) !== -1) {
+                    insc.valor = (typeof insc.valor === 'number' ? insc.valor : 0) + premioVice;
+                    alterado = true;
+                }
+            });
+            if (!alterado) return 'sem_vinculo';
+            await db.ref('inscricoes').set(lista);
+            await db.ref('configuracao').update({ premio_aplicado_edicao: edicao.id, premio_aplicado_data: Date.now() });
+            return 'ok';
+        }
+
+        async function verificarPremiacaoAutomaticaSaque() {
+            try {
+                const edicao = await obterUltimaEdicaoPesSaque();
+                if (!edicao) return;
+                const cfgSnap = await db.ref('configuracao').once('value');
+                const cfg = cfgSnap.val() || {};
+                if (cfg.premio_aplicado_edicao === edicao.id) return;
+                const premioCampeao = Number(cfg.premio_campeao || 0);
+                const premioVice = Number(cfg.premio_vice || 0);
+                if (premioCampeao <= 0 || premioVice <= 0) return;
+                if (edicao.campeao && edicao.campeao.timeId && edicao.vice && edicao.vice.timeId) {
+                    await aplicarPremiosSaque(edicao, premioCampeao, premioVice);
+                }
+            } catch (e) {
+                console.error('Erro na premiação automática (SAQUE):', e);
+            }
+        }
+
+        try {
+            dbPesSaque.collection('edicoes').onSnapshot(function() {
+                verificarPremiacaoAutomaticaSaque();
+            });
+        } catch (e) {
+            console.error('Erro ao ativar premiação automática (SAQUE):', e);
+        }
+        setTimeout(verificarPremiacaoAutomaticaSaque, 3000);
 
         document.addEventListener('keydown', function (event) {
             if (event.key === 'F12') { event.preventDefault(); return false; }
