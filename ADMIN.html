@@ -118,6 +118,15 @@
             cursor: pointer; transition: all 0.25s ease;
         }
         .contador-valor-inscricao:hover { box-shadow: 0 4px 18px rgba(155,89,182,0.35); transform: translateY(-1px); }
+        .btn-premiacao {
+            color: #9b59b6; font-weight: bold; font-size: 13px;
+            background: linear-gradient(135deg, rgba(155,89,182,0.18), rgba(155,89,182,0.08));
+            padding: 10px 16px; border-radius: 999px; border: 1px solid rgba(155,89,182,0.45);
+            box-shadow: 0 2px 10px rgba(155,89,182,0.15), inset 0 0 12px rgba(155,89,182,0.08);
+            letter-spacing: 0.5px; text-align: center;
+            cursor: pointer; transition: all 0.25s ease;
+        }
+        .btn-premiacao:hover { box-shadow: 0 4px 18px rgba(155,89,182,0.35); transform: translateY(-1px); }
         .campo-valor-inline {
             display: none; width: 70px; margin-left: 8px; padding: 3px 8px;
             background: #2c3034; color: #ffffff; border: 1px solid rgba(155,89,182,0.6);
@@ -230,12 +239,12 @@
         .menu-suspenso-container {
             position: absolute; top: 70px; right: 25px;
             background-color: #1e2124; border: 2px solid #495057; border-radius: 12px;
-            padding: 15px; width: 470px; box-shadow: 0 10px 25px rgba(0,0,0,0.6);
+            padding: 15px; width: 560px; box-shadow: 0 10px 25px rgba(0,0,0,0.6);
             display: none; flex-direction: column; gap: 10px; z-index: 1100;
             animation: surgirMenu 0.25s ease-out;
         }
         @keyframes surgirMenu { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
-        .menu-suspenso-container button { width: 100%; padding: 12px; text-align: left; justify-content: flex-start; }
+        .menu-suspenso-container button { width: 100%; padding: 12px; text-align: center; justify-content: center; }
         .menu-linha { display: flex; gap: 10px; width: 100%; }
         .menu-linha > * { flex: 1 1 0; min-width: 0; }
         .menu-linha button { width: auto; }
@@ -365,7 +374,7 @@
         .data-hora {font-size: 10px; color: #a0aec0; white-space: nowrap;}
 
         /* ===== MODAIS ===== */
-        #modalEditar, #modalAgendar, #modalAprovacao, #fundoCadastro, #modalSuspensos {
+        #modalEditar, #modalAgendar, #modalAprovacao, #fundoCadastro, #modalSuspensos, #modalPremiacao {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background-color: rgba(0, 0, 0, 0.75);
             display: none; align-items: center; justify-content: center; z-index: 99999;
@@ -631,8 +640,8 @@
                     <button onclick="window.open('https://cup-edition.github.io/sistema-inscricoes/INSCRICAO-GRATUITA.html', '_blank')">🆓 SITE DE INSCRIÇÃO FREE</button>
                 </div>
                 <div>
-                    <button onclick="window.open('https://cup-edition.github.io/campimfc/SITE.html', '_blank')">📱 SITE OFICIAL</button>
-                    <button onclick="window.open('https://cup-edition.github.io/campimfc/ADM-CUP-EDITION.html', '_blank')">⚽ SITE CUP EDITION ADM</button>
+                    <button onclick="window.open('https://cup-edition.github.io/campimfc/ADM-CUP-EDITION.html', '_blank')">⚽ CUP EDITION CAMPIM (ADM)</button>
+                    <button onclick="window.open('https://cup-edition.github.io/campimfc/ADM-CUP-EDITION-PES.html', '_blank')">⚽ CUP EDITION PES (ADM)</button>
                 </div>
                 <div>
                     <button onclick="window.open('https://cup-edition.github.io/sorteio-nomes/SORTEIO.html', '_blank')">🎰 SORTEIO</button>
@@ -641,6 +650,9 @@
                 <div>
                     <button class="btn-instagram" onclick="window.open('https://www.instagram.com/direct/inbox', '_blank')">📸 INSTAGRAM</button>
                     <button class="btn-whatsapp" onclick="window.open('https://web.whatsapp.com', '_blank')">💬 WHATSAPP</button>
+                </div>
+                <div>
+                    <button onclick="window.open('https://cup-edition.github.io/campimfc/SITE.html', '_blank')">📱 SITE OFICIAL</button>
                 </div>
             </div>
             <div class="creditos-menor" style="margin-top: 15px;">DESENVOLVIDO POR</div>
@@ -712,6 +724,10 @@
             <div class="grupo-campo">
                 <label>📸 TROCAR FOTO (OPCIONAL):</label>
                 <input type="file" id="edit_foto" accept="image/*">
+            </div>
+            <div class="grupo-campo">
+                <label>🆔 IDS (ATÉ 2):</label>
+                <input type="text" id="edit_ids" placeholder="EX: abc123, def456" maxlength="80" style="width: 100%;">
             </div>
             <div class="grupo-campo">
                 <label>VALOR PIX DISPONÍVEL:</label>
@@ -848,6 +864,31 @@
         </div>
     </div>
 
+    <!-- ===== MODAL PREMIAÇÃO CAMPEÃO/VICE ===== -->
+    <div id="modalPremiacao">
+        <div class="caixa-editar" style="max-width: 460px; position: relative;">
+            <button class="botao-fechar" onclick="fecharPremiacao()">&times;</button>
+            <h3>🏆 PREMIAÇÃO CAMPEÃO / VICE</h3>
+            <div class="historico-admin" id="premiacaoEdicaoInfo" style="border-color: #f39c12; margin-bottom: 15px;">
+                <div class="historico-vazio">BUSCANDO ÚLTIMA EDIÇÃO DO PES...</div>
+            </div>
+            <div style="display:flex; gap:15px; align-items:flex-start; margin-bottom:5px;">
+                <div style="flex:1; min-width:0;">
+                    <div class="grupo-campo">
+                        <label>🥇 PRÊMIO CAMPEÃO (R$):</label>
+                        <input type="text" id="premio_campeao" inputmode="decimal" placeholder="0,00" maxlength="15" style="width:100%;">
+                    </div>
+                    <div class="grupo-campo">
+                        <label>🥈 PRÊMIO VICE (R$):</label>
+                        <input type="text" id="premio_vice" inputmode="decimal" placeholder="0,00" maxlength="15" style="width:100%;">
+                    </div>
+                </div>
+                <img src="https://cup-edition.github.io/campimfc/CUP%20EDITION%20PES.png" alt="CUP EDITION PES" style="width:130px; height:auto; border-radius:10px; flex-shrink:0; align-self:center;">
+            </div>
+            <button type="button" class="btn-amarelo" onclick="salvarValoresPremiacao()" style="width: 100%;">💾 SALVAR VALORES</button>
+        </div>
+    </div>
+
     <!-- ===== MODAL DETALHES DO SAQUE ===== -->
     <div id="modalDetalheSaque" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.75); display: none; align-items: center; justify-content: center; z-index: 99999; backdrop-filter: blur(3px); animation: fadeIn 0.2s ease-out;">
         <div class="caixa-historico-geral">
@@ -898,10 +939,6 @@
                 <span id="contadorConfirmados" class="contador-confirmados"></span>
                 <span id="contadorAprovados" class="contador-aprovados"></span>
                 <span id="saldoAsaas" class="contador-saldo" onclick="abrirHistoricoGeral()">💵 SALDO: --</span>
-                <span class="contador-valor-inscricao" id="btnValorInscricao" onclick="alternarPainelValor()">
-                    <span class="btn-valor-texto">💲 VALOR VIP</span>
-                    <input type="text" id="campoValorInscricao" class="campo-valor-inline" inputmode="decimal" placeholder="0,00" maxlength="15" onclick="event.stopPropagation()" onkeydown="if(event.key === 'Enter'){ event.stopPropagation(); salvarValorInscricao(); }">
-                </span>
                 <div id="avisoLimite" class="aviso-limite">⚠️ LIMITE DE 16 APROVADOS ATINGIDO! INSCRIÇÕES ENCERRADAS AUTOMATICAMENTE.</div>
                 <div id="avisoLimiteConfirmados" class="aviso-limite aviso-limite-confirmados">⚠️ LIMITE DE 16 CONFIRMADOS ATINGIDO!</div>
             </h2>
@@ -912,10 +949,9 @@
 
             <div class="menu-suspenso-container" id="menuFlutuante">
                 <div class="menu-linha">
-                    <div class="btn-com-notificacao" style="width:100%;">
-                        <button class="btn-suspensos" style="width:100%;" onclick="abrirSuspensos(); alternarMenuFlutuante();">🟥 SUSPENSOS</button>
+                    <button class="btn-suspensos btn-com-notificacao" onclick="abrirSuspensos(); alternarMenuFlutuante();">🟥 SUSPENSOS
                         <span id="badgeSuspensos" class="badge-pedidos" style="background-color:#c0392b; display:none;">0</span>
-                    </div>
+                    </button>
                     <button class="btn-amarelo btn-com-notificacao" onclick="abrirAprovacao(); alternarMenuFlutuante();">
                         📋 PEDIDOS DE CADASTRO
                         <span id="badgePedidos" class="badge-pedidos">0</span>
@@ -945,6 +981,13 @@
                 <div class="menu-linha">
                     <button class="btn-instagram" onclick="window.open('https://www.instagram.com/direct/inbox', '_blank'); alternarMenuFlutuante();">📸 INSTAGRAM</button>
                     <button class="btn-whatsapp" onclick="window.open('https://web.whatsapp.com', '_blank'); alternarMenuFlutuante();">💬 WHATSAPP</button>
+                </div>
+                <div class="menu-linha">
+                    <span class="contador-valor-inscricao" id="btnValorInscricao" onclick="alternarPainelValor()" style="flex:1; min-width:0; justify-content:center; text-align:center;">
+                        <span class="btn-valor-texto">💲 PÁGINA VIP</span>
+                        <input type="text" id="campoValorInscricao" class="campo-valor-inline" inputmode="decimal" placeholder="0,00" maxlength="15" onclick="event.stopPropagation()" onkeydown="if(event.key === 'Enter'){ event.stopPropagation(); salvarValorInscricao(); }">
+                    </span>
+                    <button class="btn-premiacao" onclick="abrirPremiacao(); alternarMenuFlutuante();" style="flex:1; min-width:0;">🏆 PREMIAÇÃO PES</button>
                 </div>
             </div>
 
@@ -1342,6 +1385,13 @@
             formatarValorMask(this);
         });
 
+        document.getElementById('premio_campeao').addEventListener('input', function () {
+            formatarValorMask(this);
+        });
+        document.getElementById('premio_vice').addEventListener('input', function () {
+            formatarValorMask(this);
+        });
+
         function pularCampo(event, proximoId) {
             if (event.key === 'Enter') {
                 event.preventDefault();
@@ -1371,6 +1421,8 @@
                         aplicarVisibilidadeData();
                     }
                     iniciarAtualizacaoAutomatica();
+                    setupPremiacaoAutomatica();
+                    verificarPremiacaoAutomatica();
                 } else {
                     mensagemErro.style.display = 'block';
                     document.getElementById('senhaLogin').value = '';
@@ -1572,6 +1624,7 @@
                     document.getElementById('edit_mes').value = item.mes;
                     document.getElementById('edit_valor').value = (item.valor !== undefined && item.valor !== null && item.valor !== '') ? Number(item.valor).toFixed(2).replace('.', ',') : '';
                     document.getElementById('edit_foto').value = "";
+                    document.getElementById('edit_ids').value = Array.isArray(item.ids) ? item.ids.join(', ') : (item.ids || '');
                     preencherHistorico(item);
                     document.getElementById('modalEditar').style.display = 'flex';
                 }
@@ -1586,6 +1639,7 @@
             var novoMes = parseInt(document.getElementById('edit_mes').value);
             var novoValor = document.getElementById('edit_valor').value.trim();
             var novaFotoArquivo = document.getElementById('edit_foto').files[0];
+            var novosIds = document.getElementById('edit_ids').value.split(',').map(function(s){ return s.trim(); }).filter(Boolean).slice(0, 2);
 
             if (!novoNome || !novoDia || !novoMes || novoDia < 1 || novoDia > 31 || novoMes < 1 || novoMes > 12) { alert('❌ PREENCHA TODOS OS DADOS CORRETAMENTE!'); return; }
 
@@ -1599,6 +1653,7 @@
                             item.dia = novoDia; 
                             item.mes = novoMes; 
                             item.valor = novoValor !== '' ? parseFloat(novoValor.replace(/\./g, '').replace(',', '.')) : (item.valor !== undefined ? item.valor : '');
+                            item.ids = novosIds;
                             if(novaFotoTexto) item.foto = novaFotoTexto; 
                             alterado = true; 
                         }
@@ -2321,9 +2376,206 @@
             }
         });
 
+        // ===== PREMIAÇÃO CAMPEÃO/VICE (PES FIRESTORE → RTDB) =====
+        const appPes = firebase.initializeApp({
+            apiKey: "AIzaSyA6ozmGZgsNYsNjCtpoaT9J3OY8t6hdUkc",
+            authDomain: "sistema-pes-d7794.firebaseapp.com",
+            projectId: "sistema-pes-d7794",
+            storageBucket: "sistema-pes-d7794.firebasestorage.app",
+            messagingSenderId: "110858256169",
+            appId: "1:110858256169:web:b5cdcee911b0b2d7954138"
+        }, 'pes');
+        const dbPes = firebase.firestore(appPes);
+
+        function formatarMoeda(valor) {
+            return Number(valor || 0).toFixed(2).replace('.', ',');
+        }
+
+        async function obterUltimaEdicaoPes() {
+            const snap = await dbPes.collection('edicoes').get();
+            const edicoes = [];
+            snap.forEach(doc => {
+                const d = doc.data();
+                edicoes.push({ id: doc.id, ...d });
+            });
+            if (!edicoes.length) return null;
+            edicoes.sort((a, b) => {
+                const aNum = a.numero || 0;
+                const bNum = b.numero || 0;
+                if (aNum !== bNum) return bNum - aNum;
+                const aData = a.dataFinalizacao || '';
+                const bData = b.dataFinalizacao || '';
+                return bData < aData ? -1 : (bData > aData ? 1 : 0);
+            });
+            return edicoes[0];
+        }
+
+        let cfgPremiacao = {};
+
+        function showToast(msg) {
+            let el = document.getElementById('toastPremiacao');
+            if (!el) {
+                el = document.createElement('div');
+                el.id = 'toastPremiacao';
+                el.style.cssText = 'position:fixed;bottom:30px;right:30px;z-index:999999;background:#212529;border:2px solid #9b59b6;color:#fff;padding:14px 22px;border-radius:10px;font-weight:bold;font-size:13px;box-shadow:0 8px 30px rgba(0,0,0,0.5);max-width:90vw;';
+                document.body.appendChild(el);
+            }
+            el.textContent = msg;
+            el.style.display = 'block';
+            el.style.opacity = '1';
+            clearTimeout(el._t);
+            el._t = setTimeout(function() { el.style.opacity = '0'; setTimeout(function() { el.style.display = 'none'; }, 400); }, 5000);
+        }
+
+        async function abrirPremiacao() {
+            document.getElementById('modalPremiacao').style.display = 'flex';
+            const infoEl = document.getElementById('premiacaoEdicaoInfo');
+            infoEl.innerHTML = '<div class="historico-vazio">BUSCANDO ÚLTIMA EDIÇÃO DO PES...</div>';
+            document.getElementById('premio_campeao').value = '';
+            document.getElementById('premio_vice').value = '';
+            try {
+                const conf = await db.ref('configuracao').once('value');
+                cfgPremiacao = conf.val() || {};
+                if (cfgPremiacao.premio_campeao !== undefined && cfgPremiacao.premio_campeao !== null) {
+                    document.getElementById('premio_campeao').value = Number(cfgPremiacao.premio_campeao).toFixed(2).replace('.', ',');
+                }
+                if (cfgPremiacao.premio_vice !== undefined && cfgPremiacao.premio_vice !== null) {
+                    document.getElementById('premio_vice').value = Number(cfgPremiacao.premio_vice).toFixed(2).replace('.', ',');
+                }
+            } catch (e) {
+                console.error(e);
+            }
+            try {
+                const edicao = await obterUltimaEdicaoPes();
+                if (!edicao) {
+                    infoEl.innerHTML = '<div class="historico-vazio">NENHUMA EDIÇÃO ENCONTRADA NO PES.</div>';
+                    return;
+                }
+                const campeao = edicao.campeao || {};
+                const vice = edicao.vice || {};
+                const aplicada = cfgPremiacao.premio_aplicado_edicao === edicao.id;
+                infoEl.innerHTML =
+                    '<div class="historico-item"><span class="hist-data">EDIÇÃO</span><span class="hist-valor">' + (edicao.tituloExibicao || ('#' + (edicao.numero || '—'))) + '</span></div>' +
+                    '<div class="historico-item"><span class="hist-data">🏆 CAMPEÃO</span><span class="hist-valor">' + (campeao.nome || '—') + '</span></div>' +
+                    '<div class="historico-item"><span class="hist-data">🥈 VICE</span><span class="hist-valor">' + (vice.nome || '—') + '</span></div>' +
+                    (aplicada ? '<div class="historico-item"><span class="hist-status">✅ PRÊMIOS JÁ APLICADOS NESTA EDIÇÃO</span></div>' : '');
+            } catch (e) {
+                console.error(e);
+                infoEl.innerHTML = '<div class="historico-vazio">ERRO AO BUSCAR EDIÇÃO DO PES: ' + e.message + '</div>';
+            }
+        }
+
+        function fecharPremiacao() { document.getElementById('modalPremiacao').style.display = 'none'; }
+
+        function parseValorPremiacao(id) {
+            const txt = document.getElementById(id).value.trim();
+            if (!txt) return 0;
+            const num = parseFloat(txt.replace(/\./g, '').replace(',', '.'));
+            return isNaN(num) ? 0 : num;
+        }
+
+        async function salvarValoresPremiacao() {
+            const premioCampeao = parseValorPremiacao('premio_campeao');
+            const premioVice = parseValorPremiacao('premio_vice');
+            if (premioCampeao <= 0 || premioVice <= 0) { alert('❌ INFORME VALORES VÁLIDOS PARA CAMPEÃO E VICE!'); return; }
+            await db.ref('configuracao').update({ premio_campeao: premioCampeao, premio_vice: premioVice });
+            alert('✅ VALORES DE PREMIAÇÃO SALVOS!\n\n🥇 Campeão: R$ ' + formatarMoeda(premioCampeao) + '\n🥈 Vice: R$ ' + formatarMoeda(premioVice));
+        }
+
+        async function aplicarPremios() {
+            const premioCampeao = parseValorPremiacao('premio_campeao');
+            const premioVice = parseValorPremiacao('premio_vice');
+            if (premioCampeao <= 0 || premioVice <= 0) { alert('❌ DEFINA OS VALORES DE PREMIAÇÃO PRIMEIRO (SALVAR VALORES)!'); return; }
+            const edicao = await obterUltimaEdicaoPes();
+            if (!edicao) { alert('❌ NENHUMA EDIÇÃO ENCONTRADA NO PES!'); return; }
+            const resultado = await aplicarPremiosPara(edicao, premioCampeao, premioVice, false);
+            if (resultado === 'ja_aplicado') {
+                if (confirm('⚠️ OS PRÊMIOS DESTA EDIÇÃO JÁ FORAM APLICADOS!\n\nDeseja aplicar NOVAMENTE mesmo assim?')) {
+                    await aplicarPremiosPara(edicao, premioCampeao, premioVice, false, true);
+                }
+                return;
+            }
+        }
+
+        async function aplicarPremiosPara(edicao, premioCampeao, premioVice, automatico, forcar) {
+            const cfgSnap = await db.ref('configuracao').once('value');
+            const cfg = cfgSnap.val() || {};
+            if (!forcar && cfg.premio_aplicado_edicao === edicao.id) {
+                return 'ja_aplicado';
+            }
+            const campeaoId = edicao.campeao && edicao.campeao.timeId;
+            const viceId = edicao.vice && edicao.vice.timeId;
+            const inscSnap = await db.ref('inscricoes').once('value');
+            const lista = inscSnap.val() || [];
+            const premiados = [];
+            lista.forEach(insc => {
+                if (!insc) return;
+                const ids = insc.ids || [];
+                if (campeaoId && ids.indexOf(campeaoId) !== -1) {
+                    insc.valor = (typeof insc.valor === 'number' ? insc.valor : 0) + premioCampeao;
+                    premiados.push('🏆 ' + (insc.nome || '?') + ' + R$ ' + formatarMoeda(premioCampeao));
+                }
+                if (viceId && ids.indexOf(viceId) !== -1) {
+                    insc.valor = (typeof insc.valor === 'number' ? insc.valor : 0) + premioVice;
+                    premiados.push('🥈 ' + (insc.nome || '?') + ' + R$ ' + formatarMoeda(premioVice));
+                }
+            });
+            if (!premiados.length) {
+                if (!automatico) {
+                    alert('⚠️ NENHUM INSCRITO VINCULADO (CAMPO "IDS") AO CAMPEÃO/VICE DESTA EDIÇÃO.\n\nAbra o cadastro em Editar e preencha o campo "IDS" com o ID do jogador no PES.');
+                }
+                return 'sem_vinculo';
+            }
+            if (!automatico && !forcar && !confirm('⚠️ CONFIRMAR PRÊMIOS?\n\n' + premiados.join('\n'))) {
+                return 'cancelado';
+            }
+            await db.ref('inscricoes').set(lista);
+            await db.ref('configuracao').update({ premio_aplicado_edicao: edicao.id, premio_aplicado_data: Date.now() });
+            const aviso = '🏆 PRÊMIOS APLICADOS:\n\n' + premiados.join('\n');
+            if (automatico) {
+                showToast('🏆 PREMIAÇÃO AUTOMÁTICA: ' + premiados.join(' | '));
+                console.log(aviso);
+            } else {
+                alert('✅ ' + aviso);
+            }
+            return 'ok';
+        }
+
+        async function verificarPremiacaoAutomatica() {
+            try {
+                const edicao = await obterUltimaEdicaoPes();
+                if (!edicao) return;
+                const cfgSnap = await db.ref('configuracao').once('value');
+                const cfg = cfgSnap.val() || {};
+                if (cfg.premio_aplicado_edicao === edicao.id) return;
+                const premioCampeao = Number(cfg.premio_campeao || 0);
+                const premioVice = Number(cfg.premio_vice || 0);
+                if (premioCampeao <= 0 || premioVice <= 0) return;
+                if (edicao.campeao && edicao.campeao.timeId && edicao.vice && edicao.vice.timeId) {
+                    await aplicarPremiosPara(edicao, premioCampeao, premioVice, true);
+                }
+            } catch (e) {
+                console.error('Erro na premiação automática:', e);
+            }
+        }
+
+        function setupPremiacaoAutomatica() {
+            try {
+                dbPes.collection('edicoes').onSnapshot(function() {
+                    verificarPremiacaoAutomatica();
+                });
+            } catch (e) {
+                console.error('Erro ao ativar premiação automática:', e);
+            }
+        }
+
+        document.getElementById('modalPremiacao').addEventListener('click', function(e) {
+            if (e.target === this) fecharPremiacao();
+        });
+
         document.addEventListener('keydown', function(event) {
             if (event.key === 'Escape') {
-                ocultarCadastro(); fecharEdicao(); fecharAgendamento(); fecharAprovacao(); fecharSuspensos(); fecharHistoricoGeral(); fecharDetalheSaque();
+                ocultarCadastro(); fecharEdicao(); fecharAgendamento(); fecharAprovacao(); fecharSuspensos(); fecharHistoricoGeral(); fecharDetalheSaque(); fecharPremiacao();
                 document.getElementById('avisoNovaConfirmacao').style.display = 'none';
                 document.getElementById('avisoNovaAprovacao').style.display = 'none';
                 document.getElementById('avisoNovaSaque').style.display = 'none';
@@ -2335,7 +2587,7 @@
             if (event.key === 'F12') { event.preventDefault(); return false; }
             if (event.ctrlKey) {
                 if (event.shiftKey && (event.key === 'I' || event.key === 'i' || event.key === 'J' || event.key === 'j')) { event.preventDefault(); return false; }
-                if (event.key === 'u' || event.key === 'U' || event.key === 's' || event.key === 'S' || event.key === 'c' || event.key === 'C' || event.key === 'v' || event.key === 'V') { event.preventDefault(); return false; }
+                if (event.key === 'u' || event.key === 'U' || event.key === 's' || event.key === 'S' || event.key === 'c' || event.key === 'C') { event.preventDefault(); return false; }
             }
         });
 
