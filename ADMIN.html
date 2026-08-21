@@ -375,7 +375,7 @@
         .data-hora {font-size: 10px; color: #a0aec0; white-space: nowrap;}
 
         /* ===== MODAIS ===== */
-        #modalEditar, #modalAgendar, #modalAprovacao, #fundoCadastro, #modalSuspensos, #modalPremiacao {
+        #modalEditar, #modalAgendar, #modalAprovacao, #fundoCadastro, #modalSuspensos, #modalPremiacao, #modalEditarSaldo {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background-color: rgba(0, 0, 0, 0.75);
             display: none; align-items: center; justify-content: center; z-index: 99999;
@@ -408,6 +408,22 @@
             box-shadow: 0 15px 35px rgba(0,0,0,0.6); border: 2px solid #22c55e; color: #f8f9fa;
             max-height: 85vh; display: flex; flex-direction: column; position: relative;
         }
+        .caixa-editar-saldo {
+            background: #212529; border-radius: 16px; width: 100%; max-width: 300px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.6); border: 1px solid #f1c40f; color: #f8f9fa;
+            padding: 22px 24px 18px; text-align: center; position: relative;
+        }
+        .caixa-editar-saldo h3 { margin: 0 0 4px; font-size: 14px; color: #f1c40f; text-transform: uppercase; letter-spacing: 0.5px; }
+        .caixa-editar-saldo .saldo-nome { font-size: 15px; color: #ffffff; font-weight: bold; margin-bottom: 14px; word-break: break-word; }
+        .caixa-editar-saldo .saldo-rotulo { font-size: 11px; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+        #editar_saldo_valor {
+            width: 100%; text-align: center; font-size: 30px; font-weight: bold; color: #f1c40f;
+            background: #2c3034; border: 2px solid #495057; border-radius: 10px; padding: 12px 8px;
+            outline: none; letter-spacing: 1px; box-sizing: border-box;
+        }
+        #editar_saldo_valor:focus { border-color: #f1c40f; }
+        .caixa-editar-saldo .botoes-modal { margin-top: 16px; }
+        .caixa-editar-saldo .botoes-modal button { flex: 1; padding: 12px; font-size: 13px; }
         .conteudo-historico-geral { overflow-y: auto; flex: 1; padding-right: 5px; }
         #detalheSaqueConteudo .linha-detalhe {
             display: flex; justify-content: space-between; align-items: center;
@@ -452,7 +468,9 @@
             display: grid; grid-template-columns: 1fr auto; align-items: center;
             column-gap: 10px; background: #2c3034; border: 1px solid #343a40;
             border-radius: 8px; padding: 10px 14px; margin-bottom: 8px; font-size: 12px;
+            cursor: pointer; transition: border-color 0.2s;
         }
+        .item-saldo:hover { border-color: #f1c40f; }
         .item-saldo .sal-nome { color: #f8f9fa; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
         .item-saldo .sal-valor { color: #f1c40f; font-weight: bold; white-space: nowrap; font-size: 13px; }
 
@@ -937,6 +955,21 @@
             </div>
             <div class="botoes-modal" style="margin-top: 15px; justify-content: flex-end;">
                 <button type="button" onclick="fecharHistoricoGeral()">FECHAR</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== MODAL EDITAR SALDO ===== -->
+    <div id="modalEditarSaldo">
+        <div class="caixa-editar-saldo">
+            <button class="botao-fechar" onclick="fecharEditarSaldo()">&times;</button>
+            <h3>💰 EDITAR SALDO</h3>
+            <div class="saldo-nome" id="editarSaldoNome"></div>
+            <div class="saldo-rotulo">SALDO (R$)</div>
+            <input type="text" id="editar_saldo_valor" inputmode="decimal" placeholder="0,00" maxlength="15" autocomplete="off">
+            <div class="botoes-modal">
+                <button type="button" onclick="zerarSaldo()">ZERAR</button>
+                <button type="button" class="btn-amarelo" onclick="confirmarEditarSaldo()">💾 SALVAR</button>
             </div>
         </div>
     </div>
@@ -1451,6 +1484,7 @@
             if (document.getElementById('fundoCadastro') && event.target === document.getElementById('fundoCadastro')) ocultarCadastro();
             if (document.getElementById('modalSuspensos') && event.target === document.getElementById('modalSuspensos')) fecharSuspensos();
             if (document.getElementById('modalHistoricoGeral') && event.target === document.getElementById('modalHistoricoGeral')) fecharHistoricoGeral();
+            if (document.getElementById('modalEditarSaldo') && event.target === document.getElementById('modalEditarSaldo')) fecharEditarSaldo();
             if (document.getElementById('modalDetalheSaque') && event.target === document.getElementById('modalDetalheSaque')) fecharDetalheSaque();
             if (document.getElementById('modalListaJogadores') && event.target === document.getElementById('modalListaJogadores')) fecharListaJogadores();
             
@@ -1621,6 +1655,7 @@
                 lista.forEach(insc => {
                     if (!insc) return;
                     saldos.push({
+                        id: insc.id,
                         nome: insc.nome || '—',
                         foto: insc.foto || '',
                         valor: Number(insc.valor) || 0
@@ -1644,7 +1679,7 @@
                         : `<span style="font-size:16px;line-height:24px;flex-shrink:0;display:inline-block;">📄</span>`;
                     const corValor = s.valor > 0 ? 'color:#3498db;' : '';
                     html += `
-                    <div class="item-saldo">
+                    <div class="item-saldo" onclick="editarSaldoLinha('${s.id}')">
                         <span class="sal-nome" style="display:flex; align-items:center; gap:8px; min-width:0;">
                             ${fotoHtml}
                             <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${s.nome}</span>
@@ -1654,6 +1689,75 @@
                 });
                 container.innerHTML = html;
             });
+        }
+
+        let idSaldoEmEdicao = null;
+
+        function editarSaldoLinha(id) {
+            abrirEditarSaldo(id);
+        }
+
+        function abrirEditarSaldo(id) {
+            db.ref('inscricoes').once('value').then(snap => {
+                const lista = snap.val() || [];
+                const insc = lista.find(item => item && String(item.id) === String(id));
+                if (!insc) { alert('❌ INSCRITO NÃO ENCONTRADO!'); return; }
+                idSaldoEmEdicao = id;
+                const atual = (Number(insc.valor) || 0).toFixed(2).replace('.', ',');
+                document.getElementById('editarSaldoNome').textContent = (insc.nome || '—').toUpperCase();
+                const campo = document.getElementById('editar_saldo_valor');
+                campo.value = atual === '0,00' ? '' : atual;
+                document.getElementById('modalEditarSaldo').style.display = 'flex';
+                campo.focus();
+                campo.setSelectionRange(campo.value.length, campo.value.length);
+            });
+        }
+
+        function fecharEditarSaldo() {
+            document.getElementById('modalEditarSaldo').style.display = 'none';
+            idSaldoEmEdicao = null;
+        }
+
+        function confirmarEditarSaldo() {
+            const idAlvo = idSaldoEmEdicao;
+            if (idAlvo === null) return;
+            const texto = document.getElementById('editar_saldo_valor').value.trim();
+            if (texto === '') { alert('❌ VALOR INVÁLIDO!'); return; }
+            const valorNum = parseFloat(texto.replace(/\./g, '').replace(',', '.'));
+            if (isNaN(valorNum) || valorNum < 0) { alert('❌ VALOR INVÁLIDO!'); return; }
+            db.ref('inscricoes').once('value').then(snap => {
+                const lista = snap.val() || [];
+                let alterado = false;
+                const novaLista = lista.map(item => {
+                    if (item && String(item.id) === String(idAlvo)) { item.valor = valorNum; alterado = true; }
+                    return item;
+                });
+                if (alterado) db.ref('inscricoes').set(novaLista);
+            });
+            fecharEditarSaldo();
+        }
+
+        document.getElementById('editar_saldo_valor').addEventListener('input', function () {
+            formatarValorMask(this);
+        });
+
+        document.getElementById('editar_saldo_valor').addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') { e.preventDefault(); confirmarEditarSaldo(); }
+        });
+
+        function zerarSaldo() {
+            const idAlvo = idSaldoEmEdicao;
+            if (idAlvo === null) return;
+            db.ref('inscricoes').once('value').then(snap => {
+                const lista = snap.val() || [];
+                let alterado = false;
+                const novaLista = lista.map(item => {
+                    if (item && String(item.id) === String(idAlvo)) { item.valor = 0; alterado = true; }
+                    return item;
+                });
+                if (alterado) db.ref('inscricoes').set(novaLista);
+            });
+            fecharEditarSaldo();
         }
 
         function descarregarSaldos() {
@@ -2752,7 +2856,7 @@
                 if (alvo && (alvo.tagName === 'INPUT' || alvo.tagName === 'TEXTAREA' || alvo.tagName === 'SELECT')) {
                     return;
                 }
-                const modaisAbertos = ['modalEditar', 'modalAgendar', 'modalAprovacao', 'modalSuspensos', 'modalHistoricoGeral', 'modalDetalheSaque', 'modalPremiacao', 'modalListaJogadores'].some(function(id) {
+                const modaisAbertos = ['modalEditar', 'modalAgendar', 'modalAprovacao', 'modalSuspensos', 'modalHistoricoGeral', 'modalDetalheSaque', 'modalPremiacao', 'modalListaJogadores', 'modalEditarSaldo'].some(function(id) {
                     const el = document.getElementById(id);
                     return el && el.style.display === 'flex';
                 });
@@ -2762,7 +2866,7 @@
                 return;
             }
             if (event.key === 'Escape') {
-                ocultarCadastro(); fecharEdicao(); fecharAgendamento(); fecharAprovacao(); fecharSuspensos(); fecharHistoricoGeral(); fecharDetalheSaque(); fecharPremiacao(); fecharListaJogadores();
+                ocultarCadastro(); fecharEdicao(); fecharAgendamento(); fecharAprovacao(); fecharSuspensos(); fecharHistoricoGeral(); fecharDetalheSaque(); fecharPremiacao(); fecharListaJogadores(); fecharEditarSaldo();
                 document.getElementById('avisoNovaConfirmacao').style.display = 'none';
                 document.getElementById('avisoNovaAprovacao').style.display = 'none';
                 document.getElementById('avisoNovaSaque').style.display = 'none';
