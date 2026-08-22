@@ -1007,29 +1007,35 @@ refInscricoes.on('value', function (snap) {
         }
 
         async function aplicarPremiosSaque(edicao, premioCampeao, premioVice) {
-            const cfgSnap = await db.ref('configuracao').once('value');
-            const cfg = cfgSnap.val() || {};
-            if (cfg.premio_aplicado_edicao === edicao.id) return 'ja_aplicado';
+            // trava atômica igual ao ADMIN para não duplicar quando ADMIN e SAQUE estão abertos juntos
+            const tx = await db.ref('configuracao/premio_aplicado_edicao').transaction(cur => {
+                if (cur === edicao.id) return undefined;
+                return edicao.id;
+            });
+            if (!tx.committed) return 'ja_aplicado';
+            await db.ref('configuracao/premio_aplicado_data').set(Date.now());
             const campeaoId = edicao.campeao && edicao.campeao.timeId;
             const viceId = edicao.vice && edicao.vice.timeId;
-            const inscSnap = await db.ref('inscricoes').once('value');
-            const lista = inscSnap.val() || [];
-            let alterado = false;
-            lista.forEach(insc => {
-                if (!insc) return;
-                const ids = insc.ids || [];
-                if (campeaoId && ids.indexOf(campeaoId) !== -1) {
-                    insc.valor = (typeof insc.valor === 'number' ? insc.valor : 0) + premioCampeao;
-                    alterado = true;
-                }
-                if (viceId && ids.indexOf(viceId) !== -1) {
-                    insc.valor = (typeof insc.valor === 'number' ? insc.valor : 0) + premioVice;
-                    alterado = true;
-                }
+            let alteradoTx = false;
+            const txIns = await db.ref('inscricoes').transaction(listaAtual => {
+                const lista = listaAtual || [];
+                alteradoTx = false;
+                lista.forEach(insc => {
+                    if (!insc) return;
+                    const ids = insc.ids || [];
+                    if (campeaoId && ids.indexOf(campeaoId) !== -1) {
+                        insc.valor = (typeof insc.valor === 'number' ? insc.valor : 0) + premioCampeao;
+                        alteradoTx = true;
+                    }
+                    if (viceId && ids.indexOf(viceId) !== -1) {
+                        insc.valor = (typeof insc.valor === 'number' ? insc.valor : 0) + premioVice;
+                        alteradoTx = true;
+                    }
+                });
+                if (!alteradoTx) return undefined;
+                return lista;
             });
-            if (!alterado) return 'sem_vinculo';
-            await db.ref('inscricoes').set(lista);
-            await db.ref('configuracao').update({ premio_aplicado_edicao: edicao.id, premio_aplicado_data: Date.now() });
+            if (!txIns.committed) return 'sem_vinculo';
             return 'ok';
         }
 
@@ -1084,39 +1090,45 @@ refInscricoes.on('value', function (snap) {
             return edicoes[0];
         }
         async function aplicarPremiosCampimSaque(edicao, premioCampeao, premioVice) {
-            const cfgSnap = await db.ref('configuracao').once('value');
-            const cfg = cfgSnap.val() || {};
-            if (cfg.premio_aplicado_edicao_campim === edicao.id) return 'ja_aplicado';
+            const txCamp = await db.ref('configuracao/premio_aplicado_edicao_campim').transaction(cur => {
+                if (cur === edicao.id) return undefined;
+                return edicao.id;
+            });
+            if (!txCamp.committed) return 'ja_aplicado';
+            await db.ref('configuracao/premio_aplicado_data_campim').set(Date.now());
             const campeaoId = edicao.campeao && edicao.campeao.timeId;
             const viceId = edicao.vice && edicao.vice.timeId;
-            const inscSnap = await db.ref('inscricoes').once('value');
-            const lista = inscSnap.val() || [];
-            const idsCampeao = (edicao.jogadores||[]).filter(j => j.timeId===campeaoId).map(j => j.id);
-            const idsVice = (edicao.jogadores||[]).filter(j => j.timeId===viceId).map(j => j.id);
-            const totalCampeao = lista.filter(insc => { if(!insc||!insc.ids) return false; const ids=insc.ids; return ids.includes(campeaoId) || ids.some(id => idsCampeao.includes(id)); }).length;
-            const totalVice = lista.filter(insc => { if(!insc||!insc.ids) return false; const ids=insc.ids; return ids.includes(viceId) || ids.some(id => idsVice.includes(id)); }).length;
-            const premioCampeaoDividido = totalCampeao ? Math.floor((premioCampeao/totalCampeao)*100)/100 : 0;
-            const premioViceDividido = totalVice ? Math.floor((premioVice/totalVice)*100)/100 : 0;
-            let restoCampeao = Math.round((premioCampeao - premioCampeaoDividido*totalCampeao)*100)/100;
-            let restoVice = Math.round((premioVice - premioViceDividido*totalVice)*100)/100;
-            let alterado = false; let idxCamp=0, idxVice=0;
-            lista.forEach(insc => {
-                if (!insc) return;
-                const ids = insc.ids || [];
-                if (campeaoId && (ids.includes(campeaoId) || ids.some(id => idsCampeao.includes(id)))) {
-                    idxCamp++; let val = premioCampeaoDividido; if(idxCamp===totalCampeao) val = Math.round((val+restoCampeao)*100)/100;
-                    insc.valor = (typeof insc.valor === 'number' ? insc.valor : 0) + val;
-                    alterado = true;
-                }
-                if (viceId && (ids.includes(viceId) || ids.some(id => idsVice.includes(id)))) {
-                    idxVice++; let val = premioViceDividido; if(idxVice===totalVice) val = Math.round((val+restoVice)*100)/100;
-                    insc.valor = (typeof insc.valor === 'number' ? insc.valor : 0) + val;
-                    alterado = true;
-                }
+            let alteradoTx = false;
+            const txIns = await db.ref('inscricoes').transaction(listaAtual => {
+                const lista = listaAtual || [];
+                const idsCampeao = (edicao.jogadores||[]).filter(j => j.timeId===campeaoId).map(j => j.id);
+                const idsVice = (edicao.jogadores||[]).filter(j => j.timeId===viceId).map(j => j.id);
+                const totalCampeao = lista.filter(insc => { if(!insc||!insc.ids) return false; const ids=insc.ids; return ids.includes(campeaoId) || ids.some(id => idsCampeao.includes(id)); }).length;
+                const totalVice = lista.filter(insc => { if(!insc||!insc.ids) return false; const ids=insc.ids; return ids.includes(viceId) || ids.some(id => idsVice.includes(id)); }).length;
+                if (totalCampeao===0 && totalVice===0) return undefined;
+                const premioCampeaoDividido = totalCampeao ? Math.floor((premioCampeao/totalCampeao)*100)/100 : 0;
+                const premioViceDividido = totalVice ? Math.floor((premioVice/totalVice)*100)/100 : 0;
+                let restoCampeao = Math.round((premioCampeao - premioCampeaoDividido*totalCampeao)*100)/100;
+                let restoVice = Math.round((premioVice - premioViceDividido*totalVice)*100)/100;
+                alteradoTx = false; let idxCamp=0, idxVice=0;
+                lista.forEach(insc => {
+                    if (!insc) return;
+                    const ids = insc.ids || [];
+                    if (campeaoId && (ids.includes(campeaoId) || ids.some(id => idsCampeao.includes(id)))) {
+                        idxCamp++; let val = premioCampeaoDividido; if(idxCamp===totalCampeao) val = Math.round((val+restoCampeao)*100)/100;
+                        insc.valor = (typeof insc.valor === 'number' ? insc.valor : 0) + val;
+                        alteradoTx = true;
+                    }
+                    if (viceId && (ids.includes(viceId) || ids.some(id => idsVice.includes(id)))) {
+                        idxVice++; let val = premioViceDividido; if(idxVice===totalVice) val = Math.round((val+restoVice)*100)/100;
+                        insc.valor = (typeof insc.valor === 'number' ? insc.valor : 0) + val;
+                        alteradoTx = true;
+                    }
+                });
+                if (!alteradoTx) return undefined;
+                return lista;
             });
-            if (!alterado) return 'sem_vinculo';
-            await db.ref('inscricoes').set(lista);
-            await db.ref('configuracao').update({ premio_aplicado_edicao_campim: edicao.id, premio_aplicado_data_campim: Date.now() });
+            if (!txIns.committed) return 'sem_vinculo';
             return 'ok';
         }
         async function verificarPremiacaoAutomaticaCampimSaque() {
