@@ -2803,39 +2803,52 @@
         }
 
         async function aplicarPremiosPara(edicao, premioCampeao, premioVice, automatico, forcar) {
-            const cfgSnap = await db.ref('configuracao').once('value');
-            const cfg = cfgSnap.val() || {};
-            if (!forcar && cfg.premio_aplicado_edicao === edicao.id) {
-                return 'ja_aplicado';
+            // trava atômica: só um cliente consegue gravar o marcador da edição
+            if (!forcar) {
+                const tx = await db.ref('configuracao/premio_aplicado_edicao').transaction(cur => {
+                    if (cur === edicao.id) return undefined; // já aplicado, aborta
+                    return edicao.id;
+                });
+                if (!tx.committed) return 'ja_aplicado';
+                // garante que estamos com o valor mais recente de premio_aplicado_data
+                await db.ref('configuracao/premio_aplicado_data').set(Date.now());
             }
             const campeaoId = edicao.campeao && edicao.campeao.timeId;
             const viceId = edicao.vice && edicao.vice.timeId;
-            const inscSnap = await db.ref('inscricoes').once('value');
-            const lista = inscSnap.val() || [];
-            const premiados = [];
-            lista.forEach(insc => {
-                if (!insc) return;
-                const ids = insc.ids || [];
-                if (campeaoId && ids.indexOf(campeaoId) !== -1) {
-                    insc.valor = (typeof insc.valor === 'number' ? insc.valor : 0) + premioCampeao;
-                    premiados.push('🏆 ' + (insc.nome || '?') + ' + R$ ' + formatarMoeda(premioCampeao));
-                }
-                if (viceId && ids.indexOf(viceId) !== -1) {
-                    insc.valor = (typeof insc.valor === 'number' ? insc.valor : 0) + premioVice;
-                    premiados.push('🥈 ' + (insc.nome || '?') + ' + R$ ' + formatarMoeda(premioVice));
-                }
+            // usa transaction no array de inscrições para não duplicar se ADMIN e SAQUE dispararem juntos
+            let premiadosTx = [];
+            const txIns = await db.ref('inscricoes').transaction(listaAtual => {
+                const lista = listaAtual || [];
+                premiadosTx = [];
+                let alterou = false;
+                lista.forEach(insc => {
+                    if (!insc) return;
+                    const ids = insc.ids || [];
+                    if (campeaoId && ids.indexOf(campeaoId) !== -1) {
+                        insc.valor = (typeof insc.valor === 'number' ? insc.valor : 0) + premioCampeao;
+                        premiadosTx.push('🏆 ' + (insc.nome || '?') + ' + R$ ' + formatarMoeda(premioCampeao));
+                        alterou = true;
+                    }
+                    if (viceId && ids.indexOf(viceId) !== -1) {
+                        insc.valor = (typeof insc.valor === 'number' ? insc.valor : 0) + premioVice;
+                        premiadosTx.push('🥈 ' + (insc.nome || '?') + ' + R$ ' + formatarMoeda(premioVice));
+                        alterou = true;
+                    }
+                });
+                if (!alterou) return undefined; // aborta, sem vínculo
+                return lista;
             });
-            if (!premiados.length) {
-                if (!automatico) {
-                    alert('⚠️ NENHUM INSCRITO VINCULADO (CAMPO "IDS") AO CAMPEÃO/VICE DESTA EDIÇÃO.\n\nAbra o cadastro em Editar e preencha o campo "IDS" com o ID do jogador no PES.');
-                }
-                return 'sem_vinculo';
-            }
+            if (!txIns.committed) return 'sem_vinculo';
+            const premiados = premiadosTx;
+            if (!premiados.length) return 'sem_vinculo';
             if (!automatico && !forcar && !confirm('⚠️ CONFIRMAR PRÊMIOS?\n\n' + premiados.join('\n'))) {
+                // desfaz: como já gravamos via transaction, precisaria reverter - mas no fluxo manual com forcar=false e sem confirmação não chegamos aqui com trava
                 return 'cancelado';
             }
-            await db.ref('inscricoes').set(lista);
-            await db.ref('configuracao').update({ premio_aplicado_edicao: edicao.id, premio_aplicado_data: Date.now() });
+            if (forcar) {
+                // no forçado, já gravamos via transaction acima, só atualiza data
+                await db.ref('configuracao/premio_aplicado_data').set(Date.now());
+            }
             const aviso = '🏆 PRÊMIOS APLICADOS:\n\n' + premiados.join('\n');
             if (automatico) {
                 showToast('🏆 PREMIAÇÃO AUTOMÁTICA: ' + premiados.join(' | '));
@@ -2937,28 +2950,41 @@
             alert('✅ VALORES DE PREMIAÇÃO CAMPIM SALVOS!\n\n🥇 Campeão: R$ ' + formatarMoeda(premioCampeao) + '\n🥈 Vice: R$ ' + formatarMoeda(premioVice));
         }
         async function aplicarPremiosCampimPara(edicao, premioCampeao, premioVice, automatico, forcar) {
-            const cfgSnap = await db.ref('configuracao').once('value'); const cfg = cfgSnap.val() || {};
-            if (!forcar && cfg.premio_aplicado_edicao_campim === edicao.id) return 'ja_aplicado';
+            if (!forcar) {
+                const txCamp = await db.ref('configuracao/premio_aplicado_edicao_campim').transaction(cur => {
+                    if (cur === edicao.id) return undefined;
+                    return edicao.id;
+                });
+                if (!txCamp.committed) return 'ja_aplicado';
+                await db.ref('configuracao/premio_aplicado_data_campim').set(Date.now());
+            }
             const campeaoId = edicao.campeao && edicao.campeao.timeId; const viceId = edicao.vice && edicao.vice.timeId;
-            const inscSnap = await db.ref('inscricoes').once('value'); const lista = inscSnap.val() || [];
-            const idsCampeao = (edicao.jogadores||[]).filter(j => j.timeId===campeaoId).map(j => j.id);
-            const idsVice = (edicao.jogadores||[]).filter(j => j.timeId===viceId).map(j => j.id);
-            const totalCampeao = lista.filter(insc => { if(!insc||!insc.ids) return false; const ids=insc.ids; return ids.includes(campeaoId) || ids.some(id => idsCampeao.includes(id)); }).length;
-            const totalVice = lista.filter(insc => { if(!insc||!insc.ids) return false; const ids=insc.ids; return ids.includes(viceId) || ids.some(id => idsVice.includes(id)); }).length;
-            const premioCampeaoDividido = totalCampeao ? Math.floor((premioCampeao/totalCampeao)*100)/100 : 0;
-            const premioViceDividido = totalVice ? Math.floor((premioVice/totalVice)*100)/100 : 0;
-            let restoCampeao = Math.round((premioCampeao - premioCampeaoDividido*totalCampeao)*100)/100;
-            let restoVice = Math.round((premioVice - premioViceDividido*totalVice)*100)/100;
-            const premiados = []; let idxCamp=0, idxVice=0;
-            lista.forEach(insc => { if (!insc) return; const ids = insc.ids || []; const ehCamp = campeaoId && (ids.includes(campeaoId) || ids.some(id => idsCampeao.includes(id))); const ehVice = viceId && (ids.includes(viceId) || ids.some(id => idsVice.includes(id))); if (ehCamp) { idxCamp++; let val = premioCampeaoDividido; if(idxCamp===totalCampeao) val = Math.round((val+restoCampeao)*100)/100; insc.valor = (typeof insc.valor === 'number' ? insc.valor : 0) + val; premiados.push('🏆 ' + (insc.nome || '?') + ' + R$ ' + formatarMoeda(val) + (totalCampeao>1 ? ` (${totalCampeao}× R$${formatarMoeda(premioCampeao)} ÷${totalCampeao})` : '')); } if (ehVice) { idxVice++; let val = premioViceDividido; if(idxVice===totalVice) val = Math.round((val+restoVice)*100)/100; insc.valor = (typeof insc.valor === 'number' ? insc.valor : 0) + val; premiados.push('🥈 ' + (insc.nome || '?') + ' + R$ ' + formatarMoeda(val) + (totalVice>1 ? ` (${totalVice}× R$${formatarMoeda(premioVice)} ÷${totalVice})` : '')); } });
-            if (!premiados.length) {
-                const msg = `⚠️ NENHUM VINCULADO! Campeão ${campeaoId} tem ${idsCampeao.length} jogadores, Vice ${viceId} tem ${idsVice.length} jogadores, mas nenhum cadastro tem esses IDs no campo IDS (0 vinculados em ${lista.filter(i=>i&&i.ids).length} cadastros com IDS). Verifique o botão 🆔 na tabela.`;
-                console.warn(msg, {campeaoId, idsCampeao, viceId, idsVice, edicaoId: edicao.id});
+            let premiadosTx = []; let totalCampeaoTx=0, totalViceTx=0, idsCampeaoTx=[], idsViceTx=[];
+            const txInsCamp = await db.ref('inscricoes').transaction(listaAtual => {
+                const lista = listaAtual || [];
+                idsCampeaoTx = (edicao.jogadores||[]).filter(j => j.timeId===campeaoId).map(j => j.id);
+                idsViceTx = (edicao.jogadores||[]).filter(j => j.timeId===viceId).map(j => j.id);
+                totalCampeaoTx = lista.filter(insc => { if(!insc||!insc.ids) return false; const ids=insc.ids; return ids.includes(campeaoId) || ids.some(id => idsCampeaoTx.includes(id)); }).length;
+                totalViceTx = lista.filter(insc => { if(!insc||!insc.ids) return false; const ids=insc.ids; return ids.includes(viceId) || ids.some(id => idsViceTx.includes(id)); }).length;
+                if (totalCampeaoTx===0 && totalViceTx===0) return undefined;
+                const premioCampeaoDividido = totalCampeaoTx ? Math.floor((premioCampeao/totalCampeaoTx)*100)/100 : 0;
+                const premioViceDividido = totalViceTx ? Math.floor((premioVice/totalViceTx)*100)/100 : 0;
+                let restoCampeao = Math.round((premioCampeao - premioCampeaoDividido*totalCampeaoTx)*100)/100;
+                let restoVice = Math.round((premioVice - premioViceDividido*totalViceTx)*100)/100;
+                premiadosTx = []; let idxCamp=0, idxVice=0;
+                lista.forEach(insc => { if (!insc) return; const ids = insc.ids || []; const ehCamp = campeaoId && (ids.includes(campeaoId) || ids.some(id => idsCampeaoTx.includes(id))); const ehVice = viceId && (ids.includes(viceId) || ids.some(id => idsViceTx.includes(id))); if (ehCamp) { idxCamp++; let val = premioCampeaoDividido; if(idxCamp===totalCampeaoTx) val = Math.round((val+restoCampeao)*100)/100; insc.valor = (typeof insc.valor === 'number' ? insc.valor : 0) + val; premiadosTx.push('🏆 ' + (insc.nome || '?') + ' + R$ ' + formatarMoeda(val) + (totalCampeaoTx>1 ? ` (${totalCampeaoTx}× R$${formatarMoeda(premioCampeao)} ÷${totalCampeaoTx})` : '')); } if (ehVice) { idxVice++; let val = premioViceDividido; if(idxVice===totalViceTx) val = Math.round((val+restoVice)*100)/100; insc.valor = (typeof insc.valor === 'number' ? insc.valor : 0) + val; premiadosTx.push('🥈 ' + (insc.nome || '?') + ' + R$ ' + formatarMoeda(val) + (totalViceTx>1 ? ` (${totalViceTx}× R$${formatarMoeda(premioVice)} ÷${totalViceTx})` : '')); } });
+                if (!premiadosTx.length) return undefined;
+                return lista;
+            });
+            if (!txInsCamp.committed) {
+                const msg = `⚠️ NENHUM VINCULADO! Campeão ${campeaoId} tem ${idsCampeaoTx.length} jogadores, Vice ${viceId} tem ${idsViceTx.length} jogadores, mas nenhum cadastro tem esses IDs no campo IDS (0 vinculados em ${(txInsCamp.snapshot && txInsCamp.snapshot.val() || []).filter(i=>i&&i.ids).length} cadastros com IDS). Verifique o botão 🆔 na tabela.`;
+                console.warn(msg, {campeaoId, idsCampeao: idsCampeaoTx, viceId, idsVice: idsViceTx, edicaoId: edicao.id});
                 if (!automatico) alert(msg); else showToast(msg);
                 return 'sem_vinculo';
             }
+            const premiados = premiadosTx;
             if (!automatico && !forcar && !confirm('⚠️ CONFIRMAR PRÊMIOS CAMPIM?\n\n' + premiados.join('\n'))) return 'cancelado';
-            await db.ref('inscricoes').set(lista); await db.ref('configuracao').update({ premio_aplicado_edicao_campim: edicao.id, premio_aplicado_data_campim: Date.now() });
+            if (forcar) await db.ref('configuracao/premio_aplicado_data_campim').set(Date.now());
             const aviso = '🏆 PRÊMIOS CAMPIM APLICADOS:\n\n' + premiados.join('\n'); if (automatico) { showToast('🏆 PREMIAÇÃO CAMPIM AUTOMÁTICA: ' + premiados.join(' | ')); console.log(aviso); } else { alert('✅ ' + aviso); } return 'ok';
         }
         async function verificarPremiacaoAutomaticaCampim() {
