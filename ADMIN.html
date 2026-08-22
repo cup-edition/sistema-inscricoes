@@ -375,7 +375,7 @@
         .data-hora {font-size: 10px; color: #a0aec0; white-space: nowrap;}
 
         /* ===== MODAIS ===== */
-        #modalEditar, #modalAgendar, #modalAprovacao, #fundoCadastro, #modalSuspensos, #modalPremiacao, #modalEditarSaldo {
+        #modalEditar, #modalAgendar, #modalAprovacao, #fundoCadastro, #modalSuspensos, #modalPremiacao, #modalPremiacaoCampim, #modalEditarSaldo {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background-color: rgba(0, 0, 0, 0.75);
             display: none; align-items: center; justify-content: center; z-index: 99999;
@@ -724,23 +724,11 @@
         <div class="creditos-container">
             <div class="creditos-botoes">
                 <div>
-                    <button onclick="window.open('https://cup-edition.github.io/sistema-inscricoes/INSCREVER.html', '_blank')">📝 SITE DE INSCRIÇÃO</button>
-                    <button onclick="window.open('https://cup-edition.github.io/sistema-inscricoes/INSCRICAO-GRATUITA.html', '_blank')">🆓 SITE DE INSCRIÇÃO FREE</button>
-                </div>
-                <div>
-                    <button onclick="window.open('https://cup-edition.github.io/campimfc/ADM-CUP-EDITION.html', '_blank')">⚽ CUP EDITION CAMPIM (ADM)</button>
-                    <button onclick="window.open('https://cup-edition.github.io/campimfc/ADM-CUP-EDITION-PES.html', '_blank')">⚽ CUP EDITION PES (ADM)</button>
-                </div>
-                <div>
-                    <button onclick="window.open('https://cup-edition.github.io/sorteio-nomes/SORTEIO.html', '_blank')">🎰 SORTEIO</button>
                     <button onclick="window.open('https://meet.google.com/esn-aqxa-gdi', '_blank')">🔴 LIVE</button>
                 </div>
                 <div>
                     <button class="btn-instagram" onclick="window.open('https://www.instagram.com/direct/inbox', '_blank')">📸 INSTAGRAM</button>
                     <button class="btn-whatsapp" onclick="window.open('https://web.whatsapp.com', '_blank')">💬 WHATSAPP</button>
-                </div>
-                <div>
-                    <button onclick="window.open('https://cup-edition.github.io/campimfc/SITE.html', '_blank')">📱 SITE OFICIAL</button>
                 </div>
             </div>
             <div class="creditos-menor" style="margin-top: 15px;">DESENVOLVIDO POR</div>
@@ -978,7 +966,7 @@
     <div id="modalPremiacao">
         <div class="caixa-editar" style="max-width: 460px; position: relative;">
             <button class="botao-fechar" onclick="fecharPremiacao()">&times;</button>
-            <h3>🏆 PREMIAÇÃO CAMPEÃO / VICE</h3>
+            <h3>🏆 PREMIAÇÃO CAMPEÃO / VICE - PES</h3>
             <div class="historico-admin" id="premiacaoEdicaoInfo" style="border-color: #f39c12; margin-bottom: 15px;">
                 <div class="historico-vazio">BUSCANDO ÚLTIMA EDIÇÃO DO PES...</div>
             </div>
@@ -996,6 +984,31 @@
                 <img src="https://cup-edition.github.io/campimfc/CUP%20EDITION%20PES.png" alt="CUP EDITION PES" style="width:130px; height:auto; border-radius:10px; flex-shrink:0; align-self:center;">
             </div>
             <button type="button" class="btn-amarelo" onclick="salvarValoresPremiacao()" style="width: 100%;">💾 SALVAR VALORES</button>
+        </div>
+    </div>
+
+    <!-- ===== MODAL PREMIAÇÃO CAMPIM ===== -->
+    <div id="modalPremiacaoCampim">
+        <div class="caixa-editar" style="max-width: 460px; position: relative;">
+            <button class="botao-fechar" onclick="fecharPremiacaoCampim()">&times;</button>
+            <h3>🏆 PREMIAÇÃO CAMPEÃO / VICE - CAMPIM</h3>
+            <div class="historico-admin" id="premiacaoEdicaoInfoCampim" style="border-color: #f39c12; margin-bottom: 15px;">
+                <div class="historico-vazio">BUSCANDO ÚLTIMA EDIÇÃO DO CAMPIM...</div>
+            </div>
+            <div style="display:flex; gap:15px; align-items:flex-start; margin-bottom:5px;">
+                <div style="flex:1; min-width:0;">
+                    <div class="grupo-campo">
+                        <label>🥇 PRÊMIO CAMPEÃO (R$):</label>
+                        <input type="text" id="premio_campeao_campim" inputmode="decimal" placeholder="0,00" maxlength="15" style="width:100%;">
+                    </div>
+                    <div class="grupo-campo">
+                        <label>🥈 PRÊMIO VICE (R$):</label>
+                        <input type="text" id="premio_vice_campim" inputmode="decimal" placeholder="0,00" maxlength="15" style="width:100%;">
+                    </div>
+                </div>
+                <img src="https://cup-edition.github.io/sistema-inscricoes/CUP%20EDITION%20CAMPIM%20FC.png" alt="CUP EDITION CAMPIM FC" style="width:130px; height:auto; border-radius:10px; flex-shrink:0; align-self:center;">
+            </div>
+            <button type="button" class="btn-amarelo" onclick="salvarValoresPremiacaoCampim()" style="width: 100%;">💾 SALVAR VALORES</button>
         </div>
     </div>
 
@@ -1080,8 +1093,11 @@
             <div id="avisoLimite" class="aviso-limite" style="margin: 0 0 15px; display:none;">⚠️ LIMITE DE 16 APROVADOS ATINGIDO! INSCRIÇÕES ENCERRADAS AUTOMATICAMENTE.</div>
             <div id="avisoLimiteConfirmados" class="aviso-limite aviso-limite-confirmados" style="margin: 0 0 15px; display:none;">⚠️ LIMITE DE 16 CONFIRMADOS ATINGIDO!</div>
 
-            <div class="btn-menu-hamburguer" id="btnMenu" onclick="alternarMenuFlutuante()" tabindex="0" role="button" aria-label="Abrir menu">
-                <span></span><span></span><span></span>
+            <div style="position:absolute;top:20px;right:25px;display:flex;align-items:center;gap:10px;z-index:1100;">
+                <img src="https://cup-edition.github.io/sistema-inscricoes/CUP%20EDITION%20CAMPIM%20FC.png" alt="Cup Edition Logo" style="height:32px;width:auto;filter:drop-shadow(0 0 8px rgba(0,0,0,0.4));">
+                <div class="btn-menu-hamburguer" id="btnMenu" onclick="alternarMenuFlutuante()" tabindex="0" role="button" aria-label="Abrir menu" style="position:relative;top:auto;right:auto;">
+                    <span></span><span></span><span></span>
+                </div>
             </div>
 
             <div class="menu-suspenso-container" id="menuFlutuante">
@@ -1108,10 +1124,6 @@
                     </button>
                 </div>
                 <div class="menu-linha">
-                    <button class="btn-sorteio" onclick="window.open('https://cup-edition.github.io/campimfc/SITE.html', '_blank'); alternarMenuFlutuante();">📱 SITE OFICIAL</button>
-                    <button class="btn-sorteio" onclick="window.open('https://cup-edition.github.io/campimfc/ADM-CUP-EDITION.html', '_blank'); alternarMenuFlutuante();">⚽ SITE CUP EDITION ADM</button>
-                </div>
-                <div class="menu-linha">
                     <button class="btn-sorteio" onclick="window.open('https://cup-edition.github.io/sorteio-nomes/SORTEIO.html', '_blank'); alternarMenuFlutuante();">🎰 SITE DE SORTEIO</button>
                     <button class="btn-live" onclick="window.open('https://meet.google.com/esn-aqxa-gdi', '_blank'); alternarMenuFlutuante();">🔴 LIVE</button>
                 </div>
@@ -1120,11 +1132,14 @@
                     <button class="btn-whatsapp" onclick="window.open('https://web.whatsapp.com', '_blank'); alternarMenuFlutuante();">💬 WHATSAPP</button>
                 </div>
                 <div class="menu-linha">
+                    <button class="btn-premiacao" onclick="abrirPremiacaoCampim(); alternarMenuFlutuante();" style="flex:1; min-width:0;">🏆 PREMIAÇÃO CAMPIM</button>
+                    <button class="btn-premiacao" onclick="abrirPremiacao(); alternarMenuFlutuante();" style="flex:1; min-width:0;">🏆 PREMIAÇÃO PES</button>
+                </div>
+                <div class="menu-linha">
                     <span class="contador-valor-inscricao" id="btnValorInscricao" onclick="alternarPainelValor()" style="flex:1; min-width:0; justify-content:center; text-align:center;">
                         <span class="btn-valor-texto">💲 PÁGINA VIP</span>
                         <input type="text" id="campoValorInscricao" class="campo-valor-inline" inputmode="decimal" placeholder="0,00" maxlength="15" onclick="event.stopPropagation()" onkeydown="if(event.key === 'Enter'){ event.stopPropagation(); salvarValorInscricao(); }">
                     </span>
-                    <button class="btn-premiacao" onclick="abrirPremiacao(); alternarMenuFlutuante();" style="flex:1; min-width:0;">🏆 PREMIAÇÃO PES</button>
                 </div>
             </div>
 
@@ -1530,6 +1545,12 @@
         document.getElementById('premio_vice').addEventListener('input', function () {
             formatarValorMask(this);
         });
+        document.getElementById('premio_campeao_campim').addEventListener('input', function () {
+            formatarValorMask(this);
+        });
+        document.getElementById('premio_vice_campim').addEventListener('input', function () {
+            formatarValorMask(this);
+        });
 
         function pularCampo(event, proximoId) {
             if (event.key === 'Enter') {
@@ -1562,6 +1583,8 @@
                     iniciarAtualizacaoAutomatica();
                     setupPremiacaoAutomatica();
                     verificarPremiacaoAutomatica();
+                    setupPremiacaoAutomaticaCampim();
+                    verificarPremiacaoAutomaticaCampim();
                 } else {
                     mensagemErro.style.display = 'block';
                     document.getElementById('senhaLogin').value = '';
@@ -2731,8 +2754,13 @@
                 const campeao = edicao.campeao || {};
                 const vice = edicao.vice || {};
                 const aplicada = cfgPremiacao.premio_aplicado_edicao === edicao.id;
+                // temporada: tenta vários campos possíveis do doc Firestore
+                let temporadaPES = edicao.temporada || edicao.temporadaNome || edicao.temporadaTitulo || edicao.season || edicao.seasonName || edicao.seasonTitle || edicao.temporadaNumero || edicao.seasonNumber || edicao.temporadaId || edicao.seasonId || null;
+                if (temporadaPES && typeof temporadaPES === 'object') temporadaPES = temporadaPES.nome || temporadaPES.titulo || temporadaPES.title || temporadaPES.id || null;
+                const temporadaTxtPES = temporadaPES ? String(temporadaPES).toUpperCase() : null;
                 infoEl.innerHTML =
-                    '<div class="historico-item"><span class="hist-data">EDIÇÃO</span><span class="hist-valor">' + (edicao.tituloExibicao || ('#' + (edicao.numero || '—'))) + '</span></div>' +
+                    '<div class="historico-item"><span class="hist-data">📋 EDIÇÃO</span><span class="hist-valor">' + (edicao.tituloExibicao || ('#' + (edicao.numero || '—'))) + '</span></div>' +
+                    (temporadaTxtPES ? '<div class="historico-item"><span class="hist-data">📅 TEMPORADA</span><span class="hist-valor">' + temporadaTxtPES + '</span></div>' : '') +
                     '<div class="historico-item"><span class="hist-data">🏆 CAMPEÃO</span><span class="hist-valor">' + (campeao.nome || '—') + '</span></div>' +
                     '<div class="historico-item"><span class="hist-data">🥈 VICE</span><span class="hist-valor">' + (vice.nome || '—') + '</span></div>' +
                     (aplicada ? '<div class="historico-item"><span class="hist-status">✅ PRÊMIOS JÁ APLICADOS NESTA EDIÇÃO</span></div>' : '');
@@ -2841,6 +2869,9 @@
                 dbPes.collection('edicoes').onSnapshot(function() {
                     verificarPremiacaoAutomatica();
                 });
+                db.ref('configuracao').on('value', function() {
+                    verificarPremiacaoAutomatica();
+                });
             } catch (e) {
                 console.error('Erro ao ativar premiação automática:', e);
             }
@@ -2849,6 +2880,92 @@
         document.getElementById('modalPremiacao').addEventListener('click', function(e) {
             if (e.target === this) fecharPremiacao();
         });
+        document.getElementById('modalPremiacaoCampim').addEventListener('click', function(e) {
+            if (e.target === this) fecharPremiacaoCampim();
+        });
+
+        async function obterUltimaEdicaoCampim() {
+            const snap = await firebase.firestore().collection('edicoes').get();
+            const edicoes = [];
+            snap.forEach(doc => {
+                const d = doc.data();
+                edicoes.push({ id: doc.id, ...d });
+            });
+            if (!edicoes.length) return null;
+            edicoes.sort((a, b) => {
+                const aNum = a.numero || 0;
+                const bNum = b.numero || 0;
+                if (aNum !== bNum) return bNum - aNum;
+                const aData = a.dataFinalizacao || '';
+                const bData = b.dataFinalizacao || '';
+                return bData < aData ? -1 : (bData > aData ? 1 : 0);
+            });
+            return edicoes[0];
+        }
+        let cfgPremiacaoCampim = {};
+        async function abrirPremiacaoCampim() {
+            document.getElementById('modalPremiacaoCampim').style.display = 'flex';
+            const infoEl = document.getElementById('premiacaoEdicaoInfoCampim');
+            infoEl.innerHTML = '<div class="historico-vazio">BUSCANDO ÚLTIMA EDIÇÃO DO CAMPIM...</div>';
+            document.getElementById('premio_campeao_campim').value = '';
+            document.getElementById('premio_vice_campim').value = '';
+            try {
+                const conf = await db.ref('configuracao').once('value');
+                cfgPremiacaoCampim = conf.val() || {};
+                if (cfgPremiacaoCampim.premio_campeao_campim !== undefined && cfgPremiacaoCampim.premio_campeao_campim !== null) {
+                    document.getElementById('premio_campeao_campim').value = Number(cfgPremiacaoCampim.premio_campeao_campim).toFixed(2).replace('.', ',');
+                }
+                if (cfgPremiacaoCampim.premio_vice_campim !== undefined && cfgPremiacaoCampim.premio_vice_campim !== null) {
+                    document.getElementById('premio_vice_campim').value = Number(cfgPremiacaoCampim.premio_vice_campim).toFixed(2).replace('.', ',');
+                }
+            } catch (e) { console.error(e); }
+            try {
+                const edicao = await obterUltimaEdicaoCampim();
+                if (!edicao) { infoEl.innerHTML = '<div class="historico-vazio">NENHUMA EDIÇÃO ENCONTRADA NO CAMPIM.</div>'; return; }
+                const campeao = edicao.campeao || {}; const vice = edicao.vice || {}; const aplicada = cfgPremiacaoCampim.premio_aplicado_edicao_campim === edicao.id;
+                let temporadaCAMPIM = edicao.temporada || edicao.temporadaNome || edicao.temporadaTitulo || edicao.season || edicao.seasonName || edicao.seasonTitle || edicao.temporadaNumero || edicao.seasonNumber || edicao.temporadaId || edicao.seasonId || null;
+                if (temporadaCAMPIM && typeof temporadaCAMPIM === 'object') temporadaCAMPIM = temporadaCAMPIM.nome || temporadaCAMPIM.titulo || temporadaCAMPIM.title || temporadaCAMPIM.id || null;
+                const temporadaTxtCAMPIM = temporadaCAMPIM ? String(temporadaCAMPIM).toUpperCase() : null;
+                infoEl.innerHTML = '<div class="historico-item"><span class="hist-data">📋 EDIÇÃO</span><span class="hist-valor">' + (edicao.tituloExibicao || ('#' + (edicao.numero || '—'))) + '</span></div>' + (temporadaTxtCAMPIM ? '<div class="historico-item"><span class="hist-data">📅 TEMPORADA</span><span class="hist-valor">' + temporadaTxtCAMPIM + '</span></div>' : '') + '<div class="historico-item"><span class="hist-data">🏆 CAMPEÃO</span><span class="hist-valor">' + (campeao.nome || '—') + '</span></div>' + '<div class="historico-item"><span class="hist-data">🥈 VICE</span><span class="hist-valor">' + (vice.nome || '—') + '</span></div>' + (aplicada ? '<div class="historico-item"><span class="hist-status">✅ PRÊMIOS JÁ APLICADOS NESTA EDIÇÃO</span></div>' : '');
+            } catch (e) { console.error(e); infoEl.innerHTML = '<div class="historico-vazio">ERRO AO BUSCAR EDIÇÃO DO CAMPIM: ' + e.message + '</div>'; }
+        }
+        function fecharPremiacaoCampim() { document.getElementById('modalPremiacaoCampim').style.display = 'none'; }
+        async function salvarValoresPremiacaoCampim() {
+            const premioCampeao = parseValorPremiacao('premio_campeao_campim'); const premioVice = parseValorPremiacao('premio_vice_campim');
+            if (premioCampeao <= 0 || premioVice <= 0) { alert('❌ INFORME VALORES VÁLIDOS PARA CAMPEÃO E VICE!'); return; }
+            await db.ref('configuracao').update({ premio_campeao_campim: premioCampeao, premio_vice_campim: premioVice });
+            alert('✅ VALORES DE PREMIAÇÃO CAMPIM SALVOS!\n\n🥇 Campeão: R$ ' + formatarMoeda(premioCampeao) + '\n🥈 Vice: R$ ' + formatarMoeda(premioVice));
+        }
+        async function aplicarPremiosCampimPara(edicao, premioCampeao, premioVice, automatico, forcar) {
+            const cfgSnap = await db.ref('configuracao').once('value'); const cfg = cfgSnap.val() || {};
+            if (!forcar && cfg.premio_aplicado_edicao_campim === edicao.id) return 'ja_aplicado';
+            const campeaoId = edicao.campeao && edicao.campeao.timeId; const viceId = edicao.vice && edicao.vice.timeId;
+            const inscSnap = await db.ref('inscricoes').once('value'); const lista = inscSnap.val() || [];
+            const idsCampeao = (edicao.jogadores||[]).filter(j => j.timeId===campeaoId).map(j => j.id);
+            const idsVice = (edicao.jogadores||[]).filter(j => j.timeId===viceId).map(j => j.id);
+            const totalCampeao = lista.filter(insc => { if(!insc||!insc.ids) return false; const ids=insc.ids; return ids.includes(campeaoId) || ids.some(id => idsCampeao.includes(id)); }).length;
+            const totalVice = lista.filter(insc => { if(!insc||!insc.ids) return false; const ids=insc.ids; return ids.includes(viceId) || ids.some(id => idsVice.includes(id)); }).length;
+            const premioCampeaoDividido = totalCampeao ? Math.floor((premioCampeao/totalCampeao)*100)/100 : 0;
+            const premioViceDividido = totalVice ? Math.floor((premioVice/totalVice)*100)/100 : 0;
+            let restoCampeao = Math.round((premioCampeao - premioCampeaoDividido*totalCampeao)*100)/100;
+            let restoVice = Math.round((premioVice - premioViceDividido*totalVice)*100)/100;
+            const premiados = []; let idxCamp=0, idxVice=0;
+            lista.forEach(insc => { if (!insc) return; const ids = insc.ids || []; const ehCamp = campeaoId && (ids.includes(campeaoId) || ids.some(id => idsCampeao.includes(id))); const ehVice = viceId && (ids.includes(viceId) || ids.some(id => idsVice.includes(id))); if (ehCamp) { idxCamp++; let val = premioCampeaoDividido; if(idxCamp===totalCampeao) val = Math.round((val+restoCampeao)*100)/100; insc.valor = (typeof insc.valor === 'number' ? insc.valor : 0) + val; premiados.push('🏆 ' + (insc.nome || '?') + ' + R$ ' + formatarMoeda(val) + (totalCampeao>1 ? ` (${totalCampeao}× R$${formatarMoeda(premioCampeao)} ÷${totalCampeao})` : '')); } if (ehVice) { idxVice++; let val = premioViceDividido; if(idxVice===totalVice) val = Math.round((val+restoVice)*100)/100; insc.valor = (typeof insc.valor === 'number' ? insc.valor : 0) + val; premiados.push('🥈 ' + (insc.nome || '?') + ' + R$ ' + formatarMoeda(val) + (totalVice>1 ? ` (${totalVice}× R$${formatarMoeda(premioVice)} ÷${totalVice})` : '')); } });
+            if (!premiados.length) {
+                const msg = `⚠️ NENHUM VINCULADO! Campeão ${campeaoId} tem ${idsCampeao.length} jogadores, Vice ${viceId} tem ${idsVice.length} jogadores, mas nenhum cadastro tem esses IDs no campo IDS (0 vinculados em ${lista.filter(i=>i&&i.ids).length} cadastros com IDS). Verifique o botão 🆔 na tabela.`;
+                console.warn(msg, {campeaoId, idsCampeao, viceId, idsVice, edicaoId: edicao.id});
+                if (!automatico) alert(msg); else showToast(msg);
+                return 'sem_vinculo';
+            }
+            if (!automatico && !forcar && !confirm('⚠️ CONFIRMAR PRÊMIOS CAMPIM?\n\n' + premiados.join('\n'))) return 'cancelado';
+            await db.ref('inscricoes').set(lista); await db.ref('configuracao').update({ premio_aplicado_edicao_campim: edicao.id, premio_aplicado_data_campim: Date.now() });
+            const aviso = '🏆 PRÊMIOS CAMPIM APLICADOS:\n\n' + premiados.join('\n'); if (automatico) { showToast('🏆 PREMIAÇÃO CAMPIM AUTOMÁTICA: ' + premiados.join(' | ')); console.log(aviso); } else { alert('✅ ' + aviso); } return 'ok';
+        }
+        async function verificarPremiacaoAutomaticaCampim() {
+            console.log('verificarPremiacaoAutomaticaCampim disparado');
+            try { const edicao = await obterUltimaEdicaoCampim(); console.log('ultima CAMPIM', edicao?.id, edicao?.campeao, edicao?.vice); if (!edicao) return; const cfgSnap = await db.ref('configuracao').once('value'); const cfg = cfgSnap.val() || {}; console.log('cfg CAMPIM', cfg.premio_campeao_campim, cfg.premio_vice_campim, 'aplicado', cfg.premio_aplicado_edicao_campim); if (cfg.premio_aplicado_edicao_campim === edicao.id) { console.log('ja_aplicado'); return; } const premioCampeao = Number(cfg.premio_campeao_campim || 0); const premioVice = Number(cfg.premio_vice_campim || 0); if (premioCampeao <= 0 || premioVice <= 0) return; if (edicao.campeao && edicao.campeao.timeId && edicao.vice && edicao.vice.timeId) await aplicarPremiosCampimPara(edicao, premioCampeao, premioVice, true); } catch (e) { console.error('Erro na premiação automática CAMPIM:', e); }
+        }
+        function setupPremiacaoAutomaticaCampim() { try { firebase.firestore().collection('edicoes').onSnapshot(function() { verificarPremiacaoAutomaticaCampim(); }); db.ref('configuracao').on('value', function() { verificarPremiacaoAutomaticaCampim(); }); } catch (e) { console.error('Erro ao ativar premiação automática CAMPIM:', e); } }
 
         document.addEventListener('keydown', function(event) {
             if (event.key === ' ' || event.key === 'Spacebar') {
@@ -2856,7 +2973,7 @@
                 if (alvo && (alvo.tagName === 'INPUT' || alvo.tagName === 'TEXTAREA' || alvo.tagName === 'SELECT')) {
                     return;
                 }
-                const modaisAbertos = ['modalEditar', 'modalAgendar', 'modalAprovacao', 'modalSuspensos', 'modalHistoricoGeral', 'modalDetalheSaque', 'modalPremiacao', 'modalListaJogadores', 'modalEditarSaldo'].some(function(id) {
+                const modaisAbertos = ['modalEditar', 'modalAgendar', 'modalAprovacao', 'modalSuspensos', 'modalHistoricoGeral', 'modalDetalheSaque', 'modalPremiacao', 'modalPremiacaoCampim', 'modalListaJogadores', 'modalEditarSaldo'].some(function(id) {
                     const el = document.getElementById(id);
                     return el && el.style.display === 'flex';
                 });
@@ -2866,7 +2983,7 @@
                 return;
             }
             if (event.key === 'Escape') {
-                ocultarCadastro(); fecharEdicao(); fecharAgendamento(); fecharAprovacao(); fecharSuspensos(); fecharHistoricoGeral(); fecharDetalheSaque(); fecharPremiacao(); fecharListaJogadores(); fecharEditarSaldo();
+                ocultarCadastro(); fecharEdicao(); fecharAgendamento(); fecharAprovacao(); fecharSuspensos(); fecharHistoricoGeral(); fecharDetalheSaque(); fecharPremiacao(); fecharPremiacaoCampim(); fecharListaJogadores(); fecharEditarSaldo();
                 document.getElementById('avisoNovaConfirmacao').style.display = 'none';
                 document.getElementById('avisoNovaAprovacao').style.display = 'none';
                 document.getElementById('avisoNovaSaque').style.display = 'none';
