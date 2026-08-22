@@ -165,10 +165,12 @@
         }
         .hist-item {
             display: flex; justify-content: space-between; align-items: center;
-            padding: 8px 6px; border-bottom: 1px solid rgba(34,197,94,0.15);
+            padding: 5px 8px; border: 1px solid rgba(34,197,94,0.15);
             font-size: 13px; cursor: pointer; border-radius: 8px;
             transition: background 0.15s ease;
+            margin-bottom: 6px;
         }
+        .hist-item:last-child{ margin-bottom:0; }
         .hist-item:hover { background: rgba(34,197,94,0.08); }
         .hist-item:last-child { border-bottom: none; }
         .hist-item .hist-data { color: #94a3b8; font-size: 12px; }
@@ -386,7 +388,7 @@
 
         <div class="caixa-historico" id="caixaHistorico" style="display:none; margin-top:14px;">
             <button type="button" class="btn-historico" id="btnHistorico" onclick="abrirJanelaHistorico()">
-                <span>🕓 ÚLTIMOS SAQUES</span>
+                <span>🧾 EXTRATO</span>
                 <span class="icone-historico">▸</span>
             </button>
         </div>
@@ -434,7 +436,7 @@
     <div id="modalHistorico">
         <div class="janela-historico">
             <button type="button" class="fechar-historico" onclick="fecharJanelaHistorico()">&times;</button>
-            <h3>🕓 ÚLTIMOS SAQUES</h3>
+            <h3>🧾 EXTRATO (ÚLTIMOS 5)</h3>
             <div id="listaHistorico" class="lista-historico"></div>
         </div>
     </div>
@@ -444,7 +446,7 @@
     <div id="modalDetalheSaque">
         <div class="janela-historico" style="border-color: #3b82f6;">
             <button type="button" class="fechar-historico" onclick="fecharDetalheSaque()">&times;</button>
-            <h3>🧾 DETALHES DO SAQUE</h3>
+            <h3 id="tituloDetalheSaqueSaque">🧾 DETALHES DO EXTRATO</h3>
             <div id="detalheSaqueConteudo" style="overflow-y: auto;"></div>
         </div>
     </div>
@@ -741,29 +743,22 @@ refInscricoes.on('value', function (snap) {
         function mostrarHistorico(cadastro) {
             const caixaHist = document.getElementById('caixaHistorico');
             const listaHist = document.getElementById('listaHistorico');
-            const historico = Array.isArray(cadastro.historico_saques) ? cadastro.historico_saques : [];
+            const historico = Array.isArray(cadastro.extrato) ? cadastro.extrato : [];
             historicoAtual = historico;
-
-            if (historico.length === 0) {
-                caixaHist.style.display = 'none';
-                return;
-            }
-
-            let html = '';
-            historico.forEach((s, idx) => {
-                const d = new Date(s.data);
-                const dataStr = String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0') + '/' + d.getFullYear() + ' ' + String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
-                html += `
-                <div class="hist-item" onclick="verDetalheSaque(${idx})">
-                    <span class="hist-data">${dataStr}</span>
-                    <span style="display:flex; align-items:center;">
-                        <span class="hist-valor">R$ ${Number(s.valor).toFixed(2).replace('.', ',')}</span>
-                        <span class="hist-status">✓ APROVADO</span>
-                    </span>
-                </div>`;
+            if (historico.length === 0) { caixaHist.style.display='none'; return; }
+            let html='';
+            historico.forEach((s, idx)=>{
+                const d=new Date(s.data);
+                const dataStr=String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+d.getFullYear()+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+                const isSaque=(s.tipo||'saque')==='saque';
+                const corLabel=isSaque ? '#e74c3c' : '#3498db';
+                const corBorda=isSaque ? 'rgba(231,76,60,0.35)' : 'rgba(52,152,219,0.35)';
+                const label=(isSaque ? '💸' : (s.posicao==='campeao'?'🏆':'🥈')) + ` R$ ${Number(s.valor).toFixed(2).replace('.',',')}`;
+                const status=isSaque ? '✓ SAQUE' : ('PRÊMIO ' + (s.posicao==='campeao'?'CAMPEÃO':'VICE') + ' ' + (s.sistema||''));
+                html+=`<div class="hist-item" onclick="verDetalheSaque(${idx})" style="border:1px solid ${corBorda}; border-radius:8px;"><span class="hist-data">${dataStr}</span><span style="display:flex; align-items:center; gap:8px;"><span class="hist-valor" style="color:${corLabel}">${label}</span><span class="hist-status">${status}</span></span></div>`;
             });
-            listaHist.innerHTML = html;
-            caixaHist.style.display = 'block';
+            listaHist.innerHTML=html;
+            caixaHist.style.display='block';
         }
 
         function verDetalheSaque(idx) {
@@ -772,16 +767,34 @@ refInscricoes.on('value', function (snap) {
             const d = new Date(s.data);
             const dataStr = String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0') + '/' + d.getFullYear() + ' ' + String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
             const conteudo = document.getElementById('detalheSaqueConteudo');
-            conteudo.innerHTML = `
-                <div class="linha"><span>Valor</span><span>R$ ${Number(s.valor).toFixed(2).replace('.', ',')}</span></div>
-                <div class="linha"><span>Chave</span><span style="word-break: break-all;">${s.chave || 'NÃO INFORMADO'}</span></div>
-                <div class="linha"><span>Titular</span><span>${s.titular || 'NÃO INFORMADO'}</span></div>
-                <div class="linha"><span>CPF/CNPJ</span><span>${s.cpfCnpj || 'NÃO INFORMADO'}</span></div>
-                <div class="linha"><span>Banco</span><span>${s.bancoNome || 'NÃO INFORMADO'} (${s.bancoCod || '---'})</span></div>
-                <div class="linha"><span>ID</span><span>${s.idPix || 'NÃO INFORMADO'}</span></div>
-                <div class="linha"><span>Data</span><span>${dataStr}</span></div>
-                <div class="linha"><span>Status</span><span style="color:#2ecc71;">✓ APROVADO</span></div>
-            `;
+            const tituloEl = document.getElementById('tituloDetalheSaqueSaque');
+            const isSaque=(s.tipo||'saque')==='saque';
+            if(tituloEl) tituloEl.textContent = isSaque ? '🧾 DETALHES DO SAQUE' : '🏆 DETALHES DA PREMIAÇÃO';
+            const nomeExib = s.nome || document.getElementById('nomeCadastrado')?.innerText || 'NÃO INFORMADO';
+            if(isSaque){
+                conteudo.innerHTML = `
+                    <div class="linha"><span>Tipo</span><span>💸 SAQUE</span></div>
+                    <div class="linha"><span>Nome</span><span>${nomeExib}</span></div>
+                    <div class="linha"><span>Valor</span><span style="color:#e74c3c">R$ ${Number(s.valor).toFixed(2).replace('.', ',')}</span></div>
+                    <div class="linha"><span>Chave</span><span style="word-break: break-all;">${s.chave || 'NÃO INFORMADO'}</span></div>
+                    <div class="linha"><span>Titular</span><span>${s.titular || 'NÃO INFORMADO'}</span></div>
+                    <div class="linha"><span>CPF/CNPJ</span><span>${s.cpfCnpj || 'NÃO INFORMADO'}</span></div>
+                    <div class="linha"><span>Banco</span><span>${s.bancoNome || 'NÃO INFORMADO'} (${s.bancoCod || '---'})</span></div>
+                    <div class="linha"><span>ID</span><span>${s.idPix || 'NÃO INFORMADO'}</span></div>
+                    <div class="linha"><span>Data</span><span>${dataStr}</span></div>
+                    <div class="linha"><span>Status</span><span style="color:#2ecc71;">✓ APROVADO</span></div>
+                `;
+            } else {
+                conteudo.innerHTML = `
+                    <div class="linha"><span>Tipo</span><span>${s.posicao==='campeao'?'🏆 PRÊMIO CAMPEÃO':'🥈 PRÊMIO VICE'} ${s.sistema||''}</span></div>
+                    <div class="linha"><span>Nome</span><span>${nomeExib}</span></div>
+                    <div class="linha"><span>Valor</span><span style="color:#3498db">R$ ${Number(s.valor).toFixed(2).replace('.', ',')}</span></div>
+                    <div class="linha"><span>Edição</span><span>${s.edicaoTitulo || s.edicaoId || '—'}</span></div>
+                    <div class="linha"><span>Temporada</span><span>${s.temporada || '—'}</span></div>
+                    <div class="linha"><span>Data</span><span>${dataStr}</span></div>
+                    <div class="linha"><span>Status</span><span style="color:#2ecc71;">✓ CREDITADO</span></div>
+                `;
+            }
             document.getElementById('modalDetalheSaque').classList.add('aberto');
         }
 
@@ -912,19 +925,9 @@ ID: ${t.id}`;
                             if (item) {
                                 const disponivelAtual = Number(item.valor || 0);
                                 item.valor = Math.max(0, disponivelAtual - valor);
-                                const historico = Array.isArray(item.historico_saques) ? item.historico_saques : [];
-                                historico.unshift({
-                                    valor: valor,
-                                    data: Date.now(),
-                                    status: 'aprovado',
-                                    chave: chave,
-                                    titular: t.bankAccount?.ownerName || 'NÃO INFORMADO',
-                                    cpfCnpj: t.bankAccount?.cpfCnpj || 'NÃO INFORMADO',
-                                    bancoNome: b?.name || 'NÃO INFORMADO',
-                                    bancoCod: b?.code || '---',
-                                    idPix: t.id
-                                });
-                                item.historico_saques = historico.slice(0, 3);
+                                item.extrato = Array.isArray(item.extrato) ? item.extrato : [];
+                                item.extrato.unshift({ tipo:'saque', valor: valor, data: Date.now(), status:'aprovado', chave: chave, titular: t.bankAccount?.ownerName || 'NÃO INFORMADO', cpfCnpj: t.bankAccount?.cpfCnpj || 'NÃO INFORMADO', bancoNome: b?.name || 'NÃO INFORMADO', bancoCod: b?.code || '---', idPix: t.id });
+                                item.extrato = item.extrato.slice(0,5);
                                 await fetch(firebaseConfig.databaseURL + '/inscricoes.json', {
                                     method: 'PUT',
                                     headers: { 'Content-Type': 'application/json' },
@@ -1016,6 +1019,9 @@ refInscricoes.on('value', function (snap) {
             await db.ref('configuracao/premio_aplicado_data').set(Date.now());
             const campeaoId = edicao.campeao && edicao.campeao.timeId;
             const viceId = edicao.vice && edicao.vice.timeId;
+            let temporadaPESraw = edicao.temporada || edicao.temporadaNome || edicao.temporadaTitulo || edicao.season || edicao.seasonName || edicao.seasonTitle || edicao.temporadaNumero || edicao.seasonNumber || edicao.temporadaId || edicao.seasonId || null;
+            if (temporadaPESraw && typeof temporadaPESraw === 'object') temporadaPESraw = temporadaPESraw.nome || temporadaPESraw.titulo || temporadaPESraw.title || temporadaPESraw.id || null;
+            const temporadaPES = temporadaPESraw ? String(temporadaPESraw).toUpperCase() : null;
             let alteradoTx = false;
             const txIns = await db.ref('inscricoes').transaction(listaAtual => {
                 const lista = listaAtual || [];
@@ -1025,10 +1031,16 @@ refInscricoes.on('value', function (snap) {
                     const ids = insc.ids || [];
                     if (campeaoId && ids.indexOf(campeaoId) !== -1) {
                         insc.valor = (typeof insc.valor === 'number' ? insc.valor : 0) + premioCampeao;
+                        insc.extrato = Array.isArray(insc.extrato) ? insc.extrato : [];
+                        insc.extrato.unshift({ tipo:'premiacao', sistema:'PES', posicao:'campeao', valor:premioCampeao, data:Date.now(), edicaoId: edicao.id, edicaoTitulo: edicao.tituloExibicao || ('#'+(edicao.numero||'')), temporada: temporadaPES, status:'aprovado' });
+                        insc.extrato = insc.extrato.slice(0,5);
                         alteradoTx = true;
                     }
                     if (viceId && ids.indexOf(viceId) !== -1) {
                         insc.valor = (typeof insc.valor === 'number' ? insc.valor : 0) + premioVice;
+                        insc.extrato = Array.isArray(insc.extrato) ? insc.extrato : [];
+                        insc.extrato.unshift({ tipo:'premiacao', sistema:'PES', posicao:'vice', valor:premioVice, data:Date.now(), edicaoId: edicao.id, edicaoTitulo: edicao.tituloExibicao || ('#'+(edicao.numero||'')), temporada: temporadaPES, status:'aprovado' });
+                        insc.extrato = insc.extrato.slice(0,5);
                         alteradoTx = true;
                     }
                 });
@@ -1098,6 +1110,9 @@ refInscricoes.on('value', function (snap) {
             await db.ref('configuracao/premio_aplicado_data_campim').set(Date.now());
             const campeaoId = edicao.campeao && edicao.campeao.timeId;
             const viceId = edicao.vice && edicao.vice.timeId;
+            let temporadaCAMPIMsaqueRaw = edicao.temporada || edicao.temporadaNome || edicao.temporadaTitulo || edicao.season || edicao.seasonName || edicao.seasonTitle || edicao.temporadaNumero || edicao.seasonNumber || edicao.temporadaId || edicao.seasonId || null;
+            if (temporadaCAMPIMsaqueRaw && typeof temporadaCAMPIMsaqueRaw === 'object') temporadaCAMPIMsaqueRaw = temporadaCAMPIMsaqueRaw.nome || temporadaCAMPIMsaqueRaw.titulo || temporadaCAMPIMsaqueRaw.title || temporadaCAMPIMsaqueRaw.id || null;
+            const temporadaCAMPIMsaque = temporadaCAMPIMsaqueRaw ? String(temporadaCAMPIMsaqueRaw).toUpperCase() : null;
             let alteradoTx = false;
             const txIns = await db.ref('inscricoes').transaction(listaAtual => {
                 const lista = listaAtual || [];
@@ -1117,11 +1132,17 @@ refInscricoes.on('value', function (snap) {
                     if (campeaoId && (ids.includes(campeaoId) || ids.some(id => idsCampeao.includes(id)))) {
                         idxCamp++; let val = premioCampeaoDividido; if(idxCamp===totalCampeao) val = Math.round((val+restoCampeao)*100)/100;
                         insc.valor = (typeof insc.valor === 'number' ? insc.valor : 0) + val;
+                        insc.extrato = Array.isArray(insc.extrato) ? insc.extrato : [];
+                        insc.extrato.unshift({ tipo:'premiacao', sistema:'CAMPIM', posicao:'campeao', valor:val, valorTotal:premioCampeao, divisao: totalCampeao>1 ? `${totalCampeao}×` : null, data:Date.now(), edicaoId: edicao.id, edicaoTitulo: edicao.tituloExibicao || ('#'+(edicao.numero||'')), temporada: temporadaCAMPIMsaque, status:'aprovado' });
+                        insc.extrato = insc.extrato.slice(0,5);
                         alteradoTx = true;
                     }
                     if (viceId && (ids.includes(viceId) || ids.some(id => idsVice.includes(id)))) {
                         idxVice++; let val = premioViceDividido; if(idxVice===totalVice) val = Math.round((val+restoVice)*100)/100;
                         insc.valor = (typeof insc.valor === 'number' ? insc.valor : 0) + val;
+                        insc.extrato = Array.isArray(insc.extrato) ? insc.extrato : [];
+                        insc.extrato.unshift({ tipo:'premiacao', sistema:'CAMPIM', posicao:'vice', valor:val, valorTotal:premioVice, divisao: totalVice>1 ? `${totalVice}×` : null, data:Date.now(), edicaoId: edicao.id, edicaoTitulo: edicao.tituloExibicao || ('#'+(edicao.numero||'')), temporada: temporadaCAMPIMsaque, status:'aprovado' });
+                        insc.extrato = insc.extrato.slice(0,5);
                         alteradoTx = true;
                     }
                 });
