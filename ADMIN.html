@@ -1792,11 +1792,18 @@
                 db.ref('inscricoes').off('value', listenerSaldos);
                 listenerSaldos = null;
             }
+            if (window._listenerHistoricoGeral) {
+                db.ref('inscricoes').off('value', window._listenerHistoricoGeral);
+                window._listenerHistoricoGeral = null;
+            }
         }
 
         function carregarHistoricoGeral() {
             const container = document.getElementById('listaHistoricoGeral');
-            db.ref('inscricoes').once('value').then(snap => {
+            if (window._listenerHistoricoGeral) {
+                db.ref('inscricoes').off('value', window._listenerHistoricoGeral);
+            }
+            window._listenerHistoricoGeral = db.ref('inscricoes').on('value', snap => {
                 const lista = snap.val() || [];
                 const todosExtrato = [];
                 lista.forEach(insc => {
