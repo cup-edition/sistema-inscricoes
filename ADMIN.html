@@ -2577,7 +2577,7 @@
             const el = document.getElementById('saldoAsaas');
             el.classList.add('girando');
             try {
-                const res = await fetch('https://cup-edition-api-saques.onrender.com/saldo-asaas');
+                const res = await fetch('https://cup-edition-api.onrender.com/saldo-asaas');
                 const dados = await res.json();
                 const saldo = Number(dados.balance || 0);
                 el.innerText = '💵 SALDO: R$ ' + saldo.toFixed(2).replace('.', ',');
