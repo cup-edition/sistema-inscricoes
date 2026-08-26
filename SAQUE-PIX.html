@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width">
     <link rel="icon" type="image/png" href="https://cup-edition.github.io/sistema-inscricoes/CUP%20EDITION.png">
     <title>SAQUE CUP EDITION</title>
 
@@ -26,11 +26,12 @@
             min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px;
         }
         .caixa {
-            background: #ffffff; padding: 32px 32px 8px; border-radius: 20px; width: 100%; max-width: 460px;
+            background: #ffffff; padding: 14px 24px 8px; border-radius: 20px; width: 100%; max-width: 460px;
             box-shadow: 0 25px 60px rgba(0,0,0,0.45); border: 2px solid #22c55e;
+            transform: translateY(-60px);
         }
         .topo {
-            display: flex; align-items: center; gap: 10px; justify-content: center; margin-bottom: 8px;
+            display: flex; align-items: center; gap: 10px; justify-content: center; margin-bottom: 4px;
         }
         .logo {
             width: 40px; height: 40px; border-radius: 12px;
@@ -44,9 +45,11 @@
             background: linear-gradient(135deg, #22d3ee, #3b82f6);
             -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
             text-shadow: 0 2px 20px rgba(59,130,246,0.35);
+            white-space: nowrap;
+            -webkit-text-stroke: 0.4px rgba(59,130,246,0.3);
         }
-        .subtitulo { text-align: center; color: #6b7280; font-size: 13px; margin-bottom: 28px; }
-        .grupo { margin-bottom: 20px; }
+        .subtitulo { text-align: center; color: #6b7280; font-size: 13px; margin-bottom: 14px; }
+        .grupo { margin-bottom: 12px; }
         label {
             display: block; margin-bottom: 8px; color: #374151; font-weight: 600; font-size: 13px;
             text-transform: uppercase; letter-spacing: 0.5px;
@@ -109,8 +112,10 @@
             border-radius: 16px; display: none;
         }
         .confirmacao h3 {
-            color: #0369a1; margin-bottom: 16px; font-size: 15px; text-transform: uppercase;
-            letter-spacing: 0.5px;
+            color: #0369a1; margin-bottom: 12px; font-size: 14px; text-transform: uppercase;
+            letter-spacing: 0.3px;
+            white-space: nowrap;
+            text-align: center;
         }
         .caixa-historico {
             margin-bottom: 0; margin-top: 14px; text-align: right;
@@ -212,11 +217,7 @@
         }
         .total-premiacao strong { color: #16a34a; }
 
-        @media (max-width: 420px) {
-            .topo h2 { font-size: 30px; font-weight: 900; white-space: nowrap; }
-        }
-
-        /* ===== LOADING OVERLAY - MEIO DA TELA ===== */
+                /* ===== LOADING OVERLAY - MEIO DA TELA ===== */
         #loadingOverlay {
             position: fixed;
             top: 0;
@@ -318,13 +319,7 @@
             100% { transform: scale(1); }
         }
         .loading-content .icone-check.mostrar { display: block; }
-        @media (max-width: 480px) {
-            .loading-content { padding: 30px 25px; }
-            .loading-content .titulo-loading { font-size: 18px; }
-            .loading-content .subtitulo-loading { font-size: 13px; }
-            .loading-content .spinner-grande { width: 50px; height: 50px; }
-        }
-        /* ===== FIM DO LOADING OVERLAY ===== */
+                /* ===== FIM DO LOADING OVERLAY ===== */
     </style>
 </head>
 <body>
