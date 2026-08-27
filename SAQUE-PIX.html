@@ -5,8 +5,7 @@
     <meta name="viewport" content="width=device-width">
     <link rel="icon" type="image/png" href="https://cup-edition.github.io/sistema-inscricoes/CUP%20EDITION.png">
     <title>SAQUE CUP EDITION</title>
-
-    <meta property="og:title" content="SAQUE CUP EDITION CAMPIM FC &amp; PES" />
+            <meta property="og:title" content="SAQUE CUP EDITION CAMPIM FC &amp; PES" />
     <meta property="og:description" content="Realize seu saque da maior competição do CAMPIM FC &amp; PES" />
     <meta property="og:image" content="https://cup-edition.github.io/campimfc/CUP%20EDITION.jpg" />
     <meta property="og:image:width" content="1200" />
@@ -118,7 +117,10 @@
             text-align: center;
         }
         .caixa-historico {
-            margin-bottom: 0; margin-top: 14px; text-align: right;
+            margin-bottom: 0; margin-top: 14px; display: flex; justify-content: space-between; align-items: center;
+        }
+        .total-sacado {
+            font-size: 12px; font-weight: 800; color: #1e293b; background: #f1f5f9; border: 1px solid #cbd5e1; padding: 6px 10px; border-radius: 999px;
         }
         .btn-historico {
             display: inline-flex; align-items: center; gap: 8px;
@@ -328,15 +330,13 @@
             <h2>SAQUE CUP EDITION</h2>
         </div>
         <p class="subtitulo">SAQUES VIA PIX SEGUROS E INSTANTÂNEOS</p>
-
-        <div id="caixaValidacao">
+            <div id="caixaValidacao">
             <div class="grupo">
                 <label>Nome</label>
                 <select id="selNome" required>
                     <option value="">Selecione seu nome</option>
                 </select>
             </div>
-
             <div class="grupo">
                 <label>Data de Nascimento</label>
                 <div class="linha2">
@@ -352,17 +352,14 @@
                     </div>
                 </div>
             </div>
-
             <button id="btnValidar">Validar Acesso</button>
             <p class="rodape" id="msgValidacao" style="margin-top:12px; display:none;"></p>
         </div>
-
-        <div id="caixaSaque" style="display:none;">
+            <div id="caixaSaque" style="display:none;">
             <div style="display:flex; align-items:center; gap:14px; justify-content:center; margin-bottom:20px;">
                 <div id="fotoCadastrado" style="width:52px; height:52px; border-radius:50%; overflow:hidden; border:2px solid #22c55e; flex-shrink:0;"></div>
                 <div id="nomeCadastrado" style="font-size:18px; font-weight:700; color:#166534; text-transform:uppercase; text-align:left;"></div>
             </div>
-
             <div class="grupo" id="grupoValor">
             <div class="saldo-linha">
                 <label>💵 SALDO DISPONÍVEL</label>
@@ -373,22 +370,19 @@
                 </div>
             </div>
         </div>
-
-        <div class="grupo" id="grupoChave">
+            <div class="grupo" id="grupoChave">
             <label>Chave Pix</label>
             <input type="text" id="chave" placeholder="DIGITE A CHAVE PIX" required>
         </div>
-
-        <button id="btn1">Verificar</button>
-
-        <div class="caixa-historico" id="caixaHistorico" style="display:none; margin-top:14px;">
+            <button id="btn1">Verificar</button>
+                    <div class="caixa-historico" id="caixaHistorico" style="display:none; margin-top:14px;">
+            <span id="totalSacado" class="total-sacado">TOTAL SACADO: R$ 0,00</span>
             <button type="button" class="btn-historico" id="btnHistorico" onclick="abrirJanelaHistorico()">
                 <span>🧾 EXTRATO</span>
                 <span class="icone-historico">▸</span>
             </button>
         </div>
-
-        <div class="confirmacao" id="caixaConfirma">
+            <div class="confirmacao" id="caixaConfirma">
             <h3>CONFIRME OS DADOS DO RECEBEDOR</h3>
             <div class="linha"><span>Valor</span><span id="mostraValor"></span></div>
             <div class="linha"><span>Chave</span><span id="mostraChave"></span></div>
@@ -397,23 +391,18 @@
             <div class="linha"><span>CPF/CNPJ</span><span id="mostraCpf"></span></div>
             <div class="linha"><span>Instituição</span><span id="mostraBanco"></span></div>
             <button id="btnEnviar">SACAR💵</button>
-            <button id="btnVoltar" class="cinza">Alterar</button>
+            </div>
+            <div id="resultado" class="resultado"></div>
         </div>
-
-        <div id="resultado" class="resultado"></div>
-        </div>
-
-        <p class="rodape">Cup Edition · Plataforma de pagamentos</p>
+            <p class="rodape">Cup Edition · Plataforma de pagamentos</p>
         <div class="logos-rodape">
             <img src="https://cup-edition.github.io/sistema-inscricoes/LOGO%20PIX.png" alt="Logo PIX">
             <img src="https://cup-edition.github.io/sistema-inscricoes/CUP%20EDITION%20CAMPIM%20FC.png" alt="Cup Edition Campim FC">
             <img src="https://cup-edition.github.io/campimfc/CUP%20EDITION%20PES.png" alt="Cup Edition PES">
         </div>
-
-        <div id="totalPremiacao" class="total-premiacao">🏆 TOTAL DE PREMIAÇÃO DISTRIBUÍDA: <strong>R$ 0,00</strong></div>
+            <div id="totalPremiacao" class="total-premiacao">🏆 TOTAL DE PREMIAÇÃO DISTRIBUÍDA: <strong>R$ 0,00</strong></div>
     </div>
-
-    <!-- ===== LOADING OVERLAY - MEIO DA TELA ===== -->
+            <!-- ===== LOADING OVERLAY - MEIO DA TELA ===== -->
     <div id="loadingOverlay">
         <div class="loading-content">
             <div class="spinner-grande" id="spinnerLoading"></div>
@@ -426,8 +415,7 @@
         </div>
     </div>
     <!-- ===== FIM LOADING OVERLAY ===== -->
-
-    <!-- ===== JANELINHA FLUTUANTE DO HISTÓRICO ===== -->
+            <!-- ===== JANELINHA FLUTUANTE DO HISTÓRICO ===== -->
     <div id="modalHistorico">
         <div class="janela-historico">
             <button type="button" class="fechar-historico" onclick="fecharJanelaHistorico()">&times;</button>
@@ -436,8 +424,7 @@
         </div>
     </div>
     <!-- ===== FIM JANELINHA DO HISTÓRICO ===== -->
-
-    <!-- ===== JANELINHA FLUTUANTE DE DETALHES DO SAQUE ===== -->
+            <!-- ===== JANELINHA FLUTUANTE DE DETALHES DO SAQUE ===== -->
     <div id="modalDetalheSaque">
         <div class="janela-historico" style="border-color: #3b82f6;">
             <button type="button" class="fechar-historico" onclick="fecharDetalheSaque()">&times;</button>
@@ -446,10 +433,8 @@
         </div>
     </div>
     <!-- ===== FIM JANELINHA DE DETALHES ===== -->
-
-    <audio id="audioConfirmado" src="https://cup-edition.github.io/sistema-inscricoes/confirmado.mp3" preload="auto"></audio>
-
-    <script>
+            <audio id="audioConfirmado" src="https://cup-edition.github.io/sistema-inscricoes/confirmado.mp3" preload="auto"></audio>
+            <script>
         const URL = 'https://cup-edition-api.vercel.app/enviar-pix';
         const URL_CONSULTA = 'https://cup-edition-api.vercel.app/consultar-chave';
 
@@ -690,7 +675,6 @@ refInscricoes.on('value', function (snap) {
         const btn1 = document.getElementById('btn1');
         const caixaConfirma = document.getElementById('caixaConfirma');
         const btnEnviar = document.getElementById('btnEnviar');
-        const btnVoltar = document.getElementById('btnVoltar');
         const resultado = document.getElementById('resultado');
         const campoValor = document.getElementById('valor');
         const grupoValor = document.getElementById('grupoValor');
@@ -740,6 +724,14 @@ refInscricoes.on('value', function (snap) {
             const listaHist = document.getElementById('listaHistorico');
             const historico = Array.isArray(cadastro.extrato) ? cadastro.extrato : [];
             historicoAtual = historico;
+                        // Total independente (acumula a cada saque, nao depende do filtro do extrato)
+            let totalSacado = Number(cadastro.total_sacado || 0);
+            if (!cadastro.total_sacado) {
+                // Fallback para antigos: soma do extrato
+                totalSacado = historico.filter(s=> (s.tipo||'saque')==='saque').reduce((acc,s)=> acc + Number(s.valor||0), 0);
+            }
+            const elTotal = document.getElementById('totalSacado');
+            if (elTotal) elTotal.textContent = 'TOTAL SACADO: R$ ' + totalSacado.toFixed(2).replace('.', ',');
             if (historico.length === 0) { caixaHist.style.display='none'; return; }
             let html='';
             historico.forEach((s, idx)=>{
@@ -753,7 +745,7 @@ refInscricoes.on('value', function (snap) {
                 html+=`<div class="hist-item" onclick="verDetalheSaque(${idx})" style="border:1px solid ${corBorda}; border-radius:8px;"><span class="hist-data">${dataStr}</span><span style="display:flex; align-items:center; gap:8px;"><span class="hist-valor" style="color:${corLabel}">${label}</span><span class="hist-status">${status}</span></span></div>`;
             });
             listaHist.innerHTML=html;
-            caixaHist.style.display='block';
+            caixaHist.style.display='flex';
         }
 
         function verDetalheSaque(idx) {
@@ -857,11 +849,12 @@ refInscricoes.on('value', function (snap) {
                     (dados.financialInstitution?.name || 'Não informado') +
                     (dados.financialInstitution?.code ? ' (Cód. ' + dados.financialInstitution.code + ')' : '');
                 atualizarTextoLoading('✅ CHAVE ENCONTRADA!', 'Confira os dados do recebedor');
-                caixaConfirma.style.display = 'block';
+                                caixaConfirma.style.display = 'block';
                 grupoValor.style.display = 'none';
                 grupoChave.style.display = 'none';
                 btn1.style.display = 'none';
                 document.getElementById('caixaHistorico').style.display = 'none';
+                history.pushState({confirmaAberta:true}, '');
                 setTimeout(() => { esconderLoadingOverlay(true); }, 1000);
             } catch (e) {
                 esconderLoadingOverlay(false);
@@ -874,14 +867,25 @@ refInscricoes.on('value', function (snap) {
             }
         };
 
-        btnVoltar.onclick = function () {
+        function voltarConfirmacao() {
+            if (caixaConfirma.style.display !== 'block') return false;
             caixaConfirma.style.display = 'none';
             resultado.style.display = 'none';
             grupoValor.style.display = 'block';
             grupoChave.style.display = 'block';
             btn1.style.display = 'block';
-            document.getElementById('caixaHistorico').style.display = 'block';
-        };
+            const idCad = typeof idCadastrado !== 'undefined' ? idCadastrado : null;
+            if (idCad) {
+                const cad = inscricoes.find(i=>i&&i.id===idCad);
+                if (cad && Array.isArray(cad.extrato) && cad.extrato.length>0) document.getElementById('caixaHistorico').style.display = 'flex';
+            }
+            return true;
+        }
+        window.addEventListener('popstate', function(e){
+            if (voltarConfirmacao()) {
+                history.pushState({confirmaAberta:false}, '');
+            }
+        });
 
         btnEnviar.onclick = async function () {
             btnEnviar.disabled = true;
@@ -903,7 +907,7 @@ refInscricoes.on('value', function (snap) {
                     const b = t.bankAccount?.bank;
                     resultado.className = 'resultado sucesso';
                     resultado.innerText =
-`✅ ENVIADO COM SUCESSO!
+`SAQUE CONCLUÍDO✅
 
 VALOR: R$ ${valor.toFixed(2).replace('.', ',')}
 TITULAR: ${t.bankAccount?.ownerName || 'NÃO INFORMADO'}
@@ -920,6 +924,7 @@ ID: ${t.id}`;
                             if (item) {
                                 const disponivelAtual = Number(item.valor || 0);
                                 item.valor = Math.max(0, disponivelAtual - valor);
+                                item.total_sacado = Number(item.total_sacado || 0) + Number(valor);
                                 item.extrato = Array.isArray(item.extrato) ? item.extrato : [];
                                 item.extrato.unshift({ tipo:'saque', valor: valor, data: Date.now(), status:'aprovado', chave: chave, titular: t.bankAccount?.ownerName || 'NÃO INFORMADO', cpfCnpj: t.bankAccount?.cpfCnpj || 'NÃO INFORMADO', bancoNome: b?.name || 'NÃO INFORMADO', bancoCod: b?.code || '---', idPix: t.id });
                                 item.extrato = item.extrato.slice(0,5);
@@ -947,7 +952,7 @@ ID: ${t.id}`;
                         const atualizado = inscricoes.find(i => i && i.id === idCadastrado);
                         if (atualizado) mostrarHistorico(atualizado);
                     }
-                    atualizarTextoLoading('✅ PIX ENVIADO COM SUCESSO!', 'Seu dinheiro está a caminho');
+                    atualizarTextoLoading('SAQUE CONCLUÍDO✅', 'Seu dinheiro tá na conta');
                     setTimeout(() => { esconderLoadingOverlay(true); }, 1200);
                 } else {
                     esconderLoadingOverlay(false);
