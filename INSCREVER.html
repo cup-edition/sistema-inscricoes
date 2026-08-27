@@ -2229,7 +2229,7 @@
             const valorAtual = selectNome.value;
             selectNome.innerHTML = '<option value="">-- Selecione seu nome --</option>';
             var nomesUnicos = [...new Set(listaCompletaInscricoes
-                .filter(insc => insc && insc.nome && (insc.status === 'pendente' || insc.status === 'confirmado'))
+                .filter(insc => insc && insc.nome && (insc.status === 'pendente' || insc.status === 'confirmado' || insc.status === 'expirado'))
                 .map(insc => insc.nome))].sort(function(a, b) {
                 return a.localeCompare(b, 'pt-BR');
             });
