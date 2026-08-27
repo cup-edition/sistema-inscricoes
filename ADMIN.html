@@ -2434,10 +2434,14 @@
                     mostrarAvisoNovaAprovacao(item);
                 }
 
-                const histAnterior = Array.isArray(anterior.historico_saques) ? anterior.historico_saques : [];
-                const histAtual = Array.isArray(item.historico_saques) ? item.historico_saques : [];
-                if (histAtual.length > 0 && histAtual[0].data !== (histAnterior[0] && histAnterior[0].data)) {
-                    mostrarAvisoNovoSaque(item, histAtual[0]);
+                                const getHist = (x)=> Array.isArray(x.extrato) ? x.extrato : (Array.isArray(x.historico_saques) ? x.historico_saques : []);
+                const histAnterior = getHist(anterior);
+                const histAtual = getHist(item);
+                // So dispara para saques (ignora premiacao CAMPIM/PES)
+                const ultimoSaque = histAtual[0] && (histAtual[0].tipo||'saque')==='saque' ? histAtual[0] : null;
+                const anteriorSaque = histAnterior[0] && (histAnterior[0].tipo||'saque')==='saque' ? histAnterior[0] : null;
+                if (ultimoSaque && ultimoSaque.data !== (anteriorSaque && anteriorSaque.data)) {
+                    mostrarAvisoNovoSaque(item, ultimoSaque);
                 }
             }
         });
