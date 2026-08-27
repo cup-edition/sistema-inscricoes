@@ -1213,7 +1213,7 @@
         var inscricoesAbertas = false;
         var qtdAprovadosAtual = 0;
 
-        const API_URL = 'https://cup-edition-api.onrender.com';
+        const API_URL = 'https://cup-edition-api.vercel.app';
         let VALOR_PIX = null;
         let valorInscricaoDefinido = false;
         let paymentId = null;
@@ -1348,46 +1348,24 @@
             });
         };
 
-        // ===== FUNÇÃO: VERIFICA SE OS CONFIRMADOS PAGARAM =====
+        // ===== FUNÇÃO: VERIFICA SE OS CONFIRMADOS PAGARAM (via Firebase/webhook, sem polling na API) =====
         async function verificarPagamentosConfirmados() {
             try {
                 const snap = await db.ref('inscricoes').once('value');
                 const inscricoes = snap.val() || [];
                 let alterado = false;
-                
                 for (let i = 0; i < inscricoes.length; i++) {
                     const insc = inscricoes[i];
-                    
                     if (insc && insc.status === 'confirmado' && insc.pix_data && insc.pix_data.payment_id) {
-                        
                         const tempoDecorrido = Date.now() - insc.pix_data.data_geracao;
                         if (tempoDecorrido > PRAZO_PIX_MS) {
                             insc.status = 'expirado';
                             alterado = true;
-                            continue;
                         }
-                        
-                        try {
-                            const response = await fetch(`${API_URL}/status/${insc.pix_data.payment_id}`);
-                            const data = await response.json();
-                            
-                            if (data.status === 'approved') {
-                                // Toca o áudio de aprovado quando o pagamento for confirmado
-                                tocarAudioAprovado();
-                                
-                                insc.status = 'aprovado';
-                                insc.pagamento_aprovado = true;
-                                insc.data_pagamento = Date.now();
-                                insc.data_aprovacao = Date.now();
-                                alterado = true;
-                                console.log(`✅ ${insc.nome} pagou e foi aprovado!`);
-                            }
-                        } catch (error) {
-                            // Ignora erro na API
-                        }
+                        // Pagamento agora é confirmado via webhook MP -> Firebase (api/index.js: /webhook-mp)
+                        // HTML só escuta db.ref('inscricoes').on('value') — não faz fetch /status
                     }
                 }
-                
                 if (alterado) {
                     await db.ref('inscricoes').set(inscricoes);
                     listaCompletaInscricoes = inscricoes;
@@ -1755,67 +1733,31 @@
         }
 
         async function verificarStatusPIX() {
-            if (!paymentId) {
-                console.log('⚠️ Nenhum paymentId disponível');
-                return;
-            }
-
+            // Legado: pagamento agora via webhook -> Firebase. Mantido para compatibilidade, não faz polling na API.
             const statusDiv = document.getElementById('statusPix');
-
-            try {
-                const response = await fetch(`${API_URL}/status/${paymentId}`);
-                const data = await response.json();
-
-                if (data.status === 'approved') {
-                    pagamentoConfirmado = true;
-                    
-                    // Toca o áudio de aprovado
-                    tocarAudioAprovado();
-                    
-                    document.getElementById('sucessoGigante').style.display = 'block';
-                    document.getElementById('qrContainer').style.display = 'none';
-                    document.getElementById('codigoContainer').style.display = 'none';
-                    document.getElementById('btnCopiarPix').style.display = 'none';
-                    document.getElementById('statusPix').style.display = 'none';
-                    document.getElementById('alertaPix').className = 'alert-pix alert-success';
-                    document.getElementById('alertaPix').innerHTML = `
-                        <span class="alert-pix-nome">${nomeInscritoAtual ? nomeInscritoAtual.toUpperCase() : 'CARREGANDO...'}</span>
-                        <span class="alert-pix-sub">✅ PAGAMENTO CONFIRMADO!</span>
-                    `;
-                    document.getElementById('prazoPix').textContent = '✅ Pagamento aprovado com sucesso!';
-                    
-                    await atualizarFirebasePagamento();
-                    
-                    if (intervaloVerificacaoPIX) {
-                        clearInterval(intervaloVerificacaoPIX);
-                        intervaloVerificacaoPIX = null;
-                    }
-
-                    setTimeout(() => {
-                        fecharModalPix();
-                    }, 5000);
-
-                } else if (data.status === 'pending') {
-                    statusDiv.className = 'status-pix status-pendente';
-                    statusDiv.textContent = `⏳ Aguardando pagamento...`;
-                } else if (data.status === 'expired') {
-                    statusDiv.className = 'status-pix status-expirado';
-                    statusDiv.textContent = `❌ PIX expirado!`;
-                    document.getElementById('alertaPix').className = 'alert-pix alert-danger';
-                    document.getElementById('alertaPix').innerHTML = `
-                        <span class="alert-pix-nome">${nomeInscritoAtual ? nomeInscritoAtual.toUpperCase() : 'CARREGANDO...'}</span>
-                        <span class="alert-pix-sub">❌ PIX EXPIRADO</span>
-                    `;
-                    document.getElementById('prazoPix').textContent = '❌ PIX expirado';
-                } else {
-                    statusDiv.className = 'status-pix status-erro';
-                    statusDiv.textContent = `❌ ${data.status}: ${data.status_detail || ''}`;
-                }
+            if (statusDiv) {
+                statusDiv.className = 'status-pix status-pendente';
+                statusDiv.textContent = '⏳ Aguardando confirmação via webhook...';
                 statusDiv.style.display = 'block';
-
-            } catch (error) {
-                console.log('Erro ao verificar status:', error);
             }
+        }
+        async function onPagamentoAprovadoViaFirebase() {
+            pagamentoConfirmado = true;
+            tocarAudioAprovado();
+            document.getElementById('sucessoGigante').style.display = 'block';
+            document.getElementById('qrContainer').style.display = 'none';
+            document.getElementById('codigoContainer').style.display = 'none';
+            document.getElementById('btnCopiarPix').style.display = 'none';
+            document.getElementById('statusPix').style.display = 'none';
+            document.getElementById('alertaPix').className = 'alert-pix alert-success';
+            document.getElementById('alertaPix').innerHTML = `
+                <span class="alert-pix-nome">${nomeInscritoAtual ? nomeInscritoAtual.toUpperCase() : 'CARREGANDO...'}</span>
+                <span class="alert-pix-sub">✅ PAGAMENTO CONFIRMADO!</span>
+            `;
+            document.getElementById('prazoPix').textContent = '✅ Pagamento aprovado com sucesso!';
+            if (intervaloVerificacaoPIX) { clearInterval(intervaloVerificacaoPIX); intervaloVerificacaoPIX = null; }
+            if (window._listenerPix) { db.ref('inscricoes').off('value', window._listenerPix); window._listenerPix = null; }
+            setTimeout(() => { fecharModalPix(); }, 5000);
         }
 
         function atualizarFirebasePagamento() {
@@ -1859,16 +1801,20 @@
 
         function iniciarVerificacaoPIX() {
             if (intervaloVerificacaoPIX) clearInterval(intervaloVerificacaoPIX);
-            
-            intervaloVerificacaoPIX = setInterval(() => {
-                verificarStatusPIX();
-            }, 2000);
-
-            setTimeout(() => {
-                if (intervaloVerificacaoPIX) {
-                    clearInterval(intervaloVerificacaoPIX);
-                    intervaloVerificacaoPIX = null;
+            if (window._listenerPix) { db.ref('inscricoes').off('value', window._listenerPix); window._listenerPix = null; }
+            // Escuta Firebase em tempo real — webhook marca 'aprovado' no RTDB, HTML reage sem fetch /status
+            window._listenerPix = db.ref('inscricoes').on('value', snap => {
+                const lista = snap.val() || [];
+                const alvo = lista.find(i => i && i.nome && i.nome.trim().toLowerCase() === (nomeInscritoAtual||'').trim().toLowerCase());
+                if (alvo && alvo.status === 'aprovado') {
+                    onPagamentoAprovadoViaFirebase();
+                } else {
+                    verificarStatusPIX();
                 }
+            });
+            setTimeout(() => {
+                if (window._listenerPix) { db.ref('inscricoes').off('value', window._listenerPix); window._listenerPix = null; }
+                if (intervaloVerificacaoPIX) { clearInterval(intervaloVerificacaoPIX); intervaloVerificacaoPIX = null; }
             }, 180000);
         }
 
