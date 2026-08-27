@@ -1221,47 +1221,26 @@
             if (snap.val() !== true) { firebase.database().goOnline(); }
         });
 
-        // ===== FUNÇÃO: VERIFICA SE OS CONFIRMADOS PAGARAM =====
+        // ===== FUNÇÃO: VERIFICA SE OS CONFIRMADOS PAGARAM (via webhook, sem fetch /status) =====
         async function verificarPagamentosConfirmados() {
             try {
                 const snap = await db.ref('inscricoes').once('value');
                 const inscricoes = snap.val() || [];
                 let alterado = false;
-                
                 for (let i = 0; i < inscricoes.length; i++) {
                     const insc = inscricoes[i];
-                    
                     if (insc && insc.status === 'confirmado' && insc.pix_data && insc.pix_data.payment_id) {
-                        
                         const tempoDecorrido = Date.now() - insc.pix_data.data_geracao;
                         if (tempoDecorrido > 3 * 24 * 60 * 60 * 1000) {
                             insc.status = 'expirado';
                             alterado = true;
-                            console.log(`⏰ PIX expirado para ${insc.nome}`);
-                            continue;
-                        }
-                        
-                        try {
-                            const response = await fetch(`https://cup-edition-api.onrender.com/status/${insc.pix_data.payment_id}`);
-                            const data = await response.json();
-                            
-                            if (data.status === 'approved') {
-                                insc.status = 'aprovado';
-                                insc.pagamento_aprovado = true;
-                                insc.data_pagamento = Date.now();
-                                insc.data_aprovacao = Date.now();
-                                alterado = true;
-                                console.log(`✅ ${insc.nome} pagou e foi aprovado!`);
-                            }
-                        } catch (error) {
-                            // Ignora erro na API
+                            console.log('⏰ PIX expirado para ' + insc.nome);
                         }
                     }
                 }
-                
                 if (alterado) {
                     await db.ref('inscricoes').set(inscricoes);
-                    console.log('✅ Pagamentos verificados e atualizados!');
+                    console.log('✅ Expirados verificados! (aprovados via webhook)');
                 }
             } catch (error) {
                 console.error('Erro na verificação:', error);
@@ -2578,7 +2557,7 @@
             const el = document.getElementById('saldoAsaas');
             el.classList.add('girando');
             try {
-                const res = await fetch('https://cup-edition-api.onrender.com/saldo-asaas');
+                const res = await fetch('https://cup-edition-api.vercel.app/saldo-asaas');
                 const dados = await res.json();
                 const saldo = Number(dados.balance || 0);
                 el.innerText = '💵 SALDO: R$ ' + saldo.toFixed(2).replace('.', ',');
