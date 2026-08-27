@@ -2159,7 +2159,7 @@
                 return;
             }
 
-            if (inscricao && inscricao.status === 'confirmado') {
+            if (inscricao && (inscricao.status === 'confirmado' || inscricao.status === 'expirado')) {
                 btnConfirmar.disabled = false;
                 btnConfirmar.style.opacity = '1';
                 btnConfirmar.style.cursor = 'pointer';
@@ -2237,9 +2237,9 @@
             nomesUnicos.forEach(nome => {
                 var opcao = document.createElement('option');
                 opcao.value = nome; 
-                const insc = listaCompletaInscricoes.find(i => i.nome === nome);
+                const insc = listaCompletaInscricoes.find(i => i.nome === nome && (i.status === 'confirmado' || i.status === 'expirado')) || listaCompletaInscricoes.find(i => i.nome === nome);
                 let statusText = '';
-                if (insc && insc.status === 'confirmado') {
+                if (insc && (insc.status === 'confirmado' || insc.status === 'expirado')) {
                     statusText = ' ᵃᵍᵘᵃʳᵈᵃⁿᵈᵒ ᵖᵃᵍᵃᵐᵉⁿᵗᵒ';
                 }
                 opcao.textContent = nome + statusText;
@@ -2351,7 +2351,7 @@
             }
 
             const inscConfirmado = listaCompletaInscricoes.find(insc => 
-                insc && insc.nome && insc.nome.trim().toLowerCase() === nome.toLowerCase() && insc.status === 'confirmado'
+                insc && insc.nome && insc.nome.trim().toLowerCase() === nome.toLowerCase() && (insc.status === 'confirmado' || insc.status === 'expirado')
             );
 
             if (inscConfirmado) {
