@@ -770,15 +770,16 @@
         <div class="creditos-container">
             <div class="creditos-botoes">
                 <div>
-                    <button onclick="window.open('https://meet.google.com/esn-aqxa-gdi', '_blank')">🔴 LIVE</button>
+                    <button onclick="window.open('https://meet.google.com/esn-aqxa-gdi', '_blank')" style="background-color:#f1c40f; color:#212529;">🔴 LIVE</button>
+                    <button onclick="window.open('https://console.firebase.google.com/u/0/project/sistema-inscricoes-e9241/database/sistema-inscricoes-e9241-default-rtdb/data', '_blank')" style="background-color:#f1c40f; color:#212529;">🗄️ BANCO DE DADOS</button>
+                    <button onclick="window.open('https://vercel.com/cup-edition', '_blank')" style="background-color:#f1c40f; color:#212529;">⚙️ SERVIDOR</button>
                 </div>
                 <div>
                     <button class="btn-instagram" onclick="window.open('https://www.instagram.com/direct/inbox', '_blank')">📸 INSTAGRAM</button>
                     <button class="btn-whatsapp" onclick="window.open('https://web.whatsapp.com', '_blank')">💬 WHATSAPP</button>
                 </div>
             </div>
-            <div class="creditos-menor" style="margin-top: 15px;">DESENVOLVIDO POR</div>
-            <div class="creditos-maior">ENDRIL SILVA</div>
+            <div class="creditos-maior" style="background:none; -webkit-text-fill-color:initial; background-clip:initial; filter:none; padding:0; text-shadow:none; margin-top:15px;"><img src="https://cup-edition.github.io/campimfc/ENDRILSILVA.png" alt="ENDRIL SILVA" style="height:52px; width:auto; max-width:280px; display:block; margin:0 auto;"></div>
         </div>
     </div>
 
@@ -1166,7 +1167,12 @@
                     <button class="btn-agendar" onclick="abrirAgendamento(); alternarMenuFlutuante();">⏰ AGENDAR REINÍCIO</button>
                 </div>
                 <div class="menu-linha">
-                    <button class="btn-inscricao" onclick="window.open('https://cup-edition.github.io/sistema-inscricoes/INSCREVER.html', '_blank'); alternarMenuFlutuante();">📝 SITE DE INSCRIÇÃO</button>
+                    <button class="btn-inscricao" onclick="window.open('https://cup-edition.github.io/sistema-inscricoes/INSCREVER.html', '_blank'); alternarMenuFlutuante();">
+                        <span class="btn-texto">📝 SITE DE INSCRIÇÃO VIP</span>
+                        <span class="switch-inscricao" id="switchInscricaoVIP" onclick="event.stopPropagation(); alternarInscricaoGratuita();">
+                            <span class="switch-slider"></span>
+                        </span>
+                    </button>
                     <button class="btn-inscricao" onclick="window.open('https://cup-edition.github.io/sistema-inscricoes/INSCRICAO-GRATUITA.html', '_blank'); alternarMenuFlutuante();">
                         <span class="btn-texto">🆓 SITE DE INSCRIÇÃO FREE</span>
                         <span class="switch-inscricao" id="switchInscricaoGratuita" onclick="event.stopPropagation(); alternarInscricaoGratuita();">
@@ -1452,6 +1458,8 @@
                 const ligado = snap.val() === true;
                 const sw = document.getElementById('switchInscricaoGratuita');
                 if (sw) sw.classList.toggle('ligado', ligado);
+                const swVip = document.getElementById('switchInscricaoVIP');
+                if (swVip) swVip.classList.toggle('ligado', !ligado);
             });
         }
 
