@@ -1312,8 +1312,15 @@
             const diaSemana = agora.getDay(); // 5 = sexta-feira
             const hora = agora.getHours();
             
-            // Verifica se é sexta-feira a partir das 20h até domingo
-            if (!((diaSemana === 5 && hora >= 20) || diaSemana === 6 || diaSemana === 0 || diaSemana === 1 || diaSemana === 2 || diaSemana === 3)) return;
+            // Vale só de sexta 20h até domingo
+            const dentroJanela = (diaSemana === 5 && hora >= 20) || diaSemana === 6 || diaSemana === 0;
+            if (!dentroJanela) {
+                if (limiteDinamicoAtivado) {
+                    limiteAtual = LIMITE_MAXIMO;
+                    limiteDinamicoAtivado = false;
+                }
+                return;
+            }
             
             if (qtdAprovados < 12) {
                 if (!limiteDinamicoAtivado) {
@@ -1379,6 +1386,11 @@
             if (contador) {
                 const vagasRestantes = Math.max(0, limiteAtual - qtdAprovadosGlobal);
                 contador.innerText = `💰 ${qtdAprovadosGlobal} APROVADOS | RESTAM ${vagasRestantes} VAGAS`;
+            }
+            const contConf = document.getElementById('contadorConfirmados');
+            if (contConf) {
+                const vagasConf = Math.max(0, limiteAtual - qtdConfirmadosGlobal);
+                contConf.innerText = `✅ ${qtdConfirmadosGlobal} CONFIRMADOS | RESTAM ${vagasConf} VAGAS`;
             }
         }
 
@@ -2511,7 +2523,7 @@
 
             if (inscricoes.length === 0 || !inscricoes[0]) {
                 tabela.innerHTML = '<tr><td colspan="8" style="text-align: center; color: #adb5bd;">NENHUMA INSCRIÇÃO CADASTRADA AINDA.</td></tr>';
-                document.getElementById('contadorConfirmados').innerText = '✅ 0 CONFIRMADOS';
+                document.getElementById('contadorConfirmados').innerText = `✅ 0 CONFIRMADOS | RESTAM ${limiteAtual} VAGAS`;
                 qtdAprovadosGlobal = 0;
                 qtdConfirmadosGlobal = 0;
                 dadosCarregados = true;
@@ -2539,7 +2551,7 @@
             qtdConfirmadosGlobal = qtdConfirmados;
             dadosCarregados = true;
             verificarLimitesCompletos();
-            document.getElementById('contadorConfirmados').innerText = `✅ ${qtdConfirmados} CONFIRMADOS`;
+            document.getElementById('contadorConfirmados').innerText = `✅ ${qtdConfirmados} CONFIRMADOS | RESTAM ${Math.max(0, limiteAtual - qtdConfirmados)} VAGAS`;
 
             tabela.innerHTML = '';
             listaOrdenada.forEach(insc => {
@@ -2850,7 +2862,7 @@
         async function salvarValoresPremiacao() {
             const premioCampeao = parseValorPremiacao('premio_campeao');
             const premioVice = parseValorPremiacao('premio_vice');
-            if (premioCampeao <= 0 || premioVice <= 0) { alert('❌ INFORME VALORES VÁLIDOS PARA CAMPEÃO E VICE!'); return; }
+            if (premioCampeao < 0 || premioVice < 0) { alert('❌ INFORME VALORES VÁLIDOS PARA CAMPEÃO E VICE!'); return; }
             await db.ref('configuracao').update({ premio_campeao: premioCampeao, premio_vice: premioVice });
             alert('✅ VALORES DE PREMIAÇÃO SALVOS!\n\n🥇 Campeão: R$ ' + formatarMoeda(premioCampeao) + '\n🥈 Vice: R$ ' + formatarMoeda(premioVice));
         }
@@ -3022,7 +3034,7 @@
         function fecharPremiacaoCampim() { document.getElementById('modalPremiacaoCampim').style.display = 'none'; }
         async function salvarValoresPremiacaoCampim() {
             const premioCampeao = parseValorPremiacao('premio_campeao_campim'); const premioVice = parseValorPremiacao('premio_vice_campim');
-            if (premioCampeao <= 0 || premioVice <= 0) { alert('❌ INFORME VALORES VÁLIDOS PARA CAMPEÃO E VICE!'); return; }
+            if (premioCampeao < 0 || premioVice < 0) { alert('❌ INFORME VALORES VÁLIDOS PARA CAMPEÃO E VICE!'); return; }
             await db.ref('configuracao').update({ premio_campeao_campim: premioCampeao, premio_vice_campim: premioVice });
             alert('✅ VALORES DE PREMIAÇÃO CAMPIM SALVOS!\n\n🥇 Campeão: R$ ' + formatarMoeda(premioCampeao) + '\n🥈 Vice: R$ ' + formatarMoeda(premioVice));
         }
